@@ -1,0 +1,5 @@
+{
+  "name": "The Maitre D' - Door Triage",
+  "description": "A restaurant door triage simulator. Manage the queue, verify reservations, and catch scammers in this high-stakes hospitality game.",
+  "requestFramePermissions": []
+}
