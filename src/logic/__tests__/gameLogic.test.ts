@@ -259,3 +259,51 @@ describe('canSelectCell', () => {
     expect(canSelectCell(farCell, [selectedNeighbor])).toBe(false);
   });
 });
+
+describe('checkAccusation', () => {
+  it('correctly catches a scammer on reservation accusation', () => {
+    const client = makeClient({ type: ClientType.SCAMMER });
+    const result = checkAccusation({ field: 'reservation', client, reservations: [] });
+    expect(result.caught).toBe(true);
+  });
+
+  it('false reservation accusation on a legit client has a patience penalty', () => {
+    const client = makeClient({ type: ClientType.LEGITIMATE });
+    const result = checkAccusation({ field: 'reservation', client, reservations: [] });
+    expect(result.caught).toBe(false);
+    expect(result.patiencePenalty).toBe(50);
+  });
+
+  it('correctly catches a late client on time accusation', () => {
+    const client = makeClient({ isLate: true });
+    const result = checkAccusation({ field: 'time', client, reservations: [] });
+    expect(result.caught).toBe(true);
+  });
+
+  it('false time accusation on an on-time client', () => {
+    const client = makeClient({ isLate: false });
+    const result = checkAccusation({ field: 'time', client, reservations: [] });
+    expect(result.caught).toBe(false);
+  });
+
+  it('correctly catches a size lie when reservation is in the array', () => {
+    // Client claims 4 people but reservation is for 2
+    const client = makeClient({ truePartySize: 4, trueReservationId: 'res-1' });
+    const reservations = [makeReservation({ partySize: 2 })];
+    const result = checkAccusation({ field: 'size', client, reservations });
+    expect(result.caught).toBe(true);
+  });
+
+  it('false size accusation when party sizes match', () => {
+    const client = makeClient({ truePartySize: 2, trueReservationId: 'res-1' });
+    const reservations = [makeReservation({ partySize: 2 })];
+    const result = checkAccusation({ field: 'size', client, reservations });
+    expect(result.caught).toBe(false);
+  });
+
+  it('false size accusation when reservation is not found in array', () => {
+    const client = makeClient({ truePartySize: 4, trueReservationId: 'res-1' });
+    const result = checkAccusation({ field: 'size', client, reservations: [] });
+    expect(result.caught).toBe(false);
+  });
+});
