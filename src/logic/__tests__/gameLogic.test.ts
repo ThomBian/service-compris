@@ -307,3 +307,43 @@ describe('checkAccusation', () => {
     expect(result.caught).toBe(false);
   });
 });
+
+describe('handleRefusedClient', () => {
+  // Use safe starting values: rating=3.0, morale=50
+  // Justified: +0.2 rating, +5 morale → 3.2 / 55
+  // Unjustified: -0.5 rating, -15 morale → 2.5 / 35
+
+  it('justified refusal of a scammer boosts rating and morale', () => {
+    const client = makeClient({ type: ClientType.SCAMMER });
+    const { nextRating, nextMorale } = handleRefusedClient(client, 3.0, 50, []);
+    expect(nextRating).toBeCloseTo(3.2);
+    expect(nextMorale).toBe(55);
+  });
+
+  it('justified refusal of a size liar boosts rating and morale', () => {
+    const client = makeClient({ lieType: LieType.SIZE });
+    const { nextRating, nextMorale } = handleRefusedClient(client, 3.0, 50, []);
+    expect(nextRating).toBeCloseTo(3.2);
+    expect(nextMorale).toBe(55);
+  });
+
+  it('justified refusal of a late client boosts rating and morale', () => {
+    const client = makeClient({ isLate: true });
+    const { nextRating, nextMorale } = handleRefusedClient(client, 3.0, 50, []);
+    expect(nextRating).toBeCloseTo(3.2);
+    expect(nextMorale).toBe(55);
+  });
+
+  it('unjustified refusal of an honest client drops rating and morale', () => {
+    const client = makeClient({ type: ClientType.LEGITIMATE, lieType: LieType.NONE, isLate: false });
+    const { nextRating, nextMorale } = handleRefusedClient(client, 3.0, 50, []);
+    expect(nextRating).toBeCloseTo(2.5);
+    expect(nextMorale).toBe(35);
+  });
+
+  it('always adds a log entry', () => {
+    const client = makeClient();
+    const { nextLogs } = handleRefusedClient(client, 3.0, 50, ['existing log']);
+    expect(nextLogs.length).toBe(2);
+  });
+});
