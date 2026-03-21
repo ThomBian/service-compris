@@ -106,7 +106,7 @@ function GameContent() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute inset-y-0 right-0 w-80 bg-white border-l border-[#141414] shadow-2xl z-30 flex flex-col"
+              className="absolute inset-y-0 right-0 w-[28rem] bg-white border-l border-[#141414] shadow-2xl z-30 flex flex-col"
             >
               <div className="p-4 border-b border-[#141414] flex items-center justify-between bg-[#141414] text-[#E4E3E0]">
                 <h3 className="font-serif italic text-lg">Reservations</h3>
