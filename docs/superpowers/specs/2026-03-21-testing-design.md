@@ -112,7 +112,7 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 | Scammer always lies about identity | `lieType === LieType.IDENTITY` when `type === SCAMMER` |
 | Scammer has no reservation | `trueReservationId === undefined` for scammers |
 | Legitimate has reservation id | `trueReservationId === res.id` when called with a `res` |
-| Legitimate may lie about size | Over 500 samples with a `res`, between 15–45% have `lieType === LieType.SIZE` |
+| Legitimate may lie about size | Over 500 samples calling `generateClientData(makeReservation())`, between 22–38% have `lieType === LieType.SIZE` |
 | Walk-in party size range | `truePartySize >= 1 && truePartySize <= 4` |
 | Scammer party size range | `truePartySize >= 2 && truePartySize <= 5` |
 
@@ -133,7 +133,7 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 | Advances physical state | `physicalState === PhysicalState.AT_DESK` |
 | Advances dialogue state | `dialogueState === DialogueState.OPENING_GAMBIT` |
 | Sets lastMessage to greeting | `lastMessage` is a non-empty string |
-| Greeting is added to chatHistory | `chatHistory` has one entry from `'guest'` matching `lastMessage` |
+| chatHistory is replaced with greeting | `chatHistory.length === 1`, `chatHistory[0].sender === 'guest'`, `chatHistory[0].text === lastMessage` (function replaces chatHistory, not appends) |
 
 ### `isAdjacent()`
 
@@ -156,35 +156,42 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 
 ### `checkAccusation()`
 
+Note: the function looks up the client's reservation via `reservations.find(r => r.id === client.trueReservationId)`. For size-related tests, the `reservations` array must include a reservation whose `id` matches `client.trueReservationId`.
+
 | Test | Assertion |
 |------|-----------|
 | Correctly accuses a scammer | `caught === true` when `field === 'reservation'` and `client.type === SCAMMER` |
 | False accusation on legit client | `caught === false`, `patiencePenalty === 50` |
 | Correctly accuses late client | `caught === true` when `field === 'time'` and `client.isLate === true` |
 | False time accusation | `caught === false` when `client.isLate === false` |
-| Correctly accuses size lie | `caught === true` when `field === 'size'` and `client.truePartySize > res.partySize` |
-| False size accusation | `caught === false` when party sizes match |
+| Correctly accuses size lie | `caught === true` when `field === 'size'`, `client.truePartySize > res.partySize`, and `reservations` contains the matching reservation |
+| False size accusation — no excess guests | `caught === false` when `client.truePartySize === res.partySize` and matching reservation is in array |
+| False size accusation — no reservation found | `caught === false` when `reservations` is empty (function returns false if `res` is undefined) |
 
 ### `handleRefusedClient()`
 
+Justified refusal is triggered by `client.type === SCAMMER`, `client.lieType === LieType.SIZE`, or `client.isLate === true`. Use `isLate: true` (not `lieType: LieType.TIME`) for the late-client fixture.
+
 | Test | Assertion |
 |------|-----------|
-| Justified refusal (scammer) | `rating` increases, `morale` increases |
-| Justified refusal (size lie) | `rating` increases, `morale` increases |
-| Justified refusal (late) | `rating` increases, `morale` increases |
-| Unjustified refusal | `rating` decreases by 0.5, `morale` decreases by 15 |
+| Justified refusal (scammer) | `nextRating > currentRating`, `nextMorale > currentMorale` |
+| Justified refusal (size lie) | `nextRating > currentRating`, `nextMorale > currentMorale` |
+| Justified refusal (late, `isLate: true`) | `nextRating > currentRating`, `nextMorale > currentMorale` |
+| Unjustified refusal | `nextRating === currentRating - 0.5`, `nextMorale === currentMorale - 15` |
 | Log entry added | `nextLogs.length === currentLogs.length + 1` |
 
 ### `handleAcceptedClient()`
 
+The internal `basePay` formula is: `((20 + partySize * 10) / partySize) * seatedCount`. Tests should compute expected cash values using this formula or use concrete examples. All tests should pass `seatedCount === client.truePartySize` unless explicitly testing cropping.
+
 | Test | Assertion |
 |------|-----------|
-| Honest customer: cash increases | `nextCash > currentCash` |
+| Honest customer: cash increases | `nextCash > currentCash` (for `truePartySize=2, seatedCount=2`: expected pay = `(40/2)*2 = 40`, so `nextCash === currentCash + 40`) |
 | Honest customer: small rating boost | `nextRating === currentRating + 0.1` (capped at 5) |
-| Scammer (uncaught): cash decreases by 50 | `nextCash === currentCash - 50` |
+| Scammer (uncaught, `seatedCount === truePartySize`): cash decreases | `nextCash === currentCash - 50` |
 | Scammer (uncaught): rating drops by 1.0 | `nextRating === currentRating - 1.0` |
-| Grateful liar (caught + seated): cash bonus | `nextCash === currentCash + basePay * 2.5` |
-| Cropped party: rating penalty | `nextRating < currentRating` when `seatedCount < truePartySize` |
+| Grateful liar (`isCaught: true`, `seatedCount === truePartySize`): cash bonus | For `truePartySize=2, seatedCount=2`: `basePay = 40`, so `nextCash === currentCash + 40 * 2.5 === currentCash + 100` |
+| Cropped party (`seatedCount < truePartySize`): rating penalty | `nextRating < currentRating` |
 
 ### `processQueueTick()`
 
@@ -193,7 +200,7 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 | Drains patience by 1 per tick | Queue clients each lose 1 patience |
 | Storm out removes zero-patience clients | Clients at `patience === 0` are removed from queue |
 | Storm out penalizes rating | `rating` decreases when storm outs occur |
-| Promotes first queue client to desk | When `currentClient` is null and queue is non-empty, first client moves to desk |
+| Promotes first queue client to desk | When `currentClient` is null and queue is non-empty, first client moves to desk with `physicalState === AT_DESK` and `dialogueState === OPENING_GAMBIT` |
 | Does not promote when desk occupied | `currentClient` unchanged when already set |
 | Grid meal duration decrements | `mealDuration` decreases by 1 each tick |
 | Finished meal frees cell | Cell transitions to `CellState.EMPTY` when `mealDuration` reaches 0 |
@@ -205,4 +212,4 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 - Internal randomness beyond statistical invariants
 - Name generation cosmetics (`FIRST_NAMES`, `LAST_NAMES`)
 - Non-exported helper functions (`updateQueuePatience`, `handleStormOuts`, `tryMoveToDesk`, etc.)
-- `generateQuestionResponse` — covered implicitly via the `checkAccusation` and decision tests; can be added later
+- `generateQuestionResponse` — deferred; can be added later
