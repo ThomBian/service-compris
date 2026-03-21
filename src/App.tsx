@@ -28,6 +28,10 @@ function GameContent() {
   const [showLogs, setShowLogs] = React.useState(false);
   const isLg = useMediaQuery('(min-width: 1024px)');
 
+  React.useEffect(() => {
+    if (!isLg) setShowLogs(false);
+  }, [isLg]);
+
   return (
     <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       <TopBar
