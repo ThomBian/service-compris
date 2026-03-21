@@ -58,7 +58,7 @@ src/
 
 ## Test Fixtures
 
-Tests will need a minimal `Reservation` factory and a minimal `Client` factory. These are defined at the top of the test file:
+Three factories are defined at the top of the test file. All accept `Partial<T>` overrides.
 
 ```ts
 const makeReservation = (overrides?: Partial<Reservation>): Reservation => ({
@@ -66,7 +66,7 @@ const makeReservation = (overrides?: Partial<Reservation>): Reservation => ({
   firstName: 'John',
   lastName: 'Smith',
   partySize: 2,
-  time: 1200, // 20:00
+  time: 1200, // 20:00 in minutes from midnight
   arrived: false,
   ...overrides
 });
@@ -90,7 +90,38 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
   chatHistory: [],
   ...overrides
 });
+
+const makeGameState = (overrides?: Partial<GameState>): GameState => ({
+  inGameMinutes: 1200,
+  timeMultiplier: 1,
+  reservations: [],
+  spawnedReservationIds: [],
+  queue: [],
+  currentClient: null,
+  grid: createInitialGrid(),
+  cash: 0,
+  rating: 3.0,
+  morale: 50,
+  logs: [],
+  ...overrides
+});
 ```
+
+### Controlling Randomness
+
+`generateClientData()` uses `Math.random()` to select client type. Tests that need a specific branch (walk-in vs scammer) must control randomness with Vitest's spy:
+
+```ts
+// Force walk-in branch (typeRoll < 0.6)
+vi.spyOn(Math, 'random').mockReturnValueOnce(0.3);
+
+// Force scammer branch (typeRoll >= 0.6)
+vi.spyOn(Math, 'random').mockReturnValueOnce(0.8);
+```
+
+Restore with `vi.restoreAllMocks()` in `afterEach`.
+
+`prepareClientForDesk()` sets `knownPartySize` with 50% probability. Tests must **not** assert on `knownPartySize` unless `Math.random` is mocked.
 
 ---
 
@@ -106,15 +137,17 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 
 ### `generateClientData()`
 
+Walk-in and scammer tests require mocking `Math.random` to force the type branch (see Fixtures section).
+
 | Test | Assertion |
 |------|-----------|
-| Walk-in has no reservation | `trueReservationId === undefined` when called without `res` and type is `WALK_IN` |
-| Scammer always lies about identity | `lieType === LieType.IDENTITY` when `type === SCAMMER` |
-| Scammer has no reservation | `trueReservationId === undefined` for scammers |
-| Legitimate has reservation id | `trueReservationId === res.id` when called with a `res` |
-| Legitimate may lie about size | Over 500 samples calling `generateClientData(makeReservation())`, between 22–38% have `lieType === LieType.SIZE` |
-| Walk-in party size range | `truePartySize >= 1 && truePartySize <= 4` |
-| Scammer party size range | `truePartySize >= 2 && truePartySize <= 5` |
+| Walk-in has no reservation | Mock `typeRoll = 0.3` → `trueReservationId === undefined` |
+| Walk-in party size range | Mock `typeRoll = 0.3` → `truePartySize >= 1 && truePartySize <= 4` |
+| Scammer always lies about identity | Mock `typeRoll = 0.8` → `lieType === LieType.IDENTITY` |
+| Scammer has no reservation | Mock `typeRoll = 0.8` → `trueReservationId === undefined` |
+| Scammer party size range | Mock `typeRoll = 0.8` → `truePartySize >= 2 && truePartySize <= 5` |
+| Legitimate has reservation id | Call `generateClientData(makeReservation())` → `trueReservationId === 'res-1'` |
+| Legitimate may lie about size | Over 500 samples calling `generateClientData(makeReservation())`, between 22–38% have `lieType === LieType.SIZE` (no mock needed — statistical) |
 
 ### `createNewClient()`
 
@@ -164,7 +197,7 @@ Note: the function looks up the client's reservation via `reservations.find(r =>
 | False accusation on legit client | `caught === false`, `patiencePenalty === 50` |
 | Correctly accuses late client | `caught === true` when `field === 'time'` and `client.isLate === true` |
 | False time accusation | `caught === false` when `client.isLate === false` |
-| Correctly accuses size lie | `caught === true` when `field === 'size'`, `client.truePartySize > res.partySize`, and `reservations` contains the matching reservation |
+| Correctly accuses size lie | Use `makeClient({ truePartySize: 4 })` and `[makeReservation({ partySize: 2 })]` → `caught === true` |
 | False size accusation — no excess guests | `caught === false` when `client.truePartySize === res.partySize` and matching reservation is in array |
 | False size accusation — no reservation found | `caught === false` when `reservations` is empty (function returns false if `res` is undefined) |
 
@@ -172,12 +205,14 @@ Note: the function looks up the client's reservation via `reservations.find(r =>
 
 Justified refusal is triggered by `client.type === SCAMMER`, `client.lieType === LieType.SIZE`, or `client.isLate === true`. Use `isLate: true` (not `lieType: LieType.TIME`) for the late-client fixture.
 
+Use starting values well below caps: `currentRating = 3.0`, `currentMorale = 50`. For unjustified refusal, ensure `currentRating >= 0.5` and `currentMorale >= 15` so `Math.max(0, ...)` clamping does not mask the delta.
+
 | Test | Assertion |
 |------|-----------|
-| Justified refusal (scammer) | `nextRating > currentRating`, `nextMorale > currentMorale` |
-| Justified refusal (size lie) | `nextRating > currentRating`, `nextMorale > currentMorale` |
-| Justified refusal (late, `isLate: true`) | `nextRating > currentRating`, `nextMorale > currentMorale` |
-| Unjustified refusal | `nextRating === currentRating - 0.5`, `nextMorale === currentMorale - 15` |
+| Justified refusal (scammer) | `nextRating === 3.2`, `nextMorale === 55` (starting from `3.0` / `50`) |
+| Justified refusal (size lie) | `nextRating === 3.2`, `nextMorale === 55` |
+| Justified refusal (late, `isLate: true`) | `nextRating === 3.2`, `nextMorale === 55` |
+| Unjustified refusal | `nextRating === 2.5`, `nextMorale === 35` (starting from `3.0` / `50`) |
 | Log entry added | `nextLogs.length === currentLogs.length + 1` |
 
 ### `handleAcceptedClient()`
