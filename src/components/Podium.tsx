@@ -27,7 +27,7 @@ export const Podium: React.FC<PodiumProps> = ({
   const [showLieMenu, setShowLieMenu] = React.useState(false);
 
   return (
-    <div className="p-4 md:p-6 flex flex-col gap-6">
+    <div className="h-full p-4 md:p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif italic text-2xl">The Podium</h2>
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-50 font-bold">
@@ -36,7 +36,7 @@ export const Podium: React.FC<PodiumProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-6">
+      <div className="flex-1 flex flex-col gap-4 min-h-0">
         <AnimatePresence mode="wait">
           {currentClient ? (
             <motion.div
@@ -44,7 +44,7 @@ export const Podium: React.FC<PodiumProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="bg-white border border-[#141414] p-8 rounded-2xl shadow-[8px_8px_0px_0px_rgba(20,20,20,1)] flex flex-col gap-6 relative overflow-hidden"
+              className="flex-1 min-h-0 bg-white border border-[#141414] p-4 md:p-6 rounded-2xl shadow-[8px_8px_0px_0px_rgba(20,20,20,1)] flex flex-col gap-4 relative overflow-hidden"
             >
               {/* Patience Bar */}
               <div className="absolute top-0 left-0 w-full h-2 bg-gray-100">

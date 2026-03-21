@@ -9,7 +9,7 @@ interface QueuePreviewProps {
 export const QueuePreview: React.FC<QueuePreviewProps> = ({ queue }) => {
   return (
     <div className="overflow-x-auto custom-scrollbar pb-2">
-      <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-4">Waiting Outside</h3>
+      <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Waiting Outside</h3>
       <div className="flex gap-2 min-w-max">
         {queue.length === 0 && <p className="text-xs italic opacity-40">The street is empty.</p>}
         {queue.map((c) => (

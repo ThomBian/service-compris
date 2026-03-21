@@ -26,7 +26,7 @@ function GameContent() {
   } = useGame();
 
   const [showLogs, setShowLogs] = React.useState(false);
-  const isLg = useMediaQuery('(min-width: 1024px)');
+  const isLg = useMediaQuery('(min-width: 1536px)');
 
   React.useEffect(() => {
     if (!isLg) setShowLogs(false);
@@ -46,10 +46,10 @@ function GameContent() {
         toggleLogs={() => setShowLogs(!showLogs)}
       />
 
-      <main className="grid grid-cols-1 md:grid-cols-[45%_55%] lg:grid-cols-12 gap-0 h-[calc(100vh-65px)] relative">
+      <main className="grid grid-cols-1 md:grid-cols-[45%_55%] 2xl:grid-cols-12 gap-0 h-[calc(100vh-65px)] relative">
         {/* Left Column: Podium & Queue — visible at all breakpoints */}
-        <div className="lg:col-span-4 flex flex-col border-r border-[#141414] overflow-hidden">
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="2xl:col-span-4 flex flex-col border-r border-[#141414] overflow-hidden">
+          <div className="flex-1 overflow-hidden min-h-0">
             <Podium
               currentClient={gameState.currentClient}
               queueLength={gameState.queue.length}
@@ -61,13 +61,13 @@ function GameContent() {
               formatTime={formatTime}
             />
           </div>
-          <div className="h-40 border-t border-[#141414] bg-stone-50 p-6 overflow-hidden shrink-0">
+          <div className="h-20 border-t border-[#141414] bg-stone-50 p-3 overflow-hidden shrink-0">
             <QueuePreview queue={gameState.queue} />
           </div>
         </div>
 
-        {/* RightPanel — tablet only (md, not lg) */}
-        <div className="hidden md:flex lg:hidden flex-col overflow-hidden">
+        {/* RightPanel — shown from md up to 2xl */}
+        <div className="hidden md:flex 2xl:hidden flex-col overflow-hidden">
           <RightPanel
             gameState={gameState}
             inGameMinutes={gameState.inGameMinutes}
@@ -77,13 +77,13 @@ function GameContent() {
           />
         </div>
 
-        {/* Middle Column: Floorplan — desktop only */}
-        <div className="hidden lg:flex lg:col-span-5 flex-col border-r border-[#141414] overflow-hidden bg-[#E4E3E0]">
+        {/* Middle Column: Floorplan — 2xl only */}
+        <div className="hidden 2xl:flex 2xl:col-span-5 flex-col border-r border-[#141414] overflow-hidden bg-[#E4E3E0]">
           <FloorplanGrid />
         </div>
 
-        {/* Right Column: Booking List — desktop only */}
-        <div className="hidden lg:flex lg:col-span-3 bg-white p-6 flex-col gap-6 overflow-hidden">
+        {/* Right Column: Booking List — 2xl only */}
+        <div className="hidden 2xl:flex 2xl:col-span-3 bg-white p-6 flex-col gap-6 overflow-hidden">
           <BookingList
             reservations={gameState.reservations}
             inGameMinutes={gameState.inGameMinutes}

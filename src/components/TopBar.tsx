@@ -48,7 +48,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-4">
         <button
           onClick={toggleLogs}
-          className={`hidden lg:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
+          className={`hidden 2xl:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
             showLogs
               ? 'bg-[#141414] text-[#E4E3E0]'
               : 'bg-white hover:bg-[#141414]/5'
