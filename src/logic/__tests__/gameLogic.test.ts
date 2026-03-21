@@ -187,3 +187,30 @@ describe('createNewClient', () => {
     expect(client.isLate).toBe(false);
   });
 });
+
+describe('prepareClientForDesk', () => {
+  it('advances physical and dialogue state', () => {
+    const client = makeClient();
+    const result = prepareClientForDesk(client);
+    expect(result.physicalState).toBe(PhysicalState.AT_DESK);
+    expect(result.dialogueState).toBe(DialogueState.OPENING_GAMBIT);
+  });
+
+  it('sets lastMessage to a non-empty greeting string', () => {
+    const client = makeClient();
+    const result = prepareClientForDesk(client);
+    expect(result.lastMessage).toBeTruthy();
+    expect(typeof result.lastMessage).toBe('string');
+  });
+
+  it('replaces chatHistory with a single guest greeting entry', () => {
+    // Pass a client with pre-existing chatHistory to confirm replacement, not append
+    const client = makeClient({
+      chatHistory: [{ sender: 'guest', text: 'old message' }],
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.chatHistory.length).toBe(1);
+    expect(result.chatHistory[0].sender).toBe('guest');
+    expect(result.chatHistory[0].text).toBe(result.lastMessage);
+  });
+});
