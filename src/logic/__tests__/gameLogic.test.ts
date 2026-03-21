@@ -347,3 +347,41 @@ describe('handleRefusedClient', () => {
     expect(nextLogs.length).toBe(2);
   });
 });
+
+describe('handleAcceptedClient', () => {
+  it('honest customer earns cash and a small rating boost', () => {
+    const client = makeClient({ hasLied: false, truePartySize: 2 });
+    const { nextCash, nextRating } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
+    expect(nextCash).toBe(40); // basePay = 40
+    expect(nextRating).toBeCloseTo(3.1);
+  });
+
+  it('uncaught scammer costs $50 and drops rating by 1', () => {
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      hasLied: true,
+      isCaught: false,
+      truePartySize: 2,
+    });
+    const { nextCash, nextRating } = handleAcceptedClient(client, 2, 100, 3.0, 50, []);
+    expect(nextCash).toBe(50); // 100 - 50
+    expect(nextRating).toBeCloseTo(2.0);
+  });
+
+  it('grateful liar (caught + seated) earns 2.5x basePay', () => {
+    const client = makeClient({
+      hasLied: true,
+      isCaught: true,
+      truePartySize: 2,
+    });
+    const { nextCash } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
+    expect(nextCash).toBe(100); // 40 * 2.5
+  });
+
+  it('cropped party (fewer seated than actual) drops rating', () => {
+    const client = makeClient({ hasLied: false, truePartySize: 4 });
+    // Only seat 2 of 4 — 2 cropped
+    const { nextRating } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
+    expect(nextRating).toBeLessThan(3.0);
+  });
+});
