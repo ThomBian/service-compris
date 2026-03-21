@@ -109,19 +109,35 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
 
 ### Controlling Randomness
 
-`generateClientData()` uses `Math.random()` to select client type. Tests that need a specific branch (walk-in vs scammer) must control randomness with Vitest's spy:
+`generateClientData()` makes multiple `Math.random()` calls in sequence (type roll, then one or two more within each branch for party size and stolen-identity). Rather than mocking multiple sequential calls, walk-in and scammer invariants should be tested with a **sampling strategy**: call `generateClientData()` 200 times without a `res`, filter results by `type`, and assert on the filtered subset. This avoids fragile ordered mock chains.
 
 ```ts
-// Force walk-in branch (typeRoll < 0.6)
-vi.spyOn(Math, 'random').mockReturnValueOnce(0.3);
-
-// Force scammer branch (typeRoll >= 0.6)
-vi.spyOn(Math, 'random').mockReturnValueOnce(0.8);
+// Example sampling pattern for walk-in invariants
+const results = Array.from({ length: 200 }, () => generateClientData());
+const walkIns = results.filter(r => r.type === ClientType.WALK_IN);
+expect(walkIns.length).toBeGreaterThan(0);
+walkIns.forEach(r => expect(r.trueReservationId).toBeUndefined());
 ```
 
-Restore with `vi.restoreAllMocks()` in `afterEach`.
-
 `prepareClientForDesk()` sets `knownPartySize` with 50% probability. Tests must **not** assert on `knownPartySize` unless `Math.random` is mocked.
+
+`processQueueTick()` internally calls `prepareClientForDesk()` when promoting a client, which contains a `Math.random()` call. Use `vi.restoreAllMocks()` in `afterEach` to prevent mock leakage between test groups.
+
+### `makeClientData` Fixture
+
+`createNewClient` takes a `data` object of type `ReturnType<typeof generateClientData>`, not a `Client`. A minimal fixture:
+
+```ts
+const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData>>) => ({
+  type: ClientType.LEGITIMATE,
+  trueFirstName: 'John',
+  trueLastName: 'Smith',
+  truePartySize: 2,
+  trueReservationId: 'res-1',
+  lieType: LieType.NONE,
+  ...overrides,
+});
+```
 
 ---
 
@@ -137,27 +153,29 @@ Restore with `vi.restoreAllMocks()` in `afterEach`.
 
 ### `generateClientData()`
 
-Walk-in and scammer tests require mocking `Math.random` to force the type branch (see Fixtures section).
+Walk-in and scammer tests use a sampling strategy (200 calls, filtered by type). See Fixtures section.
 
 | Test | Assertion |
 |------|-----------|
-| Walk-in has no reservation | Mock `typeRoll = 0.3` → `trueReservationId === undefined` |
-| Walk-in party size range | Mock `typeRoll = 0.3` → `truePartySize >= 1 && truePartySize <= 4` |
-| Scammer always lies about identity | Mock `typeRoll = 0.8` → `lieType === LieType.IDENTITY` |
-| Scammer has no reservation | Mock `typeRoll = 0.8` → `trueReservationId === undefined` |
-| Scammer party size range | Mock `typeRoll = 0.8` → `truePartySize >= 2 && truePartySize <= 5` |
-| Legitimate has reservation id | Call `generateClientData(makeReservation())` → `trueReservationId === 'res-1'` |
-| Legitimate may lie about size | Over 500 samples calling `generateClientData(makeReservation())`, between 22–38% have `lieType === LieType.SIZE` (no mock needed — statistical) |
+| Walk-ins have no reservation | Sample 200 calls; all `WALK_IN` results have `trueReservationId === undefined` |
+| Walk-in party size range | All `WALK_IN` results have `truePartySize >= 1 && truePartySize <= 4` |
+| Scammers always lie about identity | All `SCAMMER` results have `lieType === LieType.IDENTITY` |
+| Scammers have no reservation | All `SCAMMER` results have `trueReservationId === undefined` |
+| Scammer party size range | All `SCAMMER` results have `truePartySize >= 2 && truePartySize <= 5` |
+| Legitimate has reservation id | `generateClientData(makeReservation())` → `trueReservationId === 'res-1'` |
+| Legitimate may lie about size | Over 500 calls of `generateClientData(makeReservation())`, between 22–38% have `lieType === LieType.SIZE` |
 
 ### `createNewClient()`
+
+Uses `makeClientData` and optionally `makeReservation` fixtures. See Fixtures section.
 
 | Test | Assertion |
 |------|-----------|
 | Starts in queue | `physicalState === PhysicalState.IN_QUEUE` |
 | Patience is 100 | `patience === 100` |
 | Dialogue state initialized | `dialogueState === DialogueState.AWAITING_GREETING` |
-| Late legitimate gets TIME lie | When `currentMinutes - res.time > 30` and `lieType` was `NONE`, result has `lieType === LieType.TIME` |
-| On-time legitimate keeps original lie | `lieType` is not overridden when client is not late |
+| Late legitimate gets TIME lie | `makeClientData({ lieType: LieType.NONE })` + `res = makeReservation({ time: 1170 })` + `currentMinutes = 1210` → `lieType === LieType.TIME` |
+| On-time legitimate keeps original lie | Same setup but `currentMinutes = 1180` → `lieType === LieType.NONE` |
 
 ### `prepareClientForDesk()`
 
