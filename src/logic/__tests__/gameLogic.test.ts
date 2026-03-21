@@ -90,3 +90,24 @@ describe('gameLogic', () => {
     // Tests will be added in subsequent tasks
   });
 });
+
+describe('createInitialGrid', () => {
+  it('returns a grid with GRID_SIZE rows and GRID_SIZE columns', () => {
+    const grid = createInitialGrid();
+    expect(grid.length).toBe(GRID_SIZE);
+    grid.forEach(row => expect(row.length).toBe(GRID_SIZE));
+  });
+
+  it('all cells start as EMPTY', () => {
+    const grid = createInitialGrid();
+    grid.forEach(row =>
+      row.forEach(cell => expect(cell.state).toBe(CellState.EMPTY))
+    );
+  });
+
+  it('all cell IDs are unique', () => {
+    const grid = createInitialGrid();
+    const ids = grid.flat().map(c => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
