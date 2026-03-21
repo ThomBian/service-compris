@@ -26,31 +26,31 @@ export const TopBar: React.FC<TopBarProps> = ({
 }) => {
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20">
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4 md:gap-8">
         <div className="flex items-center gap-2">
           <Clock size={20} />
-          <span className="font-mono text-xl font-bold">{formatTime(inGameMinutes)}</span>
+          <span className="font-mono text-base md:text-xl font-bold">{formatTime(inGameMinutes)}</span>
         </div>
         <div className="flex items-center gap-2">
           <Star size={20} className="text-yellow-600 fill-yellow-600" />
-          <span className="font-mono text-xl font-bold">{rating.toFixed(1)}</span>
+          <span className="font-mono text-base md:text-xl font-bold">{rating.toFixed(1)}</span>
         </div>
         <div className="flex items-center gap-2">
           <Heart size={20} className="text-red-500 fill-red-500" />
-          <span className="font-mono text-xl font-bold">{morale}%</span>
+          <span className="font-mono text-base md:text-xl font-bold">{morale}%</span>
         </div>
         <div className="flex items-center gap-2">
           <DollarSign size={20} className="text-emerald-700" />
-          <span className="font-mono text-xl font-bold">{cash}</span>
+          <span className="font-mono text-base md:text-xl font-bold">{cash}</span>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
         <button
           onClick={toggleLogs}
-          className={`px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
-            showLogs 
-              ? 'bg-[#141414] text-[#E4E3E0]' 
+          className={`hidden lg:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
+            showLogs
+              ? 'bg-[#141414] text-[#E4E3E0]'
               : 'bg-white hover:bg-[#141414]/5'
           }`}
         >
