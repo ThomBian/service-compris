@@ -35,13 +35,13 @@ const makeReservation = (overrides?: Partial<Reservation>): Reservation => ({
   ...overrides,
 });
 
-const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData>>) => ({
+const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData>>): ReturnType<typeof generateClientData> => ({
   type: ClientType.LEGITIMATE,
   trueFirstName: 'John',
   trueLastName: 'Smith',
   truePartySize: 2,
   trueReservationId: 'res-1',
-  lieType: LieType.NONE,
+  lieType: LieType.NONE as const,
   ...overrides,
 });
 

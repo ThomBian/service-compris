@@ -16,8 +16,7 @@ import {
   GREETINGS,
   SCAMMER_GREETINGS,
   WALK_IN_GREETINGS,
-  GRID_SIZE,
-  MEAL_DURATION
+  GRID_SIZE
 } from '../constants';
 import { getRandom, formatTime } from '../utils';
 
@@ -42,13 +41,20 @@ export const createInitialGrid = (): Cell[][] => {
 
 // --- Client Spawning Logic ---
 
-export const generateClientData = (res?: Reservation, allReservations: Reservation[] = []) => {
+export const generateClientData = (res?: Reservation, allReservations: Reservation[] = []): {
+  type: ClientType;
+  trueFirstName: string;
+  trueLastName: string;
+  truePartySize: number;
+  trueReservationId?: string;
+  lieType: LieType.NONE | LieType.SIZE | LieType.IDENTITY;
+} => {
   let type: ClientType;
   let trueFirstName: string;
   let trueLastName: string;
   let truePartySize: number;
   let trueReservationId: string | undefined;
-  let lieType: LieType = LieType.NONE;
+  let lieType: LieType.NONE | LieType.SIZE | LieType.IDENTITY = LieType.NONE;
 
   if (res) {
     type = ClientType.LEGITIMATE;
@@ -74,7 +80,7 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
     } else {
       type = ClientType.SCAMMER;
       lieType = LieType.IDENTITY;
-      
+
       // Stolen identity logic
       const stolenRoll = Math.random();
       if (stolenRoll < 0.5 && allReservations.length > 0) {
@@ -85,7 +91,7 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
         trueFirstName = getRandom(FIRST_NAMES);
         trueLastName = getRandom(LAST_NAMES);
       }
-      
+
       truePartySize = Math.floor(Math.random() * 4) + 2;
     }
   }
