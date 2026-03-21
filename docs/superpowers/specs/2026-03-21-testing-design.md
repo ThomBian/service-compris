@@ -101,7 +101,7 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   grid: createInitialGrid(),
   cash: 0,
   rating: 3.0,
-  morale: 50,
+  morale: 50,        // required field — must be present
   logs: [],
   ...overrides
 });
