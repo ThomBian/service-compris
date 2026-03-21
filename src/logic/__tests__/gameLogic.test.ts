@@ -199,7 +199,7 @@ describe('prepareClientForDesk', () => {
   it('sets lastMessage to a non-empty greeting string', () => {
     const client = makeClient();
     const result = prepareClientForDesk(client);
-    expect(result.lastMessage).toBeTruthy();
+    expect(result.lastMessage.length).toBeGreaterThan(0);
     expect(typeof result.lastMessage).toBe('string');
   });
 
@@ -238,24 +238,25 @@ describe('isAdjacent', () => {
 });
 
 describe('canSelectCell', () => {
-  const emptyCell = { id: 'c', x: 1, y: 0, state: CellState.EMPTY };
-  const occupiedCell = { id: 'd', x: 1, y: 0, state: CellState.OCCUPIED };
-  const selectedNeighbor = { id: 'e', x: 0, y: 0, state: CellState.EMPTY };
-  const farCell = { id: 'f', x: 3, y: 3, state: CellState.EMPTY };
-
   it('first cell is always selectable (no selection yet)', () => {
+    const emptyCell = { id: 'c', x: 1, y: 0, state: CellState.EMPTY };
     expect(canSelectCell(emptyCell, [])).toBe(true);
   });
 
   it('non-empty cell is not selectable', () => {
+    const occupiedCell = { id: 'd', x: 1, y: 0, state: CellState.OCCUPIED };
     expect(canSelectCell(occupiedCell, [])).toBe(false);
   });
 
   it('empty cell adjacent to a selected cell is selectable', () => {
+    const emptyCell = { id: 'c', x: 1, y: 0, state: CellState.EMPTY };
+    const selectedNeighbor = { id: 'e', x: 0, y: 0, state: CellState.EMPTY };
     expect(canSelectCell(emptyCell, [selectedNeighbor])).toBe(true);
   });
 
   it('empty cell not adjacent to any selected cell is not selectable', () => {
+    const selectedNeighbor = { id: 'e', x: 0, y: 0, state: CellState.EMPTY };
+    const farCell = { id: 'f', x: 3, y: 3, state: CellState.EMPTY };
     expect(canSelectCell(farCell, [selectedNeighbor])).toBe(false);
   });
 });
@@ -287,7 +288,7 @@ describe('checkAccusation', () => {
   });
 
   it('correctly catches a size lie when reservation is in the array', () => {
-    // Client claims 4 people but reservation is for 2
+    // Client's true party size (4) exceeds the reservation (2)
     const client = makeClient({ truePartySize: 4, trueReservationId: 'res-1' });
     const reservations = [makeReservation({ partySize: 2 })];
     const result = checkAccusation({ field: 'size', client, reservations });
@@ -364,7 +365,7 @@ describe('handleAcceptedClient', () => {
       truePartySize: 2,
     });
     const { nextCash, nextRating } = handleAcceptedClient(client, 2, 100, 3.0, 50, []);
-    expect(nextCash).toBe(50); // 100 - 50
+    expect(nextCash).toBe(50); // 100 (starting cash) - 50 (penalty) = 50; basePay not earned for uncaught scammer
     expect(nextRating).toBeCloseTo(2.0);
   });
 
@@ -382,13 +383,14 @@ describe('handleAcceptedClient', () => {
     const client = makeClient({ hasLied: false, truePartySize: 4 });
     // Only seat 2 of 4 — 2 cropped
     const { nextRating } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
-    expect(nextRating).toBeLessThan(3.0);
+    expect(nextRating).toBeCloseTo(2.1); // -1.0 penalty for 2 cropped guests (-0.5 * 2^(2-1)) + 0.1 bonus for honest = 3.0 - 0.9 = 2.1
   });
 });
 
 describe('processQueueTick', () => {
   it('drains patience by 1 for each queue client', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    // Occupant prevents desk-promotion from removing this client before assertion
     const state = makeGameState({
       queue: [makeClient({ patience: 80 }), makeClient({ id: 'c2', patience: 50 })],
       currentClient: occupant,
@@ -400,6 +402,7 @@ describe('processQueueTick', () => {
 
   it('removes clients with zero patience (storm out)', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    // Occupant prevents desk-promotion from removing this client before assertion
     const state = makeGameState({
       queue: [makeClient({ patience: 0 }), makeClient({ id: 'c2', patience: 50 })],
       currentClient: occupant,
