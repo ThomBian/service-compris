@@ -15,7 +15,7 @@ export const QueuePreview: React.FC<QueuePreviewProps> = ({ queue }) => {
         {queue.map((c) => (
           <div 
             key={c.id} 
-            className="w-10 h-10 rounded-full border border-[#141414] flex items-center justify-center bg-[#E4E3E0] relative group"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-[#141414] flex items-center justify-center bg-[#E4E3E0] relative group"
           >
             <Users size={16} />
             <div 
