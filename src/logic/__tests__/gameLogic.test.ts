@@ -84,13 +84,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// Tests will be added in subsequent tasks
-describe('gameLogic', () => {
-  it('placeholder', () => {
-    // Tests will be added in subsequent tasks
-  });
-});
-
 describe('createInitialGrid', () => {
   it('returns a grid with GRID_SIZE rows and GRID_SIZE columns', () => {
     const grid = createInitialGrid();
