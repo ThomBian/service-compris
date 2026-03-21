@@ -385,3 +385,76 @@ describe('handleAcceptedClient', () => {
     expect(nextRating).toBeLessThan(3.0);
   });
 });
+
+describe('processQueueTick', () => {
+  it('drains patience by 1 for each queue client', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const state = makeGameState({
+      queue: [makeClient({ patience: 80 }), makeClient({ id: 'c2', patience: 50 })],
+      currentClient: occupant,
+    });
+    const next = processQueueTick(state);
+    expect(next.queue[0].patience).toBe(79);
+    expect(next.queue[1].patience).toBe(49);
+  });
+
+  it('removes clients with zero patience (storm out)', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const state = makeGameState({
+      queue: [makeClient({ patience: 0 }), makeClient({ id: 'c2', patience: 50 })],
+      currentClient: occupant,
+    });
+    const next = processQueueTick(state);
+    expect(next.queue.length).toBe(1);
+    expect(next.queue[0].id).toBe('c2');
+  });
+
+  it('storm out reduces rating', () => {
+    const state = makeGameState({
+      queue: [makeClient({ patience: 0 })],
+      rating: 3.0,
+    });
+    const next = processQueueTick(state);
+    expect(next.rating).toBeLessThan(3.0);
+  });
+
+  it('promotes first queue client to desk when desk is empty', () => {
+    const state = makeGameState({
+      queue: [makeClient({ id: 'first' })],
+      currentClient: null,
+    });
+    const next = processQueueTick(state);
+    expect(next.currentClient).not.toBeNull();
+    expect(next.currentClient!.physicalState).toBe(PhysicalState.AT_DESK);
+    expect(next.currentClient!.dialogueState).toBe(DialogueState.OPENING_GAMBIT);
+    expect(next.queue.length).toBe(0);
+  });
+
+  it('does not promote when desk is already occupied', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const state = makeGameState({
+      queue: [makeClient({ id: 'queued' })],
+      currentClient: occupant,
+    });
+    const next = processQueueTick(state);
+    expect(next.currentClient!.id).toBe('occupant');
+    expect(next.queue.length).toBe(1);
+  });
+
+  it('decrements meal duration on occupied cells', () => {
+    const grid = createInitialGrid();
+    grid[0][0] = { ...grid[0][0], state: CellState.OCCUPIED, mealDuration: 5 };
+    const state = makeGameState({ grid });
+    const next = processQueueTick(state);
+    expect(next.grid[0][0].mealDuration).toBe(4);
+  });
+
+  it('frees a cell when meal duration reaches zero', () => {
+    const grid = createInitialGrid();
+    grid[0][0] = { ...grid[0][0], state: CellState.OCCUPIED, mealDuration: 1 };
+    const state = makeGameState({ grid });
+    const next = processQueueTick(state);
+    expect(next.grid[0][0].state).toBe(CellState.EMPTY);
+    expect(next.grid[0][0].mealDuration).toBeUndefined();
+  });
+});
