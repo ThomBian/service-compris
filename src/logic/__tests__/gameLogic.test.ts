@@ -161,3 +161,29 @@ describe('generateClientData', () => {
     });
   });
 });
+
+describe('createNewClient', () => {
+  it('starts in queue with full patience and awaiting greeting', () => {
+    const data = makeClientData();
+    const client = createNewClient({ data, currentMinutes: 1200 });
+    expect(client.physicalState).toBe(PhysicalState.IN_QUEUE);
+    expect(client.patience).toBe(100);
+    expect(client.dialogueState).toBe(DialogueState.AWAITING_GREETING);
+  });
+
+  it('assigns LieType.TIME when legitimate client is more than 30 min late', () => {
+    const data = makeClientData({ lieType: LieType.NONE });
+    const res = makeReservation({ time: 1170 }); // 19:30
+    const client = createNewClient({ data, currentMinutes: 1210, res }); // 40 min late
+    expect(client.lieType).toBe(LieType.TIME);
+    expect(client.isLate).toBe(true);
+  });
+
+  it('does not assign TIME lie when client is on time', () => {
+    const data = makeClientData({ lieType: LieType.NONE });
+    const res = makeReservation({ time: 1170 }); // 19:30
+    const client = createNewClient({ data, currentMinutes: 1180, res }); // 10 min late — not enough
+    expect(client.lieType).toBe(LieType.NONE);
+    expect(client.isLate).toBe(false);
+  });
+});
