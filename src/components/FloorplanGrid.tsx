@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useGame } from '../context/GameContext';
 import { CellState, PhysicalState } from '../types';
 import { Check, X, Users } from 'lucide-react';
@@ -40,13 +40,14 @@ export const FloorplanGrid: React.FC = () => {
     <div className="flex flex-col gap-4 bg-stone-100 p-6 h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b-2 border-stone-200 pb-4 shrink-0">
-        <div>
+        <div className="flex flex-col gap-1">
           <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
             <Users className="w-5 h-5" />
             Floorplan
           </h2>
           {isSeating ? (
-            <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider animate-pulse">
+            <p className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isCropping ? 'text-amber-500' : 'text-emerald-600 animate-pulse'}`}>
+              {isCropping && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />}
               Seating: {currentClient?.trueFirstName} ({selectedCells.length}/{partySize})
             </p>
           ) : (
@@ -55,14 +56,32 @@ export const FloorplanGrid: React.FC = () => {
             </p>
           )}
         </div>
+        {/* Action buttons — right side, only in seating mode */}
         {isSeating && (
-          <button
-            onClick={cancelSeating}
-            className="p-1.5 hover:bg-stone-200 rounded-full transition-colors"
-            id="close-grid-btn"
-          >
-            <X className="w-4 h-4 text-stone-600" />
-          </button>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={confirmSeating}
+              disabled={!canConfirm}
+              className={`
+                px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all border-b-2 active:border-b-0 active:translate-y-px
+                ${canConfirm
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-800'
+                  : 'bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed'}
+              `}
+              id="confirm-seating-btn"
+            >
+              <Check className="w-3 h-3" />
+              {isCropping ? 'Crop & Seat' : 'Confirm'}
+            </button>
+            <button
+              onClick={cancelSeating}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-600 transition-all flex items-center gap-1.5"
+              id="cancel-seating-btn"
+            >
+              <X className="w-3 h-3" />
+              Cancel
+            </button>
+          </div>
         )}
       </div>
 
@@ -119,53 +138,6 @@ export const FloorplanGrid: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Actions - Only visible when seating */}
-      <AnimatePresence>
-        {isSeating && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="flex flex-col gap-4 shrink-0"
-          >
-            {isCropping && (
-              <div
-                className="bg-amber-50 border border-amber-200 p-2 rounded-lg flex items-center gap-2 text-amber-800"
-                id="cropping-warning"
-              >
-                <Users className="w-4 h-4 shrink-0" />
-                <p className="text-[10px] font-bold leading-tight">
-                  Warning: Leaving {partySize - selectedCells.length} behind!
-                </p>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={confirmSeating}
-                disabled={!canConfirm}
-                className={`
-                  w-full py-3 px-4 font-bold rounded-xl transition-all border-b-4 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2 text-sm
-                  ${canConfirm
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-800'
-                    : 'bg-stone-300 text-stone-500 border-stone-400 cursor-not-allowed'}
-                `}
-                id="confirm-seating-btn"
-              >
-                <Check className="w-4 h-4" />
-                {isCropping ? 'Crop & Seat' : 'Confirm Seating'}
-              </button>
-              <button
-                onClick={cancelSeating}
-                className="w-full py-2 px-4 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold rounded-xl transition-all text-xs"
-                id="cancel-seating-btn"
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

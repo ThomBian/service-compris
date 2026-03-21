@@ -1,6 +1,6 @@
 import { useCallback, Dispatch, SetStateAction } from 'react';
 import { GameState, PhysicalState, CellState } from '../types';
-import { MEAL_DURATION } from '../constants';
+import { mealDurationForPartySize } from '../constants';
 import { 
   handleAcceptedClient, 
   handleRefusedClient, 
@@ -110,12 +110,13 @@ export function useDecisionActions(
       );
 
       const partyId = prev.currentClient.id;
+      const mealMinutes = mealDurationForPartySize(prev.currentClient.truePartySize);
       const nextGrid = prev.grid.map(row => row.map(cell => {
         if (cell.state === CellState.SELECTED) {
           return { 
             ...cell, 
             state: CellState.OCCUPIED, 
-            mealDuration: MEAL_DURATION,
+            mealDuration: mealMinutes,
             partyId 
           };
         }
