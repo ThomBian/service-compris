@@ -11,6 +11,9 @@ interface TopBarProps {
   formatTime: (minutes: number) => string;
   showLogs: boolean;
   toggleLogs: () => void;
+  showBookings: boolean;
+  toggleBookings: () => void;
+  is2xl: boolean;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -23,6 +26,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   formatTime,
   showLogs,
   toggleLogs,
+  showBookings,
+  toggleBookings,
+  is2xl,
 }) => {
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20">
@@ -46,9 +52,21 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center gap-4">
+        {!is2xl && (
+          <button
+            onClick={toggleBookings}
+            className={`hidden md:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
+              showBookings
+                ? 'bg-[#141414] text-[#E4E3E0]'
+                : 'bg-white hover:bg-[#141414]/5'
+            }`}
+          >
+            {showBookings ? 'HIDE BOOKINGS' : 'BOOKINGS'}
+          </button>
+        )}
         <button
           onClick={toggleLogs}
-          className={`hidden 2xl:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
+          className={`hidden md:block px-4 py-2 rounded-lg border border-[#141414] text-xs font-bold transition-all ${
             showLogs
               ? 'bg-[#141414] text-[#E4E3E0]'
               : 'bg-white hover:bg-[#141414]/5'
