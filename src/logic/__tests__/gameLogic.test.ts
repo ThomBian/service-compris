@@ -111,3 +111,53 @@ describe('createInitialGrid', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe('generateClientData', () => {
+  // Legitimate (called with a reservation)
+  it('legitimate client carries the reservation id', () => {
+    const data = generateClientData(makeReservation());
+    expect(data.trueReservationId).toBe('res-1');
+    expect(data.type).toBe(ClientType.LEGITIMATE);
+  });
+
+  it('legitimate client size-lie rate is ~30% over 500 samples', () => {
+    const results = Array.from({ length: 500 }, () => generateClientData(makeReservation()));
+    const rate = results.filter(r => r.lieType === LieType.SIZE).length / 500;
+    expect(rate).toBeGreaterThanOrEqual(0.22);
+    expect(rate).toBeLessThanOrEqual(0.38);
+  });
+
+  // Walk-in and scammer tests use sampling (called without a reservation)
+  // 200 samples reliably produces both types; filter and assert per-type invariants.
+  const noResResults = Array.from({ length: 200 }, () => generateClientData());
+  const walkIns = noResResults.filter(r => r.type === ClientType.WALK_IN);
+  const scammers = noResResults.filter(r => r.type === ClientType.SCAMMER);
+
+  it('walk-ins have no reservation id', () => {
+    expect(walkIns.length).toBeGreaterThan(0);
+    walkIns.forEach(r => expect(r.trueReservationId).toBeUndefined());
+  });
+
+  it('walk-in party size is between 1 and 4', () => {
+    walkIns.forEach(r => {
+      expect(r.truePartySize).toBeGreaterThanOrEqual(1);
+      expect(r.truePartySize).toBeLessThanOrEqual(4);
+    });
+  });
+
+  it('scammers always have LieType.IDENTITY', () => {
+    expect(scammers.length).toBeGreaterThan(0);
+    scammers.forEach(r => expect(r.lieType).toBe(LieType.IDENTITY));
+  });
+
+  it('scammers have no reservation id', () => {
+    scammers.forEach(r => expect(r.trueReservationId).toBeUndefined());
+  });
+
+  it('scammer party size is between 2 and 5', () => {
+    scammers.forEach(r => {
+      expect(r.truePartySize).toBeGreaterThanOrEqual(2);
+      expect(r.truePartySize).toBeLessThanOrEqual(5);
+    });
+  });
+});
