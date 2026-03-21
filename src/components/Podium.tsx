@@ -27,7 +27,7 @@ export const Podium: React.FC<PodiumProps> = ({
   const [showLieMenu, setShowLieMenu] = React.useState(false);
 
   return (
-    <div className="p-6 flex flex-col gap-6">
+    <div className="p-4 md:p-6 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="font-serif italic text-2xl">The Podium</h2>
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-50 font-bold">
@@ -60,7 +60,7 @@ export const Podium: React.FC<PodiumProps> = ({
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[10px] uppercase tracking-widest font-bold opacity-50">Current Guest</span>
-                  <h3 className="text-3xl font-bold mt-1">
+                  <h3 className="text-xl md:text-3xl font-bold mt-1">
                     {currentClient.knownFirstName || '???'} {currentClient.knownLastName || '???'}
                   </h3>
                   <div className="text-sm opacity-60 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -92,7 +92,7 @@ export const Podium: React.FC<PodiumProps> = ({
               </div>
 
               {/* Chat History */}
-              <div className="flex-1 min-h-[200px] max-h-[300px] overflow-y-auto bg-[#f9f9f9] p-4 rounded-xl border border-[#141414] flex flex-col gap-3 font-mono text-xs custom-scrollbar">
+              <div className="flex-1 min-h-0 overflow-y-auto bg-[#f9f9f9] p-4 rounded-xl border border-[#141414] flex flex-col gap-3 font-mono text-xs custom-scrollbar">
                 {currentClient.chatHistory.map((msg, i) => (
                   <div key={i} className={`flex flex-col ${msg.sender === 'maitre-d' ? 'items-end' : 'items-start'}`}>
                     <span className="text-[8px] uppercase tracking-widest opacity-40 mb-1">
