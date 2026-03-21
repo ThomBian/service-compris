@@ -214,3 +214,48 @@ describe('prepareClientForDesk', () => {
     expect(result.chatHistory[0].text).toBe(result.lastMessage);
   });
 });
+
+describe('isAdjacent', () => {
+  it('horizontal neighbors are adjacent', () => {
+    expect(isAdjacent({ x: 0, y: 0 }, { x: 1, y: 0 })).toBe(true);
+  });
+
+  it('vertical neighbors are adjacent', () => {
+    expect(isAdjacent({ x: 0, y: 0 }, { x: 0, y: 1 })).toBe(true);
+  });
+
+  it('diagonal cells are not adjacent', () => {
+    expect(isAdjacent({ x: 0, y: 0 }, { x: 1, y: 1 })).toBe(false);
+  });
+
+  it('same cell is not adjacent to itself', () => {
+    expect(isAdjacent({ x: 0, y: 0 }, { x: 0, y: 0 })).toBe(false);
+  });
+
+  it('cells two apart are not adjacent', () => {
+    expect(isAdjacent({ x: 0, y: 0 }, { x: 2, y: 0 })).toBe(false);
+  });
+});
+
+describe('canSelectCell', () => {
+  const emptyCell = { id: 'c', x: 1, y: 0, state: CellState.EMPTY };
+  const occupiedCell = { id: 'd', x: 1, y: 0, state: CellState.OCCUPIED };
+  const selectedNeighbor = { id: 'e', x: 0, y: 0, state: CellState.EMPTY };
+  const farCell = { id: 'f', x: 3, y: 3, state: CellState.EMPTY };
+
+  it('first cell is always selectable (no selection yet)', () => {
+    expect(canSelectCell(emptyCell, [])).toBe(true);
+  });
+
+  it('non-empty cell is not selectable', () => {
+    expect(canSelectCell(occupiedCell, [])).toBe(false);
+  });
+
+  it('empty cell adjacent to a selected cell is selectable', () => {
+    expect(canSelectCell(emptyCell, [selectedNeighbor])).toBe(true);
+  });
+
+  it('empty cell not adjacent to any selected cell is not selectable', () => {
+    expect(canSelectCell(farCell, [selectedNeighbor])).toBe(false);
+  });
+});
