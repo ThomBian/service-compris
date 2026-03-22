@@ -1,0 +1,143 @@
+<h2>How should Bookings appear?</h2>
+<p class="subtitle">Podium+Queue | Floorplan are always visible. Player taps a button to access Bookings. Which reveal feels best?</p>
+
+<div class="cards">
+
+  <!-- Option A: Side drawer over floorplan -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f8f8f6;">
+      <div style="border: 2px solid #141414; border-radius: 6px; overflow: hidden; font-size: 10px; font-family: monospace; position: relative;">
+        <div style="background: #141414; color: white; padding: 5px 10px; display: flex; justify-content: space-between;">
+          <span>⏱ ⭐ ❤️ 💵</span><span>📋 [0][1][2]</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 45% 55%; height: 170px; position: relative;">
+          <!-- Left: Podium -->
+          <div style="border-right: 1px solid #ccc; padding: 6px; background: #fafaf8; display: flex; flex-direction: column;">
+            <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">👤 Guest — Party 4</div>
+            <div style="background: #f0f0ee; border-radius: 3px; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #888; margin-bottom: 4px;">chat</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+              <button style="background: #141414; color:white; border:none; border-radius: 2px; padding: 2px; font-size: 7px;">Seat</button>
+              <button style="background: #141414; color:white; border:none; border-radius: 2px; padding: 2px; font-size: 7px;">Wait</button>
+            </div>
+          </div>
+          <!-- Right: Floorplan (dimmed slightly) + drawer overlay -->
+          <div style="padding: 5px; background: #f0f0ee; position: relative; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; background: #d6d3d1; padding: 2px; border-radius: 3px; opacity: 0.5; height: 100%;">
+              <div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div>
+            </div>
+            <!-- Drawer sliding in from right -->
+            <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 80%; background: white; border-left: 2px solid #141414; padding: 6px; display: flex; flex-direction: column; box-shadow: -4px 0 12px rgba(0,0,0,0.2);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-size: 9px; font-weight: bold;">Reservations</span>
+                <span style="font-size: 9px; cursor: pointer; background: #E4E3E0; padding: 1px 4px; border-radius: 2px;">✕</span>
+              </div>
+              <div style="flex: 1; overflow: auto;">
+                <table style="width:100%; border-collapse:collapse; font-size: 7px;">
+                  <thead style="background:#141414;color:white;"><tr><th style="padding:2px;">NAME</th><th>SZ</th><th>TIME</th></tr></thead>
+                  <tbody>
+                    <tr><td style="padding:2px;">Smith</td><td>4</td><td>7:30</td></tr>
+                    <tr><td style="padding:2px;">Jones</td><td>2</td><td>8:00</td></tr>
+                    <tr><td style="padding:2px;">Lee</td><td>6</td><td>8:30</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Drawer over floorplan</h3>
+      <p>Bookings slides in from the right, overlaying the floorplan. Floorplan dims behind it. Tap ✕ or outside to dismiss. Podium always stays fully visible.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Full-width bottom sheet -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f8f8f6;">
+      <div style="border: 2px solid #141414; border-radius: 6px; overflow: hidden; font-size: 10px; font-family: monospace; position: relative;">
+        <div style="background: #141414; color: white; padding: 5px 10px; display: flex; justify-content: space-between;">
+          <span>⏱ ⭐ ❤️ 💵</span><span>📋 [0][1][2]</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 45% 55%; height: 110px;">
+          <div style="border-right: 1px solid #ccc; padding: 6px; background: #fafaf8; display: flex; flex-direction: column;">
+            <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">👤 Guest — Party 4</div>
+            <div style="background: #f0f0ee; border-radius: 3px; flex: 1; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #888;">chat</div>
+          </div>
+          <div style="padding: 5px; background: #fafaf8;">
+            <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; background: #d6d3d1; padding: 2px; border-radius: 3px; height: 100%;">
+              <div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #4ade80; border-radius: 1px; aspect-ratio:1;"></div>
+              <div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: #fbbf24; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div><div style="background: white; border-radius: 1px; aspect-ratio:1;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom sheet slides up -->
+        <div style="background: white; border-top: 2px solid #141414; padding: 6px; height: 75px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 9px; font-weight: bold;">Reservations</span>
+            <span style="font-size: 8px; background: #E4E3E0; padding: 1px 4px; border-radius: 2px;">▼ hide</span>
+          </div>
+          <div style="display: flex; gap: 6px; overflow-x: auto; font-size: 7px;">
+            <div style="border: 1px solid #ccc; border-radius: 3px; padding: 2px 5px; white-space: nowrap;">Smith · 4pax · 7:30</div>
+            <div style="border: 1px solid #ccc; border-radius: 3px; padding: 2px 5px; white-space: nowrap;">Jones · 2pax · 8:00</div>
+            <div style="border: 1px solid #ccc; border-radius: 3px; padding: 2px 5px; white-space: nowrap;">Lee · 6pax · 8:30</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Bottom sheet</h3>
+      <p>Bookings slides up from the bottom as a panel below both columns. Both Podium and Floorplan shrink slightly to make room. Cards in a horizontal scroll row.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Floorplan collapses, bookings replaces it -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f8f8f6;">
+      <div style="border: 2px solid #141414; border-radius: 6px; overflow: hidden; font-size: 10px; font-family: monospace;">
+        <div style="background: #141414; color: white; padding: 5px 10px; display: flex; justify-content: space-between;">
+          <span>⏱ ⭐ ❤️ 💵</span><span>📋 [0][1][2]</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 45% 55%; height: 170px;">
+          <!-- Left: Podium (unchanged) -->
+          <div style="border-right: 1px solid #ccc; padding: 6px; background: #fafaf8; display: flex; flex-direction: column;">
+            <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">👤 Guest — Party 4</div>
+            <div style="background: #f0f0ee; border-radius: 3px; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #888; margin-bottom: 4px;">chat</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+              <button style="background: #141414; color:white; border:none; border-radius: 2px; padding: 2px; font-size: 7px;">Seat</button>
+              <button style="background: #141414; color:white; border:none; border-radius: 2px; padding: 2px; font-size: 7px;">Wait</button>
+            </div>
+          </div>
+          <!-- Right: Bookings replaces floorplan, toggle button at top -->
+          <div style="display: flex; flex-direction: column; background: #fafaf8;">
+            <div style="display: flex; border-bottom: 1px solid #ccc;">
+              <button style="flex: 1; padding: 4px; font-size: 8px; background: #E4E3E0; border: none; border-right: 1px solid #ccc; color: #666;">🗺 Floor</button>
+              <button style="flex: 1; padding: 4px; font-size: 8px; background: #141414; color: white; border: none; font-weight: bold;">📋 Bookings</button>
+            </div>
+            <div style="flex: 1; overflow: auto; padding: 4px;">
+              <table style="width:100%; border-collapse:collapse; font-size: 7px;">
+                <thead style="background:#141414;color:white;position:sticky;top:0;"><tr><th style="padding:2px;">NAME</th><th>SIZE</th><th>TIME</th><th>STATUS</th></tr></thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid #eee;"><td style="padding:2px;">Smith</td><td>4</td><td>7:30</td><td>waiting</td></tr>
+                  <tr style="border-bottom:1px solid #eee;"><td style="padding:2px;">Jones</td><td>2</td><td>8:00</td><td>–</td></tr>
+                  <tr style="border-bottom:1px solid #eee;"><td style="padding:2px;">Lee</td><td>6</td><td>8:30</td><td>–</td></tr>
+                  <tr><td style="padding:2px;">Park</td><td>3</td><td>9:00</td><td>–</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Toggle right panel</h3>
+      <p>The right column has two mini-tabs: Floor / Bookings. Tapping switches the panel content in place. No overlay — clean and predictable. Floorplan is one tap away.</p>
+    </div>
+  </div>
+
+</div>
