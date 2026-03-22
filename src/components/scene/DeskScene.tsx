@@ -6,35 +6,43 @@ import { PhysicalState } from '../../types';
 
 interface SpeechBubbleProps {
   text: string | undefined;
+  variant?: 'default' | 'storm';
 }
 
-const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text }) => (
-  <AnimatePresence>
-    {text && (
-      <motion.div
-        key={text}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
-        title={text}
-        className="relative bg-white border border-[#141414] rounded-lg px-2 py-1 text-[10px] max-w-[160px] truncate shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] mb-1"
-      >
-        {text}
-        <span
-          className="absolute -bottom-1.5 left-1/2 -translate-x-1/2"
-          style={{
-            width: 0,
-            height: 0,
-            borderLeft: '4px solid transparent',
-            borderRight: '4px solid transparent',
-            borderTop: '6px solid #141414',
-          }}
-        />
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }) => {
+  const isStorm = variant === 'storm';
+  return (
+    <AnimatePresence>
+      {text && (
+        <motion.div
+          key={text}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          title={text}
+          className={`relative rounded-lg px-2 py-1 text-[10px] max-w-[160px] whitespace-normal break-words leading-snug mb-1 ${
+            isStorm
+              ? 'bg-red-50 border border-red-600 text-red-700 font-semibold shadow-[2px_2px_0px_0px_rgba(220,38,38,1)]'
+              : 'bg-white border border-[#141414] shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]'
+          }`}
+        >
+          {text}
+          <span
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2"
+            style={{
+              width: 0,
+              height: 0,
+              borderLeft: '4px solid transparent',
+              borderRight: '4px solid transparent',
+              borderTop: isStorm ? '6px solid #dc2626' : '6px solid #141414',
+            }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 interface DeskSceneProps {
   onSeatParty: () => void;
