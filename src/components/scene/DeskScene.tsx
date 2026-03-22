@@ -17,6 +17,7 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text }) => (
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15 }}
+        title={text}
         className="relative bg-white border border-[#141414] rounded-lg px-2 py-1 text-[10px] max-w-[160px] truncate shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] mb-1"
       >
         {text}
