@@ -75,9 +75,26 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       {/* Maître D' */}
       <div className="flex flex-col items-center gap-1">
         <SpeechBubble text={maitreDMessage} />
-        <div className="w-10 h-14 bg-[#141414] rounded-t-full flex items-center justify-center text-white">
-          <span className="text-base leading-none">◆</span>
-        </div>
+        <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Head */}
+          <circle cx="24" cy="12" r="10" fill="#141414"/>
+          {/* Neck */}
+          <rect x="21" y="21" width="6" height="5" fill="#141414"/>
+          {/* Bow tie */}
+          <polygon points="18,26 24,29 18,32" fill="#555"/>
+          <polygon points="30,26 24,29 30,32" fill="#555"/>
+          <circle cx="24" cy="29" r="1.5" fill="#333"/>
+          {/* Suit body */}
+          <rect x="14" y="26" width="20" height="26" rx="3" fill="#141414"/>
+          {/* White shirt front */}
+          <rect x="21" y="28" width="6" height="20" rx="1" fill="white"/>
+          {/* Arms */}
+          <line x1="14" y1="30" x2="6" y2="48" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
+          <line x1="34" y1="30" x2="42" y2="48" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
+          {/* Legs */}
+          <line x1="19" y1="52" x2="14" y2="70" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
+          <line x1="29" y1="52" x2="34" y2="70" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
+        </svg>
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">Maître D'</span>
       </div>
 
