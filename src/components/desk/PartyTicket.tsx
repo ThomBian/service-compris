@@ -16,17 +16,23 @@ export const PartyTicket: React.FC = () => {
 
   if (!currentClient) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center opacity-30 border-2 border-dashed border-[#141414] rounded-2xl p-4">
-        <Users size={32} />
-        <p className="font-bold mt-2 uppercase tracking-widest text-xs">
-          Awaiting next guest...
-        </p>
+      <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Users size={12} />
+          <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Party Ticket</span>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center opacity-30 border-2 border-dashed border-[#141414] rounded-lg">
+          <Users size={32} />
+          <p className="font-bold mt-2 uppercase tracking-widest text-xs">
+            Awaiting next guest...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 min-h-0 bg-white border border-[#141414] rounded-2xl shadow-[6px_6px_0px_0px_rgba(20,20,20,1)] flex flex-col gap-3 relative overflow-hidden p-4">
+    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
       {/* Patience Bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
         <motion.div
@@ -41,13 +47,16 @@ export const PartyTicket: React.FC = () => {
         />
       </div>
 
+      {/* Shared header */}
+      <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+        <Users size={12} />
+        <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Party Ticket</span>
+      </div>
+
       {/* Guest header */}
-      <div className="flex items-start justify-between pt-1">
+      <div className="flex items-start justify-between">
         <div>
-          <span className="text-[10px] uppercase tracking-widest font-bold opacity-50">
-            Party Ticket
-          </span>
-          <h3 className="text-xl font-bold mt-0.5">
+          <h3 className="text-xl font-bold">
             {currentClient.knownFirstName || "???"}{" "}
             {currentClient.knownLastName || "???"}
           </h3>
