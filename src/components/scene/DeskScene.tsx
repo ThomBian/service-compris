@@ -23,11 +23,11 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }
     <AnimatePresence>
       {text && (
         <motion.div
-          key={text}
+          // No key={text} — keeps the node mounted while text changes, no flash between messages
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
+          transition={{ duration: 0.2 }}
           title={text}
           className={`relative rounded-lg px-2 py-1 text-[10px] max-w-[160px] whitespace-normal break-words leading-snug mb-1 ${
             isStorm
@@ -192,23 +192,35 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       </AnimatePresence>
 
       {/* Queue */}
-      <div className="flex flex-col flex-1 overflow-x-hidden pb-1 gap-1">
-        <SpeechBubble text={stormedOut?.message} variant="storm" />
-        <div className="flex items-end gap-2 overflow-x-auto">
-          {queue.length === 0 ? (
-            <span className="text-xs italic opacity-30">Queue is empty</span>
-          ) : (
-            queue.map((c) => (
-              <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
-                <Users size={16} className="opacity-60" />
-                <div
-                  className="w-1 rounded-full bg-emerald-500"
-                  style={{ height: Math.max(2, (c.patience / 100) * 20) }}
-                />
-              </div>
-            ))
+      <div className="flex items-end gap-2 flex-1 overflow-x-auto pb-1">
+        {queue.length === 0 && !stormedOut && (
+          <span className="text-xs italic opacity-30">Queue is empty</span>
+        )}
+        {queue.map((c) => (
+          <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
+            <Users size={16} className="opacity-60" />
+            <div
+              className="w-1 rounded-full bg-emerald-500"
+              style={{ height: Math.max(2, (c.patience / 100) * 20) }}
+            />
+          </div>
+        ))}
+        {/* Stormed-out client — stays visible until bubble expires, then both vanish */}
+        <AnimatePresence>
+          {stormedOut && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col items-center gap-0.5 shrink-0"
+            >
+              <SpeechBubble text={stormedOut.message} variant="storm" />
+              <Users size={16} className="text-red-500 opacity-70" />
+              <div className="w-1 h-0.5 rounded-full bg-red-400" />
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
     </div>
   );
