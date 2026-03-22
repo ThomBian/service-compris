@@ -20,10 +20,10 @@ interface SpeechBubbleProps {
 const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }) => {
   const isStorm = variant === 'storm';
   return (
+    // Outer AnimatePresence: fades the whole bubble shell in/out when text appears/disappears
     <AnimatePresence>
       {text && (
         <motion.div
-          // No key={text} — keeps the node mounted while text changes, no flash between messages
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -35,7 +35,22 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }
               : 'bg-white border border-[#141414] shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]'
           }`}
         >
-          {text}
+          {/* Inner AnimatePresence: crossfades the text when the message changes.
+              initial={false} so the first text inherits the container's fade-in
+              rather than double-animating. mode="wait" ensures old text fully
+              exits before new text enters — the shell stays visible throughout. */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={text}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="block"
+            >
+              {text}
+            </motion.span>
+          </AnimatePresence>
           <span
             className="absolute -bottom-1.5 left-1/2 -translate-x-1/2"
             style={{
