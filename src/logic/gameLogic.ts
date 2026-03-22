@@ -459,6 +459,21 @@ export function handleRefusedClient(
   return { nextRating, nextMorale, nextLogs };
 }
 
+export function handleSeatingRefusal(
+  client: Client,
+  currentRating: number,
+  currentMorale: number,
+  currentLogs: string[]
+) {
+  const nextRating = Math.max(0, currentRating - 1.5);
+  const nextMorale = Math.max(0, currentMorale - 30);
+  const nextLogs = [
+    `Refused after seating: You accepted ${client.trueFirstName} then turned them away. Guests are furious.`,
+    ...currentLogs
+  ];
+  return { nextRating, nextMorale, nextLogs };
+}
+
 // --- Grid Interaction Logic ---
 
 export function isAdjacent(cell1: { x: number, y: number }, cell2: { x: number, y: number }): boolean {

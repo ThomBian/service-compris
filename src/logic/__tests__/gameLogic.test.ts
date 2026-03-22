@@ -8,6 +8,7 @@ import {
   canSelectCell,
   checkAccusation,
   handleRefusedClient,
+  handleSeatingRefusal,
   handleAcceptedClient,
   processQueueTick,
 } from '../gameLogic';
@@ -377,6 +378,23 @@ describe('handleAcceptedClient', () => {
     // Only seat 2 of 4 — 2 cropped
     const { nextRating } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
     expect(nextRating).toBeCloseTo(2.1); // -1.0 penalty for 2 cropped guests (-0.5 * 2^(2-1)) + 0.1 bonus for honest = 3.0 - 0.9 = 2.1
+  });
+});
+
+describe('handleSeatingRefusal', () => {
+  it('applies a heavy rating and morale penalty regardless of client type', () => {
+    const client = makeClient({ type: ClientType.WALK_IN, lieType: LieType.NONE });
+    const result = handleSeatingRefusal(client, 4.0, 80, []);
+    expect(result.nextRating).toBeCloseTo(2.5);
+    expect(result.nextMorale).toBe(50);
+    expect(result.nextLogs[0]).toMatch(/Refused after seating/i);
+  });
+
+  it('clamps rating to 0 if penalty exceeds current rating', () => {
+    const client = makeClient();
+    const result = handleSeatingRefusal(client, 1.0, 20, []);
+    expect(result.nextRating).toBe(0);
+    expect(result.nextMorale).toBe(0);
   });
 });
 
