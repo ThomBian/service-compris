@@ -141,7 +141,7 @@ export const PartyTicket: React.FC = () => {
           WAIT IN LINE
         </button>
         <button
-          onClick={() => handleDecision(false)}
+          onClick={() => handleDecision()}
           className="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-red-700 transition-colors text-xs shadow-[0px_3px_0px_0px_rgba(185,28,28,1)] active:translate-y-px active:shadow-none"
         >
           <X size={14} />

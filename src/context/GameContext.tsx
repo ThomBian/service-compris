@@ -6,7 +6,7 @@ interface GameContextType {
   gameState: GameState;
   askQuestion: (field: 'firstName' | 'lastName' | 'time') => void;
   callOutLie: (field: 'size' | 'time' | 'reservation') => void;
-  handleDecision: (accepted: boolean) => void;
+  handleDecision: () => void;
   waitInLine: () => void;
   seatParty: () => void;
   toggleCellSelection: (x: number, y: number) => void;

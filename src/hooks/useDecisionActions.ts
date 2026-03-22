@@ -11,33 +11,28 @@ import {
 export function useDecisionActions(
   setGameState: Dispatch<SetStateAction<GameState>>
 ) {
-  const handleDecision = useCallback((accepted: boolean) => {
+  const handleDecision = useCallback(() => {
     setGameState(prev => {
       if (!prev.currentClient) return prev;
-      
-      if (accepted) {
-        // This is now handled by seatParty -> confirmSeating
-        return prev;
-      } else {
-        const { 
-          nextRating, 
-          nextMorale,
-          nextLogs 
-        } = handleRefusedClient(
-          prev.currentClient, 
-          prev.rating, 
-          prev.morale,
-          prev.logs
-        );
 
-        return {
-          ...prev,
-          currentClient: null,
-          rating: nextRating,
-          morale: nextMorale,
-          logs: nextLogs.slice(0, 50)
-        };
-      }
+      const {
+        nextRating,
+        nextMorale,
+        nextLogs
+      } = handleRefusedClient(
+        prev.currentClient,
+        prev.rating,
+        prev.morale,
+        prev.logs
+      );
+
+      return {
+        ...prev,
+        currentClient: null,
+        rating: nextRating,
+        morale: nextMorale,
+        logs: nextLogs.slice(0, 50)
+      };
     });
   }, [setGameState]);
 
