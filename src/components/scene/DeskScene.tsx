@@ -67,6 +67,27 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   const prevQueueRef = useRef<typeof queue>([]);
   const stormTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Delayed guest message — shows after maitre-d speaks, like a real conversation
+  const [displayedGuestMessage, setDisplayedGuestMessage] = useState<string | undefined>(undefined);
+  const guestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Immediately clear when a new client arrives at the desk
+  useEffect(() => {
+    if (guestTimerRef.current) clearTimeout(guestTimerRef.current);
+    setDisplayedGuestMessage(undefined);
+  }, [currentClient?.id]);
+
+  // Delay the guest message by 900ms so maitre-d speaks first
+  useEffect(() => {
+    if (guestTimerRef.current) clearTimeout(guestTimerRef.current);
+    if (!guestMessage) return;
+    guestTimerRef.current = setTimeout(() => setDisplayedGuestMessage(guestMessage), 900);
+  }, [guestMessage]);
+
+  useEffect(() => {
+    return () => { if (guestTimerRef.current) clearTimeout(guestTimerRef.current); };
+  }, []);
+
   useEffect(() => {
     const prev = prevQueueRef.current;
     const currentIds = new Set(queue.map(c => c.id));
@@ -146,7 +167,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            <SpeechBubble text={guestMessage} />
+            <SpeechBubble text={displayedGuestMessage} />
             <div className="flex flex-wrap gap-1 max-w-[120px]">
               {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
                 <Users key={i} size={20} className="text-[#141414]" />
