@@ -20,7 +20,7 @@ Three player-facing issues reduce clarity in the desk view:
 
 ### 1. DeskTools Column Reorder
 
-`DeskTools.tsx` changes its grid from:
+`DeskTools.tsx` changes its grid template from:
 ```
 grid-cols-[1fr_1fr_1.5fr_auto]
 ```
@@ -29,9 +29,15 @@ to:
 grid-cols-[auto_1.5fr_1fr_1fr]
 ```
 
-Column order changes from `BookingLedger | Clipboard | PartyTicket | MiniGrid` to:
+And the JSX children reorder to match:
+```tsx
+<MiniGrid />
+<PartyTicket />
+<BookingLedger />
+<Clipboard />
+```
 
-**`MiniGrid | PartyTicket | BookingLedger | Clipboard`**
+Column order becomes: **`MiniGrid | PartyTicket | BookingLedger | Clipboard`**
 
 - MiniGrid (leftmost, `auto` width) aligns with the Door above it in DeskScene.
 - PartyTicket sits immediately right of MiniGrid, spatially linking the floorplan and the current party.
@@ -43,7 +49,7 @@ No changes to any individual tool component.
 
 ### 2. Maître D' Visual Redesign
 
-The Maître D' figure in `DeskScene.tsx` gets a uniform detail that distinguishes it from guest icons.
+The Maître D' figure in `DeskScene.tsx` gets a bow tie detail that distinguishes it from guest icons.
 
 **Current:**
 ```tsx
@@ -52,9 +58,7 @@ The Maître D' figure in `DeskScene.tsx` gets a uniform detail that distinguishe
 </div>
 ```
 
-**New:** Same silhouette shape, but the "MD" text is replaced with a white bow tie rendered in CSS — two small white triangles forming a bow tie shape, positioned at the collar area. Implementation: two `div` elements with `border` tricks or a `◆` character in white at an appropriate size.
-
-The label below the figure stays: `Maître D'`.
+**New:** Same silhouette shape, but the "MD" text is replaced with a white `◆` character (preferred) rendered at `text-[10px]` in the collar area. A CSS border-triangle approach is an acceptable alternative if the unicode character looks poor in the browser. The label below the figure stays: `Maître D'`.
 
 ---
 
@@ -62,11 +66,30 @@ The label below the figure stays: `Maître D'`.
 
 When `currentClient` changes (a new party reaches `PhysicalState.AT_DESK`), the party figures in DeskScene animate in from the right rather than appearing instantly.
 
-- The guest figures wrapper is a `motion.div` keyed on `currentClient.id`
+- Requires adding `import { motion, AnimatePresence } from 'motion/react'` to `DeskScene.tsx` (not currently imported there)
+- Also replace `overflow-hidden` with `overflow-x-hidden` on the `DeskScene` root div — the current `overflow-hidden` would clip speech bubbles that extend upward above the figure wrappers
+- `AnimatePresence` wraps only the current-party block (not the queue). The guest figures wrapper is a `motion.div` keyed on `currentClient.id`:
+
+```tsx
+<AnimatePresence mode="wait">
+  {currentClient && (
+    <motion.div
+      key={currentClient.id}
+      className="flex flex-col items-center gap-1 min-w-[60px]"
+      initial={{ x: 120, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+    >
+      {/* speech bubble + guest figures */}
+    </motion.div>
+  )}
+</AnimatePresence>
+```
+
 - Initial state: `x: 120, opacity: 0`
 - Animate to: `x: 0, opacity: 1`
 - Transition: spring (`stiffness: 200, damping: 20`)
-- Uses `AnimatePresence` (already imported in the project)
 - The Maître D' figure does not move
 
 ---
@@ -76,12 +99,13 @@ When `currentClient` changes (a new party reaches `PhysicalState.AT_DESK`), the 
 Two speech bubbles replace the chat history. Both live in `DeskScene.tsx`.
 
 **Maître D' bubble** — shown above the Maître D' figure:
-- Content: last entry in `currentClient.chatHistory` where `sender === 'maitre-d'`
-- Hidden when no such message exists
+- Content: most recent entry in `currentClient.chatHistory` where `sender === 'maitre-d'`
+- Use `chatHistory.findLast(m => m.sender === 'maitre-d')` (or `[...chatHistory].reverse().find(...)` as a fallback)
+- Hidden when `currentClient` is null, or when no maitre-d message exists yet
 
 **Guest bubble** — shown above the party figures:
 - Content: `currentClient.lastMessage`
-- Hidden when `currentClient` is null
+- Hidden when `currentClient` is null, or when `currentClient.lastMessage` is an empty string
 
 **Visual treatment** (both bubbles):
 - White rounded pill, `border border-[#141414]`, small `shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]`
@@ -89,7 +113,36 @@ Two speech bubbles replace the chat history. Both live in `DeskScene.tsx`.
 - `text-[10px]` font, `max-w-[160px]`, truncated with ellipsis if overflowing
 - Fade in/update with Framer Motion `opacity: 0 → 1`, `duration: 0.15s`, keyed on message text
 
-Both bubbles are positioned using a `relative` wrapper around each figure, with the bubble as `absolute bottom-full mb-1`.
+**Positioning:** Bubbles are placed as **in-flow elements** above each figure, not as `absolute` positioned layers. Each figure group becomes a `flex flex-col items-center` wrapper with the bubble as the first child (above the silhouette). Since the parent uses `items-end`, taller wrappers extend upward naturally — no additional vertical overflow change is needed beyond the `overflow-x-hidden` already specified in Section 3.
+
+```tsx
+<div className="flex flex-col items-center gap-1">
+  {/* bubble first — renders above the figure */}
+  <SpeechBubble text={...} />
+  {/* figure below */}
+  <div className="w-10 h-14 ...">...</div>
+  <span>Maître D'</span>
+</div>
+```
+
+**Speech bubble animation:** Each bubble is a `motion.div` keyed on the message text, fading in with Framer Motion:
+
+```tsx
+<AnimatePresence>
+  {text && (
+    <motion.div
+      key={text}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      className="..."
+    >
+      {text}
+    </motion.div>
+  )}
+</AnimatePresence>
+```
 
 **No speech bubble appears when `currentClient` is null.**
 
@@ -116,8 +169,8 @@ The `flex-1 min-h-0` that was on the chat block is not transferred elsewhere —
 
 | File | Change |
 |---|---|
-| `src/components/desk/DeskTools.tsx` | Change grid template and column order |
-| `src/components/scene/DeskScene.tsx` | Maître D' bow tie detail; guest approach animation; two speech bubbles |
+| `src/components/desk/DeskTools.tsx` | Change grid template and reorder JSX children |
+| `src/components/scene/DeskScene.tsx` | Add Framer Motion import; Maître D' bow tie detail; guest approach animation; two in-flow speech bubbles |
 | `src/components/desk/PartyTicket.tsx` | Remove chat history block |
 
 ---
