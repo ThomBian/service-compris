@@ -72,7 +72,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
     const currentIds = new Set(queue.map(c => c.id));
 
     for (const client of prev) {
-      if (!currentIds.has(client.id) && client.patience <= 0) {
+      if (!currentIds.has(client.id) && client.patience <= 1 && currentClient?.id !== client.id) {
         if (stormTimerRef.current) clearTimeout(stormTimerRef.current);
         const message = STORM_OUT_LINES[Math.floor(Math.random() * STORM_OUT_LINES.length)];
         setStormedOut({ message });
@@ -84,7 +84,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
     prevQueueRef.current = queue;
     // No cleanup return here — returning a cleanup would cancel the timer
     // on every queue tick. The unmount cleanup is in a separate effect (Step 5).
-  }, [queue]);
+  }, [queue, currentClient]);
 
   useEffect(() => {
     return () => {
