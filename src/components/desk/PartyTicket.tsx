@@ -82,30 +82,6 @@ export const PartyTicket: React.FC = () => {
         )}
       </div>
 
-      {/* Chat history */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-[#f9f9f9] p-3 rounded-xl border border-[#141414] flex flex-col gap-2 font-mono text-xs custom-scrollbar">
-        {currentClient.chatHistory.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex flex-col ${msg.sender === "maitre-d" ? "items-end" : "items-start"}`}
-          >
-            <span className="text-[8px] uppercase tracking-widest opacity-40 mb-0.5">
-              {msg.sender === "maitre-d" ? "Maître D'" : "Guest"}
-            </span>
-            <div
-              className={`px-3 py-1.5 rounded-lg max-w-[90%] border ${
-                msg.sender === "maitre-d"
-                  ? "bg-[#141414] text-white border-[#141414]"
-                  : "bg-white text-[#141414] border-[#141414]/20"
-              }`}
-            >
-              {msg.text}
-            </div>
-          </div>
-        ))}
-        <div ref={(el) => el?.scrollIntoView({ behavior: "smooth" })} />
-      </div>
-
       {/* Question buttons */}
       <div className="grid grid-cols-3 gap-2">
         {(["firstName", "lastName", "time"] as const).map((field) => (
