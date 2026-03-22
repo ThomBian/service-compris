@@ -1,10 +1,11 @@
 import { useCallback, Dispatch, SetStateAction } from 'react';
 import { GameState, PhysicalState, CellState } from '../types';
 import { mealDurationForPartySize } from '../constants';
-import { 
-  handleAcceptedClient, 
-  handleRefusedClient, 
-  canSelectCell 
+import {
+  handleAcceptedClient,
+  handleRefusedClient,
+  handleSeatingRefusal,
+  canSelectCell
 } from '../logic/gameLogic';
 
 export function useDecisionActions(
@@ -95,11 +96,11 @@ export function useDecisionActions(
       const selectedCells = prev.grid.flat().filter(c => c.state === CellState.SELECTED);
       if (selectedCells.length === 0) return prev;
 
-      const { 
-        nextCash, 
-        nextRating, 
-        nextMorale, 
-        nextLogs 
+      const {
+        nextCash,
+        nextRating,
+        nextMorale,
+        nextLogs
       } = handleAcceptedClient(
         prev.currentClient,
         selectedCells.length,
@@ -113,11 +114,11 @@ export function useDecisionActions(
       const mealMinutes = mealDurationForPartySize(prev.currentClient.truePartySize);
       const nextGrid = prev.grid.map(row => row.map(cell => {
         if (cell.state === CellState.SELECTED) {
-          return { 
-            ...cell, 
-            state: CellState.OCCUPIED, 
+          return {
+            ...cell,
+            state: CellState.OCCUPIED,
             mealDuration: mealMinutes,
-            partyId 
+            partyId
           };
         }
         return cell;
@@ -135,33 +136,35 @@ export function useDecisionActions(
     });
   }, [setGameState]);
 
-  const cancelSeating = useCallback(() => {
+  const refuseSeatedParty = useCallback(() => {
     setGameState(prev => {
-      if (!prev.currentClient) return prev;
-      const nextGrid = prev.grid.map(row => row.map(cell => {
-        if (cell.state === CellState.SELECTED) {
-          return { ...cell, state: CellState.EMPTY };
-        }
-        return cell;
-      }));
-
+      if (!prev.currentClient || prev.currentClient.physicalState !== PhysicalState.SEATING) return prev;
+      const { nextRating, nextMorale, nextLogs } = handleSeatingRefusal(
+        prev.currentClient,
+        prev.rating,
+        prev.morale,
+        prev.logs
+      );
+      const nextGrid = prev.grid.map(row => row.map(cell =>
+        cell.state === CellState.SELECTED ? { ...cell, state: CellState.EMPTY } : cell
+      ));
       return {
         ...prev,
+        currentClient: null,
         grid: nextGrid,
-        currentClient: {
-          ...prev.currentClient,
-          physicalState: PhysicalState.AT_DESK
-        }
+        rating: nextRating,
+        morale: nextMorale,
+        logs: nextLogs.slice(0, 50)
       };
     });
   }, [setGameState]);
 
-  return { 
-    handleDecision, 
-    waitInLine, 
-    seatParty, 
-    toggleCellSelection, 
-    confirmSeating, 
-    cancelSeating 
+  return {
+    handleDecision,
+    waitInLine,
+    seatParty,
+    toggleCellSelection,
+    confirmSeating,
+    refuseSeatedParty
   };
 }

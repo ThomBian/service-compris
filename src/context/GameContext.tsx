@@ -11,7 +11,7 @@ interface GameContextType {
   seatParty: () => void;
   toggleCellSelection: (x: number, y: number) => void;
   confirmSeating: () => void;
-  cancelSeating: () => void;
+  refuseSeatedParty: () => void;
   toggleReservationArrived: (id: string) => void;
   setTimeMultiplier: (m: number) => void;
 }

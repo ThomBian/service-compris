@@ -31,13 +31,13 @@ export function useGameEngine() {
   
   const { askQuestion } = useQuestionActions(setGameState);
   const { callOutLie } = useAccusationActions(setGameState);
-  const { 
-    handleDecision, 
-    waitInLine, 
-    seatParty, 
-    toggleCellSelection, 
-    confirmSeating, 
-    cancelSeating 
+  const {
+    handleDecision,
+    waitInLine,
+    seatParty,
+    toggleCellSelection,
+    confirmSeating,
+    refuseSeatedParty
   } = useDecisionActions(setGameState);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
@@ -50,7 +50,7 @@ export function useGameEngine() {
     seatParty,
     toggleCellSelection,
     confirmSeating,
-    cancelSeating,
+    refuseSeatedParty,
     toggleReservationArrived,
     setTimeMultiplier
   };
