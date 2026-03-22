@@ -43,7 +43,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   const { gameState: { currentClient, queue } } = useGame();
   const canSeat = currentClient?.physicalState === PhysicalState.AT_DESK;
 
-  const maitreDMessage = currentClient?.chatHistory.findLast(m => m.sender === 'maitre-d')?.text;
+  const maitreDMessage = currentClient?.chatHistory.filter(m => m.sender === 'maitre-d').at(-1)?.text;
   const guestMessage = currentClient?.lastMessage || undefined;
 
   return (
@@ -84,7 +84,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
             <SpeechBubble text={guestMessage} />
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1 max-w-[120px]">
               {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
                 <Users key={i} size={20} className="text-[#141414]" />
               ))}
