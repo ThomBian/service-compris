@@ -1,17 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { useGame } from '../context/GameContext';
-import { CellState, PhysicalState } from '../types';
+import { useGame } from '../../context/GameContext';
+import { CellState, PhysicalState } from '../../types';
 import { Check, X, Users } from 'lucide-react';
-import { GRID_SIZE } from '../constants';
-import { useContainerSize } from '../hooks/useContainerSize';
+import { GRID_SIZE } from '../../constants';
+import { useContainerSize } from '../../hooks/useContainerSize';
 
 export const FloorplanGrid: React.FC = () => {
   const {
     gameState,
     toggleCellSelection,
     confirmSeating,
-    cancelSeating
+    refuseSeatedParty
   } = useGame();
 
   const { grid, currentClient } = gameState;
@@ -74,12 +74,12 @@ export const FloorplanGrid: React.FC = () => {
               {isCropping ? 'Crop & Seat' : 'Confirm'}
             </button>
             <button
-              onClick={cancelSeating}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-600 transition-all flex items-center gap-1.5"
-              id="cancel-seating-btn"
+              onClick={refuseSeatedParty}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-all flex items-center gap-1.5"
+              id="refuse-party-btn"
             >
               <X className="w-3 h-3" />
-              Cancel
+              Refuse Party
             </button>
           </div>
         )}
