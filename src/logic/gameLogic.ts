@@ -153,7 +153,10 @@ export function prepareClientForDesk(client: Client): Client {
     physicalState: PhysicalState.AT_DESK,
     dialogueState: DialogueState.OPENING_GAMBIT,
     lastMessage: greeting,
-    chatHistory: [{ sender: 'guest', text: greeting }]
+    chatHistory: [
+      { sender: 'maitre-d', text: 'Good evening! How may I help you?' },
+      { sender: 'guest', text: greeting }
+    ]
   };
 
   preparedClient.knownFirstName = preparedClient.trueFirstName;

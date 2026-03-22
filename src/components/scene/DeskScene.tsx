@@ -110,7 +110,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       </button>
 
       {/* Maître D' */}
-      <div className="flex flex-col items-center gap-1">
+      <div className="flex flex-col items-center gap-1 min-w-[160px]">
         <SpeechBubble text={maitreDMessage} />
         <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Head */}

@@ -197,15 +197,16 @@ describe('prepareClientForDesk', () => {
     expect(typeof result.lastMessage).toBe('string');
   });
 
-  it('replaces chatHistory with a single guest greeting entry', () => {
+  it('replaces chatHistory with a maitre-d greeting followed by a guest greeting', () => {
     // Pass a client with pre-existing chatHistory to confirm replacement, not append
     const client = makeClient({
       chatHistory: [{ sender: 'guest', text: 'old message' }],
     });
     const result = prepareClientForDesk(client);
-    expect(result.chatHistory.length).toBe(1);
-    expect(result.chatHistory[0].sender).toBe('guest');
-    expect(result.chatHistory[0].text).toBe(result.lastMessage);
+    expect(result.chatHistory.length).toBe(2);
+    expect(result.chatHistory[0].sender).toBe('maitre-d');
+    expect(result.chatHistory[1].sender).toBe('guest');
+    expect(result.chatHistory[1].text).toBe(result.lastMessage);
   });
 });
 
