@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Users, DoorOpen, DoorClosed } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../../context/GameContext';
 import { PhysicalState } from '../../types';
+
+const STORM_OUT_LINES = [
+  "This is outrageous!",
+  "I'm never coming back!",
+  "What a disgrace!",
+  "Absolutely unacceptable!",
+  "You'll be hearing from my lawyer!",
+];
 
 interface SpeechBubbleProps {
   text: string | undefined;
@@ -54,6 +62,35 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
 
   const maitreDMessage = currentClient?.chatHistory.filter(m => m.sender === 'maitre-d').at(-1)?.text;
   const guestMessage = currentClient?.lastMessage || undefined;
+
+  const [stormedOut, setStormedOut] = useState<{ message: string } | null>(null);
+  const prevQueueRef = useRef<typeof queue>([]);
+  const stormTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const prev = prevQueueRef.current;
+    const currentIds = new Set(queue.map(c => c.id));
+
+    for (const client of prev) {
+      if (!currentIds.has(client.id) && client.patience <= 0) {
+        if (stormTimerRef.current) clearTimeout(stormTimerRef.current);
+        const message = STORM_OUT_LINES[Math.floor(Math.random() * STORM_OUT_LINES.length)];
+        setStormedOut({ message });
+        stormTimerRef.current = setTimeout(() => setStormedOut(null), 2000);
+        break;
+      }
+    }
+
+    prevQueueRef.current = queue;
+    // No cleanup return here — returning a cleanup would cancel the timer
+    // on every queue tick. The unmount cleanup is in a separate effect (Step 5).
+  }, [queue]);
+
+  useEffect(() => {
+    return () => {
+      if (stormTimerRef.current) clearTimeout(stormTimerRef.current);
+    };
+  }, []); // empty deps — runs cleanup only on unmount
 
   return (
     <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-x-hidden">
@@ -134,20 +171,23 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       </AnimatePresence>
 
       {/* Queue */}
-      <div className="flex items-end gap-2 flex-1 overflow-x-auto pb-1">
-        {queue.length === 0 ? (
-          <span className="text-xs italic opacity-30">Queue is empty</span>
-        ) : (
-          queue.map((c) => (
-            <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
-              <Users size={16} className="opacity-60" />
-              <div
-                className="w-1 rounded-full bg-emerald-500"
-                style={{ height: Math.max(2, (c.patience / 100) * 20) }}
-              />
-            </div>
-          ))
-        )}
+      <div className="flex flex-col flex-1 overflow-x-hidden pb-1 gap-1">
+        <SpeechBubble text={stormedOut?.message} variant="storm" />
+        <div className="flex items-end gap-2 overflow-x-auto">
+          {queue.length === 0 ? (
+            <span className="text-xs italic opacity-30">Queue is empty</span>
+          ) : (
+            queue.map((c) => (
+              <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
+                <Users size={16} className="opacity-60" />
+                <div
+                  className="w-1 rounded-full bg-emerald-500"
+                  style={{ height: Math.max(2, (c.patience / 100) * 20) }}
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
