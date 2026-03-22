@@ -7,12 +7,12 @@ export const BookingLedger: React.FC = () => {
   const { gameState: { reservations, inGameMinutes }, toggleReservationArrived } = useGame();
 
   return (
-    <div className="flex flex-col gap-2 h-full">
-      <h3 className="font-serif italic text-lg flex items-center gap-2">
-        <Book size={18} />
-        Booking Ledger
-      </h3>
-      <div className="flex-1 overflow-y-auto border border-[#141414] rounded-xl">
+    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Book size={12} />
+        <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Booking Ledger</span>
+      </div>
+      <div className="flex-1 overflow-y-auto">
         <table className="w-full text-left border-collapse">
           <thead className="sticky top-0 bg-[#141414] text-[#E4E3E0] text-[10px] uppercase tracking-wider font-bold">
             <tr>
