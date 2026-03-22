@@ -6,11 +6,11 @@ import { MiniGrid } from './MiniGrid';
 
 export const DeskTools: React.FC = () => {
   return (
-    <div className="h-full bg-[#E4E3E0] grid grid-cols-[1fr_1fr_1.5fr_auto] gap-4 p-4 overflow-hidden">
+    <div className="h-full bg-[#E4E3E0] grid grid-cols-[auto_1.5fr_1fr_1fr] gap-4 p-4 overflow-hidden">
+      <MiniGrid />
+      <PartyTicket />
       <BookingLedger />
       <Clipboard />
-      <PartyTicket />
-      <MiniGrid />
     </div>
   );
 };
