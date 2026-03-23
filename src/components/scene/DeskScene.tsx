@@ -17,40 +17,37 @@ interface SpeechBubbleProps {
   variant?: 'default' | 'storm';
 }
 
+// Rendered absolutely above each character — floats without affecting layout height.
+// key={text} gives a clean fade-out → fade-in on every new message.
 const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }) => {
   const isStorm = variant === 'storm';
+  const words = text?.split(' ') ?? [];
   return (
-    // Outer AnimatePresence: fades the whole bubble shell in/out when text appears/disappears
     <AnimatePresence>
       {text && (
         <motion.div
-          initial={{ opacity: 0 }}
+          key={text}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           title={text}
-          className={`relative rounded-lg px-2 py-1 text-[10px] max-w-[160px] whitespace-normal break-words leading-snug mb-1 ${
+          className={`relative rounded-lg px-2 py-1 text-[10px] max-w-[160px] leading-snug ${
             isStorm
               ? 'bg-red-50 border border-red-600 text-red-700 font-semibold shadow-[2px_2px_0px_0px_rgba(220,38,38,1)]'
               : 'bg-white border border-[#141414] shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]'
           }`}
         >
-          {/* Inner AnimatePresence: crossfades the text when the message changes.
-              initial={false} so the first text inherits the container's fade-in
-              rather than double-animating. mode="wait" ensures old text fully
-              exits before new text enters — the shell stays visible throughout. */}
-          <AnimatePresence mode="wait" initial={false}>
+          {words.map((word, i) => (
             <motion.span
-              key={text}
+              key={i}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="block"
+              transition={{ delay: i * 0.07, duration: 0.05 }}
             >
-              {text}
+              {word}{i < words.length - 1 ? ' ' : ''}
             </motion.span>
-          </AnimatePresence>
+          ))}
           <span
             className="absolute -bottom-1.5 left-1/2 -translate-x-1/2"
             style={{
@@ -129,7 +126,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   }, []); // empty deps — runs cleanup only on unmount
 
   return (
-    <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-x-hidden">
+    <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible">
       {/* Door */}
       <button
         onClick={canSeat ? onSeatParty : undefined}
@@ -146,8 +143,10 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       </button>
 
       {/* Maître D' */}
-      <div className="flex flex-col items-center gap-1 min-w-[160px]">
-        <SpeechBubble text={maitreDMessage} />
+      <div className="relative flex flex-col items-center gap-1 min-w-[160px]">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
+          <SpeechBubble text={maitreDMessage} />
+        </div>
         <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Head */}
           <circle cx="24" cy="12" r="10" fill="#141414"/>
@@ -176,13 +175,15 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         {currentClient ? (
           <motion.div
             key={currentClient.id}
-            className="flex flex-col items-center gap-1 min-w-[60px]"
+            className="relative flex flex-col items-center gap-1 min-w-[60px]"
             initial={{ x: 120, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            <SpeechBubble text={displayedGuestMessage} />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
+              <SpeechBubble text={displayedGuestMessage} />
+            </div>
             <div className="flex flex-wrap gap-1 max-w-[120px]">
               {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
                 <Users key={i} size={20} className="text-[#141414]" />
@@ -213,30 +214,33 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         )}
         {queue.map((c) => (
           <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
-            <Users size={16} className="opacity-60" />
             <div
-              className="w-1 rounded-full bg-emerald-500"
-              style={{ height: Math.max(2, (c.patience / 100) * 20) }}
+              className="h-1 rounded-full bg-emerald-500"
+              style={{ width: Math.max(2, (c.patience / 100) * 20) }}
             />
+            <Users size={16} className="opacity-60" />
           </div>
         ))}
-        {/* Stormed-out client — stays visible until bubble expires, then both vanish */}
-        <AnimatePresence>
-          {stormedOut && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col items-center gap-0.5 shrink-0"
-            >
-              <SpeechBubble text={stormedOut.message} variant="storm" />
-              <Users size={16} className="text-red-500 opacity-70" />
-              <div className="w-1 h-0.5 rounded-full bg-red-400" />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Stormed-out client — outside the scrollable queue so the bubble isn't clipped */}
+      <AnimatePresence>
+        {stormedOut && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative flex flex-col items-center gap-0.5 shrink-0 pb-1 mr-6"
+          >
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
+              <SpeechBubble text={stormedOut.message} variant="storm" />
+            </div>
+            <Users size={16} className="text-red-500 opacity-70" />
+            <div className="w-1 h-0.5 rounded-full bg-red-400" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
