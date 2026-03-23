@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { GameState } from '../types';
-import { START_TIME, INITIAL_RESERVATIONS } from '../constants';
-import { createInitialGrid } from '../logic/gameLogic';
-import { useGameClock } from './useGameClock';
-import { useClientSpawner } from './useClientSpawner';
-import { useQueueManager } from './useQueueManager';
-import { useQuestionActions } from './useQuestionActions';
-import { useAccusationActions } from './useAccusationActions';
-import { useDecisionActions } from './useDecisionActions';
-import { useReservationActions } from './useReservationActions';
+import { useState } from "react";
+import { GameState } from "../types";
+import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
+import { createInitialGrid } from "../logic/gameLogic";
+import { useGameClock } from "./useGameClock";
+import { useClientSpawner } from "./useClientSpawner";
+import { useQueueManager } from "./useQueueManager";
+import { useQuestionActions } from "./useQuestionActions";
+import { useAccusationActions } from "./useAccusationActions";
+import { useDecisionActions } from "./useDecisionActions";
+import { useReservationActions } from "./useReservationActions";
+import { useToast } from "../context/ToastContext";
 
 export function useGameEngine() {
   const [gameState, setGameState] = useState<GameState>({
@@ -22,13 +23,14 @@ export function useGameEngine() {
     cash: 0,
     rating: 5.0,
     morale: 100,
-    logs: ['Welcome to The Maitre D\'. The doors are open.'],
+    logs: ["Welcome to The Maitre D'. The doors are open."],
   });
 
+  const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
   useClientSpawner(gameState, setGameState);
   useQueueManager(gameState, setGameState);
-  
+
   const { askQuestion } = useQuestionActions(setGameState);
   const { callOutLie } = useAccusationActions(setGameState);
   const {
@@ -37,8 +39,8 @@ export function useGameEngine() {
     seatParty,
     toggleCellSelection,
     confirmSeating,
-    refuseSeatedParty
-  } = useDecisionActions(setGameState);
+    refuseSeatedParty,
+  } = useDecisionActions(setGameState, showToast);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
   return {
@@ -52,6 +54,6 @@ export function useGameEngine() {
     confirmSeating,
     refuseSeatedParty,
     toggleReservationArrived,
-    setTimeMultiplier
+    setTimeMultiplier,
   };
 }
