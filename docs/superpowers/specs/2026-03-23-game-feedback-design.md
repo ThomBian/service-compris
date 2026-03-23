@@ -43,7 +43,7 @@ interface ToastContextValue {
 
 ### New component: `ToastContainer`
 
-Rendered once in `App.tsx`. Positioned `fixed top-4 right-4 z-50 flex flex-col gap-2`.
+Rendered once in `App.tsx`. Positioned `fixed top-16 right-4 z-50 flex flex-col gap-2` (`top-16` keeps toasts below the sticky TopBar).
 
 Each toast renders as a small card matching the game's existing visual style (hard shadow, bold border):
 
@@ -122,6 +122,7 @@ The identical threshold and color in both components ensures visual consistency.
 | `src/main.tsx` | Modify | Wrap app in `ToastProvider` |
 | `src/App.tsx` | Modify | Render `<ToastContainer />` |
 | `src/hooks/useDecisionActions.ts` | Modify | Call `showToast` after each decision outcome |
+| `src/hooks/useGameEngine.ts` | Modify | Call `useToast()`, pass `showToast` to `useDecisionActions` |
 | `src/components/floorplan/FloorplanGrid.tsx` | Modify | `isAboutToFree` → amber cell |
 | `src/components/desk/MiniGrid.tsx` | Modify | `isAboutToFree` → amber cell |
 
