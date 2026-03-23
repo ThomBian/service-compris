@@ -362,6 +362,9 @@ export const MEAL_DURATION_BASE_MINUTES = 30;
 /** Each extra guest adds this many in-game minutes at the table. */
 export const MEAL_DURATION_PER_EXTRA_GUEST_MINUTES = 20;
 
+/** Cells with mealDuration ≤ this value turn amber to signal the table is about to free up. */
+export const TABLE_TURNING_SOON_THRESHOLD = 10;
+
 export function mealDurationForPartySize(partySize: number): number {
   const n = Math.max(0, Math.floor(partySize) - 1);
   return (
