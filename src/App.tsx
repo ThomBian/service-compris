@@ -5,12 +5,12 @@ import { PhysicalState } from './types';
 import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
+import { ToastContainer } from './components/ToastContainer';
 
 function GameContent() {
   const { gameState, seatParty, setTimeMultiplier } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
-  // Auto-return to desk when floorplan resolution clears the client
   React.useEffect(() => {
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
       setView('desk');
@@ -35,6 +35,7 @@ function GameContent() {
       />
       <ScenePanel view={view} onSeatParty={handleSeatParty} />
       <BottomPanel view={view} />
+      <ToastContainer />
     </div>
   );
 }
