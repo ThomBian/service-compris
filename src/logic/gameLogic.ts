@@ -444,6 +444,15 @@ export function handleRefusedClient(
   let nextMorale = currentMorale;
   let nextLogs = [...currentLogs];
 
+  // Walk-ins: no rating/morale penalty (temporary design — house policy TBD).
+  if (client.type === ClientType.WALK_IN) {
+    nextLogs = [
+      `Walk-in turned away: ${client.trueFirstName} heads out.`,
+      ...nextLogs,
+    ];
+    return { nextRating, nextMorale, nextLogs };
+  }
+
   // Justified if: Scammer, or Size Lie, or Time Crime (>30 mins late)
   const isJustified = client.type === ClientType.SCAMMER || client.lieType === LieType.SIZE || client.isLate;
 

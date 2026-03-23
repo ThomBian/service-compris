@@ -1,4 +1,5 @@
 import { useCallback, Dispatch, SetStateAction } from "react";
+import { flushSync } from "react-dom";
 import {
   GameState,
   PhysicalState,
@@ -58,38 +59,44 @@ export function useDecisionActions(
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
       null;
 
-    setGameState((prev) => {
-      if (!prev.currentClient) return prev;
+    flushSync(() => {
+      setGameState((prev) => {
+        if (!prev.currentClient) return prev;
 
-      const { nextRating, nextMorale, nextLogs } = handleRefusedClient(
-        prev.currentClient,
-        prev.rating,
-        prev.morale,
-        prev.logs,
-      );
+        const deskClient = prev.currentClient;
+        const { nextRating, nextMorale, nextLogs } = handleRefusedClient(
+          deskClient,
+          prev.rating,
+          prev.morale,
+          prev.logs,
+        );
 
-      // Mirrors the isJustified logic inside handleRefusedClient (gameLogic.ts).
-      const isJustified =
-        prev.currentClient.type === ClientType.SCAMMER ||
-        prev.currentClient.lieType === LieType.SIZE ||
-        prev.currentClient.isLate;
+        // No toast for walk-in refusal (silent decline).
+        if (deskClient.type !== ClientType.WALK_IN) {
+          // Mirrors the isJustified logic inside handleRefusedClient (gameLogic.ts).
+          const isJustified =
+            deskClient.type === ClientType.SCAMMER ||
+            deskClient.lieType === LieType.SIZE ||
+            deskClient.isLate;
 
-      const detail = buildDeltaDetail(
-        0,
-        nextRating - prev.rating,
-        nextMorale - prev.morale,
-      );
-      toastArgs = isJustified
-        ? ["Justified Refusal", detail, "success"]
-        : ["Unjustified Refusal", detail, "error"];
+          const detail = buildDeltaDetail(
+            0,
+            nextRating - prev.rating,
+            nextMorale - prev.morale,
+          );
+          toastArgs = isJustified
+            ? ["Justified Refusal", detail, "success"]
+            : ["Unjustified Refusal", detail, "error"];
+        }
 
-      return {
-        ...prev,
-        currentClient: null,
-        rating: nextRating,
-        morale: nextMorale,
-        logs: nextLogs.slice(0, 50),
-      };
+        return {
+          ...prev,
+          currentClient: null,
+          rating: nextRating,
+          morale: nextMorale,
+          logs: nextLogs.slice(0, 50),
+        };
+      });
     });
 
     if (toastArgs) showToast(...toastArgs);
@@ -158,65 +165,67 @@ export function useDecisionActions(
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
       null;
 
-    setGameState((prev) => {
-      if (!prev.currentClient) return prev;
-      const selectedCells = prev.grid
-        .flat()
-        .filter((c) => c.state === CellState.SELECTED);
-      if (selectedCells.length === 0) return prev;
+    flushSync(() => {
+      setGameState((prev) => {
+        if (!prev.currentClient) return prev;
+        const selectedCells = prev.grid
+          .flat()
+          .filter((c) => c.state === CellState.SELECTED);
+        if (selectedCells.length === 0) return prev;
 
-      const { nextCash, nextRating, nextMorale, nextLogs } =
-        handleAcceptedClient(
-          prev.currentClient,
-          selectedCells.length,
-          prev.cash,
-          prev.rating,
-          prev.morale,
-          prev.logs,
+        const { nextCash, nextRating, nextMorale, nextLogs } =
+          handleAcceptedClient(
+            prev.currentClient,
+            selectedCells.length,
+            prev.cash,
+            prev.rating,
+            prev.morale,
+            prev.logs,
+          );
+
+        const client = prev.currentClient;
+        const detail = buildDeltaDetail(
+          nextCash - prev.cash,
+          nextRating - prev.rating,
+          nextMorale - prev.morale,
         );
 
-      const client = prev.currentClient;
-      const detail = buildDeltaDetail(
-        nextCash - prev.cash,
-        nextRating - prev.rating,
-        nextMorale - prev.morale,
-      );
+        if (client.hasLied && client.isCaught) {
+          toastArgs = ["Grateful Liar — well played!", detail, "success"];
+        } else if (client.hasLied && client.type === ClientType.SCAMMER) {
+          toastArgs = ["Fooled! Seated a scammer", detail, "error"];
+        } else if (client.hasLied) {
+          toastArgs = ["Rule-breaker slipped through", detail, "error"];
+        } else {
+          toastArgs = [`✓ Accepted ${client.trueFirstName}`, detail, "success"];
+        }
 
-      if (client.hasLied && client.isCaught) {
-        toastArgs = ["Grateful Liar — well played!", detail, "success"];
-      } else if (client.hasLied && client.type === ClientType.SCAMMER) {
-        toastArgs = ["Fooled! Seated a scammer", detail, "error"];
-      } else if (client.hasLied) {
-        toastArgs = ["Rule-breaker slipped through", detail, "error"];
-      } else {
-        toastArgs = [`✓ Accepted ${client.trueFirstName}`, detail, "success"];
-      }
+        const partyId = client.id;
+        const mealMinutes = mealDurationForPartySize(client.truePartySize);
+        const nextGrid = prev.grid.map((row) =>
+          row.map((cell) => {
+            if (cell.state === CellState.SELECTED) {
+              return {
+                ...cell,
+                state: CellState.OCCUPIED,
+                mealDuration: mealMinutes,
+                partyId,
+              };
+            }
+            return cell;
+          }),
+        );
 
-      const partyId = client.id;
-      const mealMinutes = mealDurationForPartySize(client.truePartySize);
-      const nextGrid = prev.grid.map((row) =>
-        row.map((cell) => {
-          if (cell.state === CellState.SELECTED) {
-            return {
-              ...cell,
-              state: CellState.OCCUPIED,
-              mealDuration: mealMinutes,
-              partyId,
-            };
-          }
-          return cell;
-        }),
-      );
-
-      return {
-        ...prev,
-        currentClient: null,
-        grid: nextGrid,
-        cash: nextCash,
-        rating: nextRating,
-        morale: nextMorale,
-        logs: nextLogs.slice(0, 50),
-      };
+        return {
+          ...prev,
+          currentClient: null,
+          grid: nextGrid,
+          cash: nextCash,
+          rating: nextRating,
+          morale: nextMorale,
+          logs: nextLogs.slice(0, 50),
+        };
+      });
     });
 
     if (toastArgs) showToast(...toastArgs);
@@ -226,42 +235,44 @@ export function useDecisionActions(
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
       null;
 
-    setGameState((prev) => {
-      if (
-        !prev.currentClient ||
-        prev.currentClient.physicalState !== PhysicalState.SEATING
-      ) {
-        return prev;
-      }
-      const { nextRating, nextMorale, nextLogs } = handleSeatingRefusal(
-        prev.currentClient,
-        prev.rating,
-        prev.morale,
-        prev.logs,
-      );
+    flushSync(() => {
+      setGameState((prev) => {
+        if (
+          !prev.currentClient ||
+          prev.currentClient.physicalState !== PhysicalState.SEATING
+        ) {
+          return prev;
+        }
+        const { nextRating, nextMorale, nextLogs } = handleSeatingRefusal(
+          prev.currentClient,
+          prev.rating,
+          prev.morale,
+          prev.logs,
+        );
 
-      const detail = buildDeltaDetail(
-        0,
-        nextRating - prev.rating,
-        nextMorale - prev.morale,
-      );
-      toastArgs = ["Refused after seating", detail, "error"];
+        const detail = buildDeltaDetail(
+          0,
+          nextRating - prev.rating,
+          nextMorale - prev.morale,
+        );
+        toastArgs = ["Refused after seating", detail, "error"];
 
-      const nextGrid = prev.grid.map((row) =>
-        row.map((cell) =>
-          cell.state === CellState.SELECTED
-            ? { ...cell, state: CellState.EMPTY }
-            : cell,
-        ),
-      );
-      return {
-        ...prev,
-        currentClient: null,
-        grid: nextGrid,
-        rating: nextRating,
-        morale: nextMorale,
-        logs: nextLogs.slice(0, 50),
-      };
+        const nextGrid = prev.grid.map((row) =>
+          row.map((cell) =>
+            cell.state === CellState.SELECTED
+              ? { ...cell, state: CellState.EMPTY }
+              : cell,
+          ),
+        );
+        return {
+          ...prev,
+          currentClient: null,
+          grid: nextGrid,
+          rating: nextRating,
+          morale: nextMorale,
+          logs: nextLogs.slice(0, 50),
+        };
+      });
     });
 
     if (toastArgs) showToast(...toastArgs);

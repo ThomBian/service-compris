@@ -337,6 +337,18 @@ describe('handleRefusedClient', () => {
     expect(nextMorale).toBe(35);
   });
 
+  it('refusing a walk-in does not change rating or morale', () => {
+    const client = makeClient({
+      type: ClientType.WALK_IN,
+      trueReservationId: undefined,
+      lieType: LieType.NONE,
+    });
+    const { nextRating, nextMorale, nextLogs } = handleRefusedClient(client, 3.0, 50, []);
+    expect(nextRating).toBe(3.0);
+    expect(nextMorale).toBe(50);
+    expect(nextLogs[0]).toMatch(/Walk-in turned away/);
+  });
+
   it('always adds a log entry', () => {
     const client = makeClient();
     const { nextLogs } = handleRefusedClient(client, 3.0, 50, ['existing log']);
