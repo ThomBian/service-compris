@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, AlertCircle, X } from "lucide-react";
+import { motion } from "motion/react";
 import { useGame } from "../../context/GameContext";
 import { formatTime } from "../../utils";
 import { TicketField } from "./TicketField";
@@ -33,7 +34,7 @@ export const PartyTicket: React.FC = () => {
     <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
       {/* Patience bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
-        <div
+        <motion.div
           className={`h-full transition-all duration-500 ${
             currentClient.patience > 50
               ? "bg-emerald-500"
