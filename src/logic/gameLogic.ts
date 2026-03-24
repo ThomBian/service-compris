@@ -164,8 +164,10 @@ export function prepareClientForDesk(client: Client): Client {
     ]
   };
 
-  preparedClient.knownFirstName = preparedClient.trueFirstName;
-  if (Math.random() > 0.5) preparedClient.knownPartySize = preparedClient.truePartySize;
+  if (!preparedClient.claimedReservationId) {
+    preparedClient.knownFirstName = preparedClient.trueFirstName;
+    if (Math.random() > 0.5) preparedClient.knownPartySize = preparedClient.truePartySize;
+  }
 
   return preparedClient;
 }

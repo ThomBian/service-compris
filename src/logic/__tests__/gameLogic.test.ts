@@ -298,6 +298,44 @@ describe('prepareClientForDesk', () => {
     expect(result.chatHistory[1].sender).toBe('guest');
     expect(result.chatHistory[1].text).toBe(result.lastMessage);
   });
+
+  it('impersonator has no knownFirstName pre-populated at desk entry', () => {
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      claimedReservationId: 'res-1',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownFirstName).toBeUndefined();
+  });
+
+  it('impersonator has no knownLastName pre-populated at desk entry', () => {
+    // knownLastName is never set by prepareClientForDesk for any client type,
+    // but this test locks in that behaviour for impersonators explicitly.
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      claimedReservationId: 'res-1',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownLastName).toBeUndefined();
+  });
+
+  it('impersonator has no knownPartySize pre-populated at desk entry', () => {
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      claimedReservationId: 'res-1',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownPartySize).toBeUndefined();
+  });
+
+  it('regular scammer (no claimedReservationId) still gets knownFirstName set', () => {
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      trueFirstName: 'FakeGuy',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownFirstName).toBe('FakeGuy');
+  });
 });
 
 describe('isAdjacent', () => {
