@@ -11,7 +11,7 @@ export function useClientSpawner(
 ) {
   const spawnClient = useCallback((res?: Reservation) => {
     setGameState(prev => {
-      const clientData = generateClientData(res, prev.reservations);
+      const clientData = generateClientData(res, prev.reservations, prev.inGameMinutes);
       const newClient = createNewClient({
         data: clientData, 
         currentMinutes: prev.inGameMinutes, 
