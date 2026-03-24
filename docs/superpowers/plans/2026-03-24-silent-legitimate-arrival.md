@@ -54,7 +54,7 @@ Note: `ClientType` is already imported at line 2 of `gameLogic.ts`.
 
 `Math.random` is mocked in tests using `vi.spyOn(Math, 'random')`. Look at how existing tests in the file use `vi.spyOn` and `afterEach(() => vi.restoreAllMocks())` — follow the same pattern exactly.
 
-- [ ] **Step 1: Write three failing tests**
+- [x] **Step 1: Write three failing tests**
 
 Open `src/logic/__tests__/gameLogic.test.ts`. Locate the `describe('prepareClientForDesk', ...)` block (around line 276). Add these three tests **inside** that block, after the existing `'regular scammer (no claimedReservationId) still gets knownFirstName set'` test (after line 339):
 
@@ -92,13 +92,13 @@ Open `src/logic/__tests__/gameLogic.test.ts`. Locate the `describe('prepareClien
   });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 Run: `npm run test -- --reporter=verbose`
 
 Expected: The three new tests FAIL (knownFirstName is set unconditionally today, so the "silent" test will fail). All previously-passing tests should still pass.
 
-- [ ] **Step 3: Implement the change**
+- [x] **Step 3: Implement the change**
 
 In `src/logic/gameLogic.ts`, find the block inside `prepareClientForDesk` (around line 167):
 
@@ -121,19 +121,19 @@ Replace it with:
   }
 ```
 
-- [ ] **Step 4: Run all tests to confirm everything passes**
+- [x] **Step 4: Run all tests to confirm everything passes**
 
 Run: `npm run test`
 
 Expected: all tests pass (68 + 3 new = 71 total), no failures.
 
-- [ ] **Step 5: Run lint**
+- [x] **Step 5: Run lint**
 
 Run: `npm run lint`
 
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/logic/gameLogic.ts src/logic/__tests__/gameLogic.test.ts
