@@ -69,8 +69,10 @@ interface DeskSceneProps {
 }
 
 export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
-  const { gameState: { currentClient, queue } } = useGame();
+  const { gameState: { currentClient, queue }, callOutLie } = useGame();
   const canSeat = currentClient?.physicalState === PhysicalState.AT_DESK;
+
+  const [isPartyHovered, setIsPartyHovered] = useState(false);
 
   const maitreDMessage = currentClient?.chatHistory.filter(m => m.sender === 'maitre-d').at(-1)?.text;
   const guestMessage = currentClient?.lastMessage || undefined;
@@ -208,11 +210,50 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
               <SpeechBubble text={displayedGuestMessage} />
             </div>
-            <div className="flex flex-wrap gap-1 max-w-[120px]">
-              {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
-                <Users key={i} size={20} className="text-[#141414]" />
-              ))}
-            </div>
+            {/* Party group — clickable for size accusation when client is at desk */}
+            {(() => {
+              const isAccusable = currentClient.physicalState === PhysicalState.AT_DESK;
+              return (
+                <motion.div
+                  className={`relative rounded-lg p-1 border-2 transition-colors ${
+                    !isAccusable
+                      ? 'pointer-events-none border-transparent'
+                      : isPartyHovered
+                        ? 'border-orange-400 bg-orange-50 cursor-pointer'
+                        : 'border-transparent cursor-pointer'
+                  }`}
+                  whileHover={isAccusable ? { y: -2 } : undefined}
+                  onMouseEnter={() => { if (isAccusable) setIsPartyHovered(true); }}
+                  onMouseLeave={() => setIsPartyHovered(false)}
+                  onClick={isAccusable ? () => callOutLie('size') : undefined}
+                  style={isAccusable && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
+                >
+                  <AnimatePresence>
+                    {isPartyHovered && isAccusable && (
+                      <motion.div
+                        key="party-badge"
+                        initial={{ scale: 0.7, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.7, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                        className="absolute top-0 -translate-y-full pb-1 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-[8px] font-bold text-orange-500 bg-orange-100 border border-orange-300 rounded-full px-2 py-0.5"
+                      >
+                        👆 Accuse — Size Lie
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <div className="flex flex-wrap gap-1 max-w-[120px]">
+                    {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
+                      <Users
+                        key={i}
+                        size={20}
+                        className={isPartyHovered && isAccusable ? 'text-orange-500' : 'text-[#141414]'}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })()}
             <span className="text-[9px] font-bold uppercase tracking-widest">
               {currentClient.knownFirstName || '???'}
             </span>
