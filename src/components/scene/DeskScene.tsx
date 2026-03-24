@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Users, DoorOpen, DoorClosed } from 'lucide-react';
+import { Users, DoorClosed, DoorOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../../context/GameContext';
 import { PhysicalState } from '../../types';
@@ -127,19 +127,43 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
 
   return (
     <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible">
-      {/* Door */}
+      {/* Seat party — door opens on hover when a party is at the desk */}
       <button
+        type="button"
         onClick={canSeat ? onSeatParty : undefined}
         disabled={!canSeat}
-        title={canSeat ? 'Seat this party' : 'No party to seat'}
-        className={`flex flex-col items-center gap-1 transition-all ${
+        title={
           canSeat
-            ? 'cursor-pointer opacity-100 hover:scale-105'
-            : 'cursor-default opacity-40'
+            ? 'Seat party — choose tables on the floorplan'
+            : 'No party at the desk to seat'
+        }
+        className={`group flex flex-col items-center gap-1 rounded-xl p-2 transition-all duration-150 ${
+          canSeat
+            ? 'cursor-pointer border-2 border-transparent hover:border-emerald-600 hover:bg-emerald-50 hover:shadow-[2px_2px_0px_0px_rgba(4,120,87,0.3)]'
+            : 'cursor-default border-2 border-transparent opacity-40'
         }`}
       >
-        {canSeat ? <DoorOpen size={40} /> : <DoorClosed size={40} />}
-        <span className="text-[9px] font-bold uppercase tracking-widest">Door</span>
+        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
+          {canSeat ? (
+            <>
+              <DoorClosed
+                size={40}
+                className="absolute text-[#141414] transition-opacity duration-150 group-hover:opacity-0"
+                aria-hidden
+              />
+              <DoorOpen
+                size={40}
+                className="absolute text-emerald-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                aria-hidden
+              />
+            </>
+          ) : (
+            <DoorClosed size={40} className="text-stone-500" aria-hidden />
+          )}
+        </span>
+        <span className="text-[8px] font-bold uppercase tracking-widest text-center leading-tight max-w-[56px]">
+          Seat Party
+        </span>
       </button>
 
       {/* Maître D' */}
