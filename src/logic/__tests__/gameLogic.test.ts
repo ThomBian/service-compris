@@ -337,6 +337,38 @@ describe('prepareClientForDesk', () => {
     const result = prepareClientForDesk(client);
     expect(result.knownFirstName).toBe('FakeGuy');
   });
+
+  it('LEGITIMATE client announces name when random < 0.65', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // < 0.65 → shouldAnnounce
+    const client = makeClient({
+      type: ClientType.LEGITIMATE,
+      trueFirstName: 'Alice',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownFirstName).toBe('Alice');
+  });
+
+  it('LEGITIMATE client does NOT announce name when random >= 0.65', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.7); // >= 0.65 → silent
+    const client = makeClient({
+      type: ClientType.LEGITIMATE,
+      trueFirstName: 'Alice',
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownFirstName).toBeUndefined();
+  });
+
+  it('WALK_IN always announces name regardless of random value', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9); // would suppress LEGITIMATE, but not WALK_IN
+    const client = makeClient({
+      type: ClientType.WALK_IN,
+      trueFirstName: 'Bob',
+      trueReservationId: undefined,
+      claimedReservationId: undefined,
+    });
+    const result = prepareClientForDesk(client);
+    expect(result.knownFirstName).toBe('Bob');
+  });
 });
 
 describe('isAdjacent', () => {

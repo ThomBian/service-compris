@@ -165,7 +165,11 @@ export function prepareClientForDesk(client: Client): Client {
   };
 
   if (!preparedClient.claimedReservationId) {
-    preparedClient.knownFirstName = preparedClient.trueFirstName;
+    const shouldAnnounce =
+      preparedClient.type !== ClientType.LEGITIMATE || Math.random() < 0.65;
+    if (shouldAnnounce) {
+      preparedClient.knownFirstName = preparedClient.trueFirstName;
+    }
     if (Math.random() > 0.5) preparedClient.knownPartySize = preparedClient.truePartySize;
   }
 
