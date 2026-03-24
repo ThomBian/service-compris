@@ -372,6 +372,7 @@ export function mealDurationForPartySize(partySize: number): number {
   );
 }
 
+/** Deliberate first-name + time collisions so players must cross-check last name and time. */
 export const INITIAL_RESERVATIONS: Reservation[] = [
   {
     id: "res-1",
@@ -391,8 +392,8 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
   },
   {
     id: "res-3",
-    time: 1200,
-    firstName: "Robert",
+    time: 1170,
+    firstName: "John",
     lastName: "Williams",
     partySize: 6,
     arrived: false,
@@ -407,9 +408,9 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
   },
   {
     id: "res-5",
-    time: 1230,
-    firstName: "Michael",
-    lastName: "Jones",
+    time: 1185,
+    firstName: "Mary",
+    lastName: "Garcia",
     partySize: 3,
     arrived: false,
   },
@@ -417,7 +418,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     id: "res-6",
     time: 1245,
     firstName: "Linda",
-    lastName: "Garcia",
+    lastName: "Miller",
     partySize: 5,
     arrived: false,
   },
@@ -425,7 +426,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     id: "res-7",
     time: 1260,
     firstName: "William",
-    lastName: "Miller",
+    lastName: "Davis",
     partySize: 2,
     arrived: false,
   },
@@ -433,15 +434,15 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     id: "res-8",
     time: 1275,
     firstName: "Elizabeth",
-    lastName: "Davis",
+    lastName: "Rodriguez",
     partySize: 4,
     arrived: false,
   },
   {
     id: "res-9",
-    time: 1290,
-    firstName: "David",
-    lastName: "Rodriguez",
+    time: 1245,
+    firstName: "Linda",
+    lastName: "Martinez",
     partySize: 2,
     arrived: false,
   },
@@ -449,7 +450,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     id: "res-10",
     time: 1305,
     firstName: "Barbara",
-    lastName: "Martinez",
+    lastName: "Jones",
     partySize: 8,
     arrived: false,
   },

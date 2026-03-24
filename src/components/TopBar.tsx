@@ -45,10 +45,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         {[0, 1, 2, 3].map(m => (
           <button
             key={m}
+            type="button"
             onClick={() => setTimeMultiplier(m)}
+            title={m === 0 ? 'Pause' : m === 1 ? '1× speed' : m === 2 ? '2× speed' : '3× speed'}
             className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
               timeMultiplier === m
-                ? 'bg-[#141414] text-[#E4E3E0]'
+                ? m === 0
+                  ? 'bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]'
+                  : 'bg-[#141414] text-[#E4E3E0]'
                 : 'hover:bg-[#141414]/10'
             }`}
           >

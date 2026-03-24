@@ -64,12 +64,14 @@ export const PartyTicket: React.FC = () => {
       <div className="flex flex-col gap-2 flex-1">
         <TicketField
           label="First Name"
+          accuseLabel="No Reservation"
           value={currentClient.knownFirstName}
           onAsk={() => askQuestion('firstName')}
           onAccuse={() => callOutLie('reservation')}
         />
         <TicketField
           label="Last Name"
+          accuseLabel="No Reservation"
           value={currentClient.knownLastName}
           onAsk={() => askQuestion('lastName')}
           onAccuse={() => callOutLie('reservation')}
@@ -77,6 +79,7 @@ export const PartyTicket: React.FC = () => {
         <div className="flex flex-col gap-0.5">
           <TicketField
             label="Arrival Time"
+            accuseLabel="Too Late"
             value={currentClient.knownTime !== undefined ? formatTime(currentClient.knownTime) : undefined}
             onAsk={() => askQuestion('time')}
             onAccuse={() => callOutLie('time')}

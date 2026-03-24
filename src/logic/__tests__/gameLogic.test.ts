@@ -694,7 +694,9 @@ describe('generateQuestionResponse — impersonator lies', () => {
     expect(result.guestResponse).toContain('Blanc');
   });
 
-  it('impersonator returns stolen reservation time (not a fabricated offset)', () => {
+  it('impersonator returns stolen reservation time when not lying about time', () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5); // >= 0.4 → no time lie
+
     const result = generateQuestionResponse({
       field: 'time',
       client: impersonator,
@@ -702,6 +704,22 @@ describe('generateQuestionResponse — impersonator lies', () => {
       inGameMinutes: 1260,
     });
     expect(result.revealedInfo.knownTime).toBe(1200);
+    randomSpy.mockRestore();
+  });
+
+  it('impersonator returns offset time when lying about time', () => {
+    const randomSpy = vi.spyOn(Math, 'random');
+    randomSpy.mockReturnValueOnce(0); // < 0.4 → lie
+    randomSpy.mockReturnValueOnce(0); // < 0.5 → +15 min
+
+    const result = generateQuestionResponse({
+      field: 'time',
+      client: impersonator,
+      reservations: [stolenRes],
+      inGameMinutes: 1260,
+    });
+    expect(result.revealedInfo.knownTime).toBe(1215);
+    randomSpy.mockRestore();
   });
 
   it('non-impersonator scammer returns their true name when asked', () => {

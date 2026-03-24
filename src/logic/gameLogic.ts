@@ -300,11 +300,14 @@ function handleFieldQuestion(
         };
       }
       if (field === 'time') {
+        const liesAboutTime = Math.random() < 0.4;
+        const offset = Math.random() < 0.5 ? 15 : -15;
+        const claimedTime = liesAboutTime ? stolenRes.time + offset : stolenRes.time;
         return {
           patiencePenalty: 10,
           logMsg: '',
-          guestResponse: `Our reservation was for ${formatTime(stolenRes.time)}.`,
-          revealedInfo: { knownTime: stolenRes.time }
+          guestResponse: `Our reservation was for ${formatTime(claimedTime)}.`,
+          revealedInfo: { knownTime: claimedTime }
         };
       }
     }

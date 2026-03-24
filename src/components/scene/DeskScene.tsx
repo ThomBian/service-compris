@@ -239,9 +239,9 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.7, opacity: 0 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                    className="absolute top-0 -translate-y-full pb-1 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-[8px] font-bold text-orange-500 bg-orange-100 border border-orange-300 rounded-full px-2 py-0.5"
+                    className="absolute top-0 -translate-y-full pb-1 left-1/2 -translate-x-1/2 z-10 inline-flex items-center justify-center whitespace-nowrap text-xs font-bold uppercase tracking-wide text-orange-700 bg-orange-100 border border-orange-400 rounded-full px-2.5 py-1.5 leading-none"
                   >
-                    👆 Accuse — Size Lie
+                    👆 Wrong Party Size
                   </motion.div>
                 )}
               </AnimatePresence>
