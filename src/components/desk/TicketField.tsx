@@ -14,7 +14,7 @@ export const TicketField: React.FC<TicketFieldProps> = ({ label, value, onAsk, o
 
   return (
     <motion.div
-      className={`cursor-pointer rounded-lg px-2 py-1.5 border-2 transition-colors ${
+      className={`cursor-pointer rounded-lg px-2 py-1.5 border-2 transition-colors hover:shadow-[2px_2px_0px_0px_rgba(20,20,20,0.12)] ${
         isEmpty
           ? isHovered
             ? 'border-dashed border-blue-400 bg-blue-50'
@@ -27,7 +27,6 @@ export const TicketField: React.FC<TicketFieldProps> = ({ label, value, onAsk, o
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={isEmpty ? onAsk : onAccuse}
-      style={isHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
     >
       {/* Label row with badge flush right */}
       <div className="flex items-center justify-between mb-0.5">
