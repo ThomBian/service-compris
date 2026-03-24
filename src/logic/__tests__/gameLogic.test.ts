@@ -240,6 +240,36 @@ describe('createNewClient', () => {
     expect(client.lieType).toBe(LieType.NONE);
     expect(client.isLate).toBe(false);
   });
+
+  it('impersonator data produces a client with claimedReservationId set', () => {
+    const data = makeClientData({
+      type: ClientType.SCAMMER,
+      lieType: LieType.IDENTITY,
+      claimedReservationId: 'res-1',
+    });
+    const client = createNewClient({ data, currentMinutes: 1200 });
+    expect(client.claimedReservationId).toBe('res-1');
+  });
+
+  it('impersonator client has isLate set to true', () => {
+    const data = makeClientData({
+      type: ClientType.SCAMMER,
+      lieType: LieType.IDENTITY,
+      claimedReservationId: 'res-1',
+    });
+    const client = createNewClient({ data, currentMinutes: 1200 });
+    expect(client.isLate).toBe(true);
+  });
+
+  it('non-impersonator scammer does not get isLate forced to true', () => {
+    const data = makeClientData({
+      type: ClientType.SCAMMER,
+      lieType: LieType.IDENTITY,
+      claimedReservationId: undefined,
+    });
+    const client = createNewClient({ data, currentMinutes: 1200 });
+    expect(client.isLate).toBe(false);
+  });
 });
 
 describe('prepareClientForDesk', () => {

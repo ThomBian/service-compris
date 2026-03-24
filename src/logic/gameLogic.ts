@@ -109,12 +109,16 @@ export const createNewClient = ({
   res?: Reservation;
 }): Client => {
   const { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType } = data;
-  const finalIsLate = res ? (currentMinutes - res.time > 30) : false;
-  
-  // If they are late, that's also a lie type for Legit Reservations
+  let finalIsLate = res ? (currentMinutes - res.time > 30) : false;
+
   let finalLieType: LieType = lieType;
   if (type === ClientType.LEGITIMATE && finalIsLate && finalLieType === LieType.NONE) {
     finalLieType = LieType.TIME;
+  }
+
+  // Impersonators always arrive late
+  if (data.claimedReservationId) {
+    finalIsLate = true;
   }
 
   const client: Client = {
@@ -128,6 +132,7 @@ export const createNewClient = ({
     trueLastName,
     truePartySize,
     trueReservationId,
+    claimedReservationId: data.claimedReservationId,
     isLate: finalIsLate,
     lieType: finalLieType,
     hasLied: finalLieType !== LieType.NONE,
