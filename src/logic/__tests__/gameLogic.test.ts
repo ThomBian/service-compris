@@ -43,6 +43,7 @@ const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData
   truePartySize: 2,
   trueReservationId: 'res-1',
   lieType: LieType.NONE as const,
+  claimedReservationId: undefined,
   ...overrides,
 });
 
@@ -153,6 +154,65 @@ describe('generateClientData', () => {
       expect(r.truePartySize).toBeGreaterThanOrEqual(2);
       expect(r.truePartySize).toBeLessThanOrEqual(5);
     });
+  });
+});
+
+describe('generateClientData — impersonator logic', () => {
+  const res1 = makeReservation({ id: 'res-1', firstName: 'Sophie', lastName: 'Blanc', time: 1200 });
+  const res2 = makeReservation({ id: 'res-2', firstName: 'Marc', lastName: 'Dupont', time: 1210 });
+  const allRes = [res1, res2];
+  // currentInGameMinutes = 1260 means res.time + 45 <= 1260 for both (1245 and 1255)
+  const currentMinutes = 1260;
+
+  it('scammer true name is never a reservation name', () => {
+    const reservationNames = allRes.map(r => r.firstName);
+    const results = Array.from({ length: 200 }, () =>
+      generateClientData(undefined, allRes, currentMinutes)
+    );
+    const scammers = results.filter(r => r.type === ClientType.SCAMMER);
+    scammers.forEach(r => {
+      expect(reservationNames).not.toContain(r.trueFirstName);
+    });
+  });
+
+  it('impersonator rate is ~10% among scammers when qualifying reservations exist', () => {
+    const results = Array.from({ length: 500 }, () =>
+      generateClientData(undefined, allRes, currentMinutes)
+    );
+    const scammers = results.filter(r => r.type === ClientType.SCAMMER);
+    const impersonators = scammers.filter(r => r.claimedReservationId !== undefined);
+    const rate = impersonators.length / scammers.length;
+    expect(rate).toBeGreaterThanOrEqual(0.04);
+    expect(rate).toBeLessThanOrEqual(0.18);
+  });
+
+  it('claimedReservationId always points to a qualifying reservation', () => {
+    const results = Array.from({ length: 200 }, () =>
+      generateClientData(undefined, allRes, currentMinutes)
+    );
+    const impersonators = results.filter(r => r.claimedReservationId !== undefined);
+    impersonators.forEach(r => {
+      const match = allRes.find(res => res.id === r.claimedReservationId);
+      expect(match).toBeDefined();
+      expect(match!.time + 45).toBeLessThanOrEqual(currentMinutes);
+    });
+  });
+
+  it('no impersonator is assigned when no qualifying reservations exist (all too recent)', () => {
+    const recentRes = [makeReservation({ id: 'r', time: 1250 })]; // time + 45 = 1295 > 1260
+    const results = Array.from({ length: 100 }, () =>
+      generateClientData(undefined, recentRes, currentMinutes)
+    );
+    const impersonators = results.filter(r => r.claimedReservationId !== undefined);
+    expect(impersonators.length).toBe(0);
+  });
+
+  it('no impersonator is assigned when currentInGameMinutes is not provided', () => {
+    const results = Array.from({ length: 100 }, () =>
+      generateClientData(undefined, allRes)
+    );
+    const impersonators = results.filter(r => r.claimedReservationId !== undefined);
+    expect(impersonators.length).toBe(0);
   });
 });
 

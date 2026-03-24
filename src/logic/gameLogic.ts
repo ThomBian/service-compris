@@ -41,13 +41,14 @@ export const createInitialGrid = (): Cell[][] => {
 
 // --- Client Spawning Logic ---
 
-export const generateClientData = (res?: Reservation, allReservations: Reservation[] = []): {
+export const generateClientData = (res?: Reservation, allReservations: Reservation[] = [], currentInGameMinutes?: number): {
   type: ClientType;
   trueFirstName: string;
   trueLastName: string;
   truePartySize: number;
   trueReservationId?: string;
   lieType: LieType.NONE | LieType.SIZE | LieType.IDENTITY;
+  claimedReservationId?: string;
 } => {
   let type: ClientType;
   let trueFirstName: string;
@@ -55,6 +56,7 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
   let truePartySize: number;
   let trueReservationId: string | undefined;
   let lieType: LieType.NONE | LieType.SIZE | LieType.IDENTITY = LieType.NONE;
+  let claimedReservationId: string | undefined;
 
   if (res) {
     type = ClientType.LEGITIMATE;
@@ -65,7 +67,6 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
 
     const roll = Math.random();
     if (roll < 0.3) {
-      // Size Lie: strictly more people
       lieType = LieType.SIZE;
       truePartySize = res.partySize + Math.floor(Math.random() * 2) + 1;
     }
@@ -80,23 +81,22 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
     } else {
       type = ClientType.SCAMMER;
       lieType = LieType.IDENTITY;
-
-      // Stolen identity logic
-      const stolenRoll = Math.random();
-      if (stolenRoll < 0.5 && allReservations.length > 0) {
-        const stolenRes = getRandom(allReservations);
-        trueFirstName = stolenRes.firstName;
-        trueLastName = stolenRes.lastName;
-      } else {
-        trueFirstName = getRandom(FIRST_NAMES);
-        trueLastName = getRandom(LAST_NAMES);
-      }
-
+      // True identity is always random — impersonation is in what they *claim*
+      trueFirstName = getRandom(FIRST_NAMES);
+      trueLastName = getRandom(LAST_NAMES);
       truePartySize = Math.floor(Math.random() * 4) + 2;
+
+      // 10% chance to impersonate a reservation whose window has passed
+      if (currentInGameMinutes !== undefined && Math.random() < 0.1) {
+        const qualifying = allReservations.filter(r => r.time + 45 <= currentInGameMinutes);
+        if (qualifying.length > 0) {
+          claimedReservationId = getRandom(qualifying).id;
+        }
+      }
     }
   }
 
-  return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType };
+  return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, claimedReservationId };
 };
 
 export const createNewClient = ({
