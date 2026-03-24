@@ -16,7 +16,7 @@ const VARIANT_CLASSES: Record<Toast["variant"], string> = {
 export const ToastContainer: React.FC = () => {
   const { toasts } = useToast();
   return createPortal(
-    <div className="fixed top-16 left-4 z-[9999] flex flex-col items-start gap-2 pointer-events-none">
+    <div className="fixed top-16 left-4 z-9999 flex flex-col items-start gap-2 pointer-events-none">
       {/* Top-left under the header, aligned with TopBar padding — same band as clock / rating / cash. */}
       <AnimatePresence>
         {toasts.map((toast) => (
