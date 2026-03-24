@@ -70,7 +70,8 @@ interface DeskSceneProps {
 
 export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   const { gameState: { currentClient, queue }, callOutLie } = useGame();
-  const canSeat = currentClient?.physicalState === PhysicalState.AT_DESK;
+  const isClientAtDesk = currentClient?.physicalState === PhysicalState.AT_DESK;
+  const canSeat = isClientAtDesk; // used by the door/seat button
 
   const [isPartyHovered, setIsPartyHovered] = useState(false);
 
@@ -218,20 +219,20 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
             {/* Party group — clickable for size accusation when client is at desk */}
             <motion.div
               className={`relative rounded-lg p-1 border-2 transition-colors ${
-                !canSeat
+                !isClientAtDesk
                   ? 'pointer-events-none border-transparent'
                   : isPartyHovered
                     ? 'border-orange-400 bg-orange-50 cursor-pointer'
                     : 'border-transparent cursor-pointer'
               }`}
-              whileHover={canSeat ? { y: -2 } : undefined}
+              whileHover={isClientAtDesk ? { y: -2 } : undefined}
               onMouseEnter={() => setIsPartyHovered(true)}
               onMouseLeave={() => setIsPartyHovered(false)}
-              onClick={canSeat ? () => callOutLie('size') : undefined}
-              style={canSeat && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
+              onClick={isClientAtDesk ? () => callOutLie('size') : undefined}
+              style={isClientAtDesk && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
             >
               <AnimatePresence>
-                {isPartyHovered && canSeat && (
+                {isPartyHovered && isClientAtDesk && (
                   <motion.div
                     key="party-badge"
                     initial={{ scale: 0.7, opacity: 0 }}
@@ -249,7 +250,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                   <Users
                     key={i}
                     size={20}
-                    className={isPartyHovered && canSeat ? 'text-orange-500' : 'text-[#141414]'}
+                    className={isPartyHovered && isClientAtDesk ? 'text-orange-500' : 'text-[#141414]'}
                   />
                 ))}
               </div>
