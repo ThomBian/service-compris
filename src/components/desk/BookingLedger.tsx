@@ -6,6 +6,9 @@ import { formatTime } from '../../utils';
 export const BookingLedger: React.FC = () => {
   const { gameState: { reservations, inGameMinutes, currentClient }, toggleReservationArrived } = useGame();
 
+  // Both first AND last name must be known before highlighting a conflict.
+  // This prevents false positives on first-name matches and requires the player
+  // to ask for both name fields before the visual cue fires — by design.
   const conflictReservationId = (() => {
     if (!currentClient?.knownFirstName || !currentClient?.knownLastName) return null;
     const match = reservations.find(

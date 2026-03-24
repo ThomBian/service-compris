@@ -411,6 +411,16 @@ describe('checkAccusation', () => {
     expect(result.caught).toBe(false);
   });
 
+  it('correctly catches an impersonator via time accusation (isLate forced true)', () => {
+    const client = makeClient({
+      type: ClientType.SCAMMER,
+      claimedReservationId: 'res-1',
+      isLate: true,
+    });
+    const result = checkAccusation({ field: 'time', client, reservations: [] });
+    expect(result.caught).toBe(true);
+  });
+
   it('correctly catches a size lie when reservation is in the array', () => {
     // Client's true party size (4) exceeds the reservation (2)
     const client = makeClient({ truePartySize: 4, trueReservationId: 'res-1' });
