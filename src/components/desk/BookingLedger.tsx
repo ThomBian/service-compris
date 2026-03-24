@@ -4,7 +4,18 @@ import { useGame } from '../../context/GameContext';
 import { formatTime } from '../../utils';
 
 export const BookingLedger: React.FC = () => {
-  const { gameState: { reservations, inGameMinutes }, toggleReservationArrived } = useGame();
+  const { gameState: { reservations, inGameMinutes, currentClient }, toggleReservationArrived } = useGame();
+
+  const conflictReservationId = (() => {
+    if (!currentClient?.knownFirstName || !currentClient?.knownLastName) return null;
+    const match = reservations.find(
+      r =>
+        r.arrived &&
+        r.firstName === currentClient.knownFirstName &&
+        r.lastName === currentClient.knownLastName
+    );
+    return match?.id ?? null;
+  })();
 
   return (
     <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
@@ -25,15 +36,25 @@ export const BookingLedger: React.FC = () => {
           <tbody className="font-mono text-xs">
             {reservations.map((res) => {
               const isCurrentTime = Math.abs(inGameMinutes - res.time) <= 30;
+              const isConflict = conflictReservationId === res.id;
               return (
                 <tr
                   key={res.id}
                   className={`border-b border-[#141414]/10 transition-colors hover:bg-[#141414]/5 ${
-                    isCurrentTime ? 'bg-emerald-50' : ''
-                  } ${res.arrived ? 'opacity-40' : ''}`}
+                    isCurrentTime && !isConflict ? 'bg-emerald-50' : ''
+                  } ${
+                    res.arrived && !isConflict ? 'opacity-40' : ''
+                  } ${
+                    isConflict ? 'bg-red-100 ring-2 ring-red-500 ring-inset' : ''
+                  }`}
                 >
                   <td className="p-2 font-bold">{formatTime(res.time)}</td>
-                  <td className="p-2">{res.firstName} {res.lastName}</td>
+                  <td className="p-2">
+                    {res.firstName} {res.lastName}
+                    {isConflict && (
+                      <span className="ml-1 text-red-600 font-bold text-[10px]">⚠ ALREADY IN</span>
+                    )}
+                  </td>
                   <td className="p-2">{res.partySize}</td>
                   <td className="p-2 text-center">
                     <button
