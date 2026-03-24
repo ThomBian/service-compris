@@ -261,9 +261,55 @@ function handleFieldQuestion(
   reservations: Reservation[],
   inGameMinutes: number
 ) {
+  // Impersonators lie using the stolen reservation's data
+  if (client.claimedReservationId) {
+    const stolenRes = reservations.find(r => r.id === client.claimedReservationId);
+    if (stolenRes) {
+      const alreadyKnownForImpersonator =
+        (field === 'firstName' && client.knownFirstName) ||
+        (field === 'lastName' && client.knownLastName) ||
+        (field === 'time' && client.knownTime);
+
+      if (alreadyKnownForImpersonator) {
+        return {
+          patiencePenalty: 20,
+          logMsg: `Client is frustrated. You already asked that.`,
+          guestResponse: "I already told you that!",
+          revealedInfo: {}
+        };
+      }
+
+      if (field === 'firstName') {
+        return {
+          patiencePenalty: 10,
+          logMsg: '',
+          guestResponse: `My name is ${stolenRes.firstName}.`,
+          revealedInfo: { knownFirstName: stolenRes.firstName }
+        };
+      }
+      if (field === 'lastName') {
+        return {
+          patiencePenalty: 10,
+          logMsg: '',
+          guestResponse: `My last name is ${stolenRes.lastName}.`,
+          revealedInfo: { knownLastName: stolenRes.lastName }
+        };
+      }
+      if (field === 'time') {
+        return {
+          patiencePenalty: 10,
+          logMsg: '',
+          guestResponse: `Our reservation was for ${formatTime(stolenRes.time)}.`,
+          revealedInfo: { knownTime: stolenRes.time }
+        };
+      }
+    }
+  }
+
+  // Original logic for all other clients
   const alreadyKnown = (field === 'firstName' && client.knownFirstName) ||
-                      (field === 'lastName' && client.knownLastName) ||
-                      (field === 'time' && client.knownTime);
+                       (field === 'lastName' && client.knownLastName) ||
+                       (field === 'time' && client.knownTime);
 
   if (alreadyKnown) {
     return {

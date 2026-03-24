@@ -11,6 +11,7 @@ import {
   handleSeatingRefusal,
   handleAcceptedClient,
   processQueueTick,
+  generateQuestionResponse,
 } from '../gameLogic';
 import {
   ClientType,
@@ -611,5 +612,68 @@ describe('processQueueTick', () => {
     const next = processQueueTick(state);
     expect(next.grid[0][0].state).toBe(CellState.EMPTY);
     expect(next.grid[0][0].mealDuration).toBeUndefined();
+  });
+});
+
+describe('generateQuestionResponse — impersonator lies', () => {
+  const stolenRes = makeReservation({
+    id: 'stolen-res',
+    firstName: 'Sophie',
+    lastName: 'Blanc',
+    time: 1200,
+  });
+
+  const impersonator = makeClient({
+    type: ClientType.SCAMMER,
+    claimedReservationId: 'stolen-res',
+    trueFirstName: 'RandomFake',
+    trueLastName: 'Nobody',
+  });
+
+  it('impersonator returns stolen firstName when asked', () => {
+    const result = generateQuestionResponse({
+      field: 'firstName',
+      client: impersonator,
+      reservations: [stolenRes],
+      inGameMinutes: 1260,
+    });
+    expect(result.revealedInfo.knownFirstName).toBe('Sophie');
+    expect(result.guestResponse).toContain('Sophie');
+  });
+
+  it('impersonator returns stolen lastName when asked', () => {
+    const result = generateQuestionResponse({
+      field: 'lastName',
+      client: impersonator,
+      reservations: [stolenRes],
+      inGameMinutes: 1260,
+    });
+    expect(result.revealedInfo.knownLastName).toBe('Blanc');
+    expect(result.guestResponse).toContain('Blanc');
+  });
+
+  it('impersonator returns stolen reservation time (not a fabricated offset)', () => {
+    const result = generateQuestionResponse({
+      field: 'time',
+      client: impersonator,
+      reservations: [stolenRes],
+      inGameMinutes: 1260,
+    });
+    expect(result.revealedInfo.knownTime).toBe(1200);
+  });
+
+  it('non-impersonator scammer returns their true name when asked', () => {
+    const regularScammer = makeClient({
+      type: ClientType.SCAMMER,
+      trueFirstName: 'TrueFake',
+      claimedReservationId: undefined,
+    });
+    const result = generateQuestionResponse({
+      field: 'firstName',
+      client: regularScammer,
+      reservations: [stolenRes],
+      inGameMinutes: 1260,
+    });
+    expect(result.revealedInfo.knownFirstName).toBe('TrueFake');
   });
 });
