@@ -70,6 +70,7 @@ export interface Client {
   trueLastName: string;
   truePartySize: number;
   trueReservationId?: string; // Only for LEGITIMATE
+  claimedReservationId?: string; // Reservation they're impersonating (impersonators only)
   isLate: boolean;
   lieType: LieType;
   
