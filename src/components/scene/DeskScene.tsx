@@ -91,6 +91,11 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
     setDisplayedGuestMessage(undefined);
   }, [currentClient?.id]);
 
+  // Reset hover state when a new client arrives
+  useEffect(() => {
+    setIsPartyHovered(false);
+  }, [currentClient?.id]);
+
   // Delay the guest message by 900ms so maitre-d speaks first
   useEffect(() => {
     if (guestTimerRef.current) clearTimeout(guestTimerRef.current);
@@ -211,49 +216,44 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
               <SpeechBubble text={displayedGuestMessage} />
             </div>
             {/* Party group — clickable for size accusation when client is at desk */}
-            {(() => {
-              const isAccusable = currentClient.physicalState === PhysicalState.AT_DESK;
-              return (
-                <motion.div
-                  className={`relative rounded-lg p-1 border-2 transition-colors ${
-                    !isAccusable
-                      ? 'pointer-events-none border-transparent'
-                      : isPartyHovered
-                        ? 'border-orange-400 bg-orange-50 cursor-pointer'
-                        : 'border-transparent cursor-pointer'
-                  }`}
-                  whileHover={isAccusable ? { y: -2 } : undefined}
-                  onMouseEnter={() => { if (isAccusable) setIsPartyHovered(true); }}
-                  onMouseLeave={() => setIsPartyHovered(false)}
-                  onClick={isAccusable ? () => callOutLie('size') : undefined}
-                  style={isAccusable && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
-                >
-                  <AnimatePresence>
-                    {isPartyHovered && isAccusable && (
-                      <motion.div
-                        key="party-badge"
-                        initial={{ scale: 0.7, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.7, opacity: 0 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                        className="absolute top-0 -translate-y-full pb-1 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-[8px] font-bold text-orange-500 bg-orange-100 border border-orange-300 rounded-full px-2 py-0.5"
-                      >
-                        👆 Accuse — Size Lie
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="flex flex-wrap gap-1 max-w-[120px]">
-                    {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
-                      <Users
-                        key={i}
-                        size={20}
-                        className={isPartyHovered && isAccusable ? 'text-orange-500' : 'text-[#141414]'}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              );
-            })()}
+            <motion.div
+              className={`relative rounded-lg p-1 border-2 transition-colors ${
+                !canSeat
+                  ? 'pointer-events-none border-transparent'
+                  : isPartyHovered
+                    ? 'border-orange-400 bg-orange-50 cursor-pointer'
+                    : 'border-transparent cursor-pointer'
+              }`}
+              whileHover={canSeat ? { y: -2 } : undefined}
+              onMouseEnter={() => setIsPartyHovered(true)}
+              onMouseLeave={() => setIsPartyHovered(false)}
+              onClick={canSeat ? () => callOutLie('size') : undefined}
+              style={canSeat && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
+            >
+              <AnimatePresence>
+                {isPartyHovered && canSeat && (
+                  <motion.div
+                    key="party-badge"
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.7, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className="absolute top-0 -translate-y-full pb-1 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap text-[8px] font-bold text-orange-500 bg-orange-100 border border-orange-300 rounded-full px-2 py-0.5"
+                  >
+                    👆 Accuse — Size Lie
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div className="flex flex-wrap gap-1 max-w-[120px]">
+                {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
+                  <Users
+                    key={i}
+                    size={20}
+                    className={isPartyHovered && canSeat ? 'text-orange-500' : 'text-[#141414]'}
+                  />
+                ))}
+              </div>
+            </motion.div>
             <span className="text-[9px] font-bold uppercase tracking-widest">
               {currentClient.knownFirstName || '???'}
             </span>
