@@ -41,10 +41,19 @@ describe('generateDailyVips', () => {
     expect(generateDailyVips(1, [])).toEqual([]);
   });
 
+  it('returns empty array when difficulty is 0', () => {
+    expect(generateDailyVips(0, [FOOD_CRITIC, THE_OWNER])).toEqual([]);
+  });
+
   it('returns exactly 1 VIP from roster regardless of difficulty', () => {
     const result = generateDailyVips(1, [FOOD_CRITIC, THE_OWNER]);
     expect(result).toHaveLength(1);
     expect([FOOD_CRITIC, THE_OWNER]).toContainEqual(result[0]);
+
+    const result2 = generateDailyVips(2, [FOOD_CRITIC, THE_OWNER]);
+    expect(result2).toHaveLength(2);
+    const ids = result2.map(v => v.id);
+    expect(new Set(ids).size).toBe(2); // no duplicates
   });
 });
 

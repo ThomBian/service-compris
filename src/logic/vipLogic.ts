@@ -1,9 +1,11 @@
 import type { Vip, Reservation, VisualTraits } from '../types';
 import { START_TIME } from '../constants';
 
-export function generateDailyVips(_difficulty: number, roster: Vip[]): Vip[] {
-  if (roster.length === 0) return [];
-  return [roster[Math.floor(Math.random() * roster.length)]];
+export function generateDailyVips(difficulty: number, roster: Vip[]): Vip[] {
+  if (difficulty <= 0 || roster.length === 0) return [];
+  const count = Math.min(difficulty, roster.length);
+  const shuffled = [...roster].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
 }
 
 export function injectVipReservations(
