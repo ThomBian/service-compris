@@ -7,11 +7,15 @@ import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
+import { HowToPlay } from './components/HowToPlay';
 
 function GameContent() {
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
   const [difficulty, setDifficulty] = React.useState(1);
+  const [showHelp, setShowHelp] = React.useState(
+    () => localStorage.getItem('service-compris-help-seen') !== 'true',
+  );
 
   React.useEffect(() => {
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
@@ -29,6 +33,11 @@ function GameContent() {
     resetGame(d);
   };
 
+  const handleCloseHelp = () => {
+    setShowHelp(false);
+    localStorage.setItem('service-compris-help-seen', 'true');
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       <TopBar
@@ -41,6 +50,7 @@ function GameContent() {
         formatTime={formatTime}
         difficulty={difficulty}
         onDifficultyChange={handleDifficultyChange}
+        onHelpClick={() => setShowHelp(true)}
       />
       <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
         <ScenePanel view={view} onSeatParty={handleSeatParty} />
@@ -73,6 +83,7 @@ function GameContent() {
             </div>
           </div>
         )}
+        {showHelp && <HowToPlay onClose={handleCloseHelp} />}
       </div>
       <ToastContainer />
     </div>

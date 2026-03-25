@@ -7,6 +7,7 @@ import {
   Pause,
   FastForward,
   Heart,
+  HelpCircle,
 } from "lucide-react";
 
 interface TopBarProps {
@@ -19,6 +20,7 @@ interface TopBarProps {
   formatTime: (minutes: number) => string;
   difficulty: number;
   onDifficultyChange: (d: number) => void;
+  onHelpClick: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -31,6 +33,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   formatTime,
   difficulty,
   onDifficultyChange,
+  onHelpClick,
 }) => {
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
@@ -113,6 +116,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        onClick={onHelpClick}
+        title="How to Play"
+        className="rounded p-1.5 transition-colors hover:bg-[#141414]/10"
+      >
+        <HelpCircle size={20} />
+      </button>
     </header>
   );
 };
