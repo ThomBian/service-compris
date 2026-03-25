@@ -12,6 +12,7 @@ import {
   handleAcceptedClient,
   processQueueTick,
   generateQuestionResponse,
+  seedTraits,
 } from '../gameLogic';
 import {
   ClientType,
@@ -22,6 +23,7 @@ import {
   type Reservation,
   type Client,
   type GameState,
+  type VisualTraits,
 } from '../../types';
 import { GRID_SIZE } from '../../constants';
 
@@ -38,6 +40,16 @@ const makeReservation = (overrides?: Partial<Reservation>): Reservation => ({
   ...overrides,
 });
 
+const makeVisualTraits = (overrides?: Partial<VisualTraits>): VisualTraits => ({
+  skinTone: 0,
+  hairStyle: 0,
+  hairColor: 0,
+  clothingStyle: 0,
+  clothingColor: 0,
+  height: 1,
+  ...overrides,
+});
+
 const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData>>): ReturnType<typeof generateClientData> => ({
   type: ClientType.LEGITIMATE,
   trueFirstName: 'John',
@@ -46,6 +58,7 @@ const makeClientData = (overrides?: Partial<ReturnType<typeof generateClientData
   trueReservationId: 'res-1',
   lieType: LieType.NONE as const,
   claimedReservationId: undefined,
+  visualTraits: makeVisualTraits(),
   ...overrides,
 });
 
@@ -63,6 +76,7 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
   isLate: false,
   lieType: LieType.NONE,
   hasLied: false,
+  visualTraits: makeVisualTraits(),
   isCaught: false,
   lastMessage: 'Waiting in line...',
   chatHistory: [],
@@ -764,5 +778,37 @@ describe('generateQuestionResponse — impersonator lies', () => {
       inGameMinutes: 1260,
     });
     expect(result.revealedInfo.knownFirstName).toBe('TrueFake');
+  });
+});
+
+describe('visualTraits', () => {
+  it('generateClientData assigns visualTraits within valid ranges', () => {
+    const data = generateClientData();
+    const { visualTraits: t } = data;
+    expect(t).toBeDefined();
+    expect(t.skinTone).toBeGreaterThanOrEqual(0);
+    expect(t.skinTone).toBeLessThanOrEqual(4);
+    expect(t.hairStyle).toBeGreaterThanOrEqual(0);
+    expect(t.hairStyle).toBeLessThanOrEqual(4);
+    expect(t.hairColor).toBeGreaterThanOrEqual(0);
+    expect(t.hairColor).toBeLessThanOrEqual(5);
+    expect(t.clothingStyle).toBeGreaterThanOrEqual(0);
+    expect(t.clothingStyle).toBeLessThanOrEqual(3);
+    expect(t.clothingColor).toBeGreaterThanOrEqual(0);
+    expect(t.clothingColor).toBeLessThanOrEqual(4);
+    expect(t.height).toBeGreaterThanOrEqual(0);
+    expect(t.height).toBeLessThanOrEqual(2);
+  });
+
+  it('seedTraits is deterministic — same input returns identical traits', () => {
+    const a = seedTraits('abc123', 1);
+    const b = seedTraits('abc123', 1);
+    expect(a).toEqual(b);
+  });
+
+  it('seedTraits varies by index — different index produces different traits', () => {
+    const a = seedTraits('abc123', 0);
+    const b = seedTraits('abc123', 1);
+    expect(a).not.toEqual(b);
   });
 });

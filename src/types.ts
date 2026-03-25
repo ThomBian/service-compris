@@ -43,6 +43,15 @@ export enum LieType {
   IDENTITY = 'IDENTITY',
 }
 
+export interface VisualTraits {
+  skinTone:      0 | 1 | 2 | 3 | 4;
+  hairStyle:     0 | 1 | 2 | 3 | 4;
+  hairColor:     0 | 1 | 2 | 3 | 4 | 5;
+  clothingStyle: 0 | 1 | 2 | 3;
+  clothingColor: 0 | 1 | 2 | 3 | 4;
+  height:        0 | 1 | 2;
+}
+
 export interface Reservation {
   id: string;
   time: number; // in-game minutes
@@ -84,6 +93,7 @@ export interface Client {
   knownPartySize?: number;
   knownTime?: number;
   hasLied: boolean; // Flag for "Grateful Liar" or "Justified Refusal"
+  visualTraits: VisualTraits;
   isCaught: boolean; // Flag for successful accusation
   
   // Dialogue

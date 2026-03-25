@@ -8,7 +8,8 @@ import {
   DialogueState,
   ChatMessage,
   Cell,
-  CellState
+  CellState,
+  VisualTraits
 } from '../types';
 import { 
   FIRST_NAMES, 
@@ -19,6 +20,28 @@ import {
   GRID_SIZE
 } from '../constants';
 import { getRandom, formatTime } from '../utils';
+
+export function seedTraits(id: string, index: number): VisualTraits {
+  const seed = id + String(index);
+  let h = 5381;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) + h) ^ seed.charCodeAt(i);
+    h = h >>> 0;
+  }
+  const pick = (range: number): number => {
+    const v = h % range;
+    h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) >>> 0;
+    return v;
+  };
+  return {
+    skinTone:      pick(5) as VisualTraits['skinTone'],
+    hairStyle:     pick(5) as VisualTraits['hairStyle'],
+    hairColor:     pick(6) as VisualTraits['hairColor'],
+    clothingStyle: pick(4) as VisualTraits['clothingStyle'],
+    clothingColor: pick(5) as VisualTraits['clothingColor'],
+    height:        pick(3) as VisualTraits['height'],
+  };
+}
 
 // --- Grid Initialization ---
 
@@ -54,6 +77,7 @@ export const generateClientData = (
   trueReservationId?: string;
   lieType: LieType.NONE | LieType.SIZE | LieType.IDENTITY;
   claimedReservationId?: string;
+  visualTraits: VisualTraits;
 } => {
   let type: ClientType;
   let trueFirstName: string;
@@ -107,7 +131,16 @@ export const generateClientData = (
     }
   }
 
-  return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, claimedReservationId };
+  const visualTraits: VisualTraits = {
+    skinTone:      Math.floor(Math.random() * 5) as VisualTraits['skinTone'],
+    hairStyle:     Math.floor(Math.random() * 5) as VisualTraits['hairStyle'],
+    hairColor:     Math.floor(Math.random() * 6) as VisualTraits['hairColor'],
+    clothingStyle: Math.floor(Math.random() * 4) as VisualTraits['clothingStyle'],
+    clothingColor: Math.floor(Math.random() * 5) as VisualTraits['clothingColor'],
+    height:        Math.floor(Math.random() * 3) as VisualTraits['height'],
+  };
+
+  return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, claimedReservationId, visualTraits };
 };
 
 export const createNewClient = ({
@@ -119,7 +152,7 @@ export const createNewClient = ({
   currentMinutes: number;
   res?: Reservation;
 }): Client => {
-  const { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType } = data;
+  const { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, visualTraits } = data;
   let finalIsLate = res ? (currentMinutes - res.time > 30) : false;
 
   let finalLieType: LieType = lieType;
@@ -147,6 +180,7 @@ export const createNewClient = ({
     isLate: finalIsLate,
     lieType: finalLieType,
     hasLied: finalLieType !== LieType.NONE,
+    visualTraits,
     isCaught: false,
     lastMessage: 'Waiting in line...',
     chatHistory: [],
