@@ -1,55 +1,78 @@
 import { useCallback, Dispatch, SetStateAction } from 'react';
+import { flushSync } from 'react-dom';
 import { GameState } from '../types';
 import { AccusationField, checkAccusation } from '../logic/gameLogic';
+import { type Toast } from '../context/ToastContext';
+
+type ShowToast = (
+  title: string,
+  detail?: string,
+  variant?: Toast['variant'],
+  duration?: number,
+) => void;
 
 export function useAccusationActions(
-  setGameState: Dispatch<SetStateAction<GameState>>
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  showToast: ShowToast,
 ) {
   const callOutLie = useCallback((field: AccusationField) => {
-    setGameState(prev => {
-      if (!prev.currentClient) return prev;
-      
-      const { 
-        caught, 
-        accusationText, 
-        guestResponse, 
-        logMsg, 
-        patiencePenalty 
-      } = checkAccusation({
-        field, 
-        client: prev.currentClient, 
-        reservations: prev.reservations
-      });
+    let toastArgs: [string, string | undefined, Toast['variant']] | null = null;
 
-      const nextPatience = Math.max(0, prev.currentClient.patience - patiencePenalty);
-      const nextLogs = [logMsg, ...prev.logs].slice(0, 50);
+    flushSync(() => {
+      setGameState(prev => {
+        if (!prev.currentClient) return prev;
 
-      if (nextPatience <= 0) {
-        return { 
-          ...prev, 
-          currentClient: null, 
-          rating: Math.max(0, prev.rating - 0.5),
-          logs: [`Client stormed out after false accusation!`, ...nextLogs].slice(0, 50)
+        const {
+          caught,
+          accusationText,
+          guestResponse,
+          logMsg,
+          patiencePenalty
+        } = checkAccusation({
+          field,
+          client: prev.currentClient,
+          reservations: prev.reservations
+        });
+
+        const nextPatience = Math.max(0, prev.currentClient.patience - patiencePenalty);
+        const nextLogs = [logMsg, ...prev.logs].slice(0, 50);
+
+        if (nextPatience <= 0) {
+          toastArgs = ['Client stormed out!', '★ −0.5', 'error'];
+          return {
+            ...prev,
+            currentClient: null,
+            rating: Math.max(0, prev.rating - 0.5),
+            logs: [`Client stormed out after false accusation!`, ...nextLogs].slice(0, 50)
+          };
+        }
+
+        if (caught) {
+          toastArgs = ['Caught in a lie!', `Patience −${patiencePenalty}`, 'success'];
+        } else {
+          toastArgs = ['False accusation!', `Patience −${patiencePenalty}`, 'warning'];
+        }
+
+        return {
+          ...prev,
+          currentClient: {
+            ...prev.currentClient,
+            patience: nextPatience,
+            isCaught: caught || prev.currentClient.isCaught,
+            lastMessage: guestResponse,
+            chatHistory: [
+              ...prev.currentClient.chatHistory,
+              { sender: 'maitre-d', text: accusationText },
+              { sender: 'guest', text: guestResponse }
+            ]
+          },
+          logs: nextLogs
         };
-      }
-
-      return {
-        ...prev,
-        currentClient: {
-          ...prev.currentClient,
-          patience: nextPatience,
-          isCaught: caught || prev.currentClient.isCaught,
-          lastMessage: guestResponse,
-          chatHistory: [
-            ...prev.currentClient.chatHistory,
-            { sender: 'maitre-d', text: accusationText },
-            { sender: 'guest', text: guestResponse }
-          ]
-        },
-        logs: nextLogs
-      };
+      });
     });
-  }, [setGameState]);
+
+    if (toastArgs) showToast(...toastArgs);
+  }, [setGameState, showToast]);
 
   return { callOutLie };
 }

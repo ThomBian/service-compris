@@ -44,10 +44,10 @@ export function useGameEngine() {
   const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
   useClientSpawner(gameState, setGameState);
-  useQueueManager(gameState, setGameState);
+  useQueueManager(gameState, setGameState, showToast);
 
-  const { askQuestion } = useQuestionActions(setGameState);
-  const { callOutLie } = useAccusationActions(setGameState);
+  const { askQuestion } = useQuestionActions(setGameState, showToast);
+  const { callOutLie } = useAccusationActions(setGameState, showToast);
   const {
     handleDecision,
     waitInLine,

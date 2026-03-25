@@ -1,63 +1,80 @@
 import { useCallback, Dispatch, SetStateAction } from 'react';
+import { flushSync } from 'react-dom';
 import { 
   GameState,
   ChatMessage
 } from '../types';
 import { QuestionField, generateQuestionResponse } from '../logic/gameLogic';
+import { type Toast } from '../context/ToastContext';
+
+type ShowToast = (
+  title: string,
+  detail?: string,
+  variant?: Toast['variant'],
+  duration?: number,
+) => void;
 
 export function useQuestionActions(
-  setGameState: Dispatch<SetStateAction<GameState>>
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  showToast: ShowToast,
 ) {
   const askQuestion = useCallback((field: QuestionField) => {
-    setGameState(prev => {
-      if (!prev.currentClient) return prev;
-      
-      const { 
-        playerQuestion, 
-        guestResponse, 
-        patiencePenalty, 
-        revealedInfo, 
-        caught, 
-        logMsg 
-      } = generateQuestionResponse({
-        field, 
-        client: prev.currentClient, 
-        reservations: prev.reservations, 
-        inGameMinutes: prev.inGameMinutes
-      });
+    let toastArgs: [string, string | undefined, Toast['variant']] | null = null;
 
-      const nextPatience = Math.max(0, prev.currentClient.patience - patiencePenalty);
-      const nextLogs = logMsg ? [logMsg, ...prev.logs].slice(0, 50) : prev.logs;
+    flushSync(() => {
+      setGameState(prev => {
+        if (!prev.currentClient) return prev;
 
-      if (nextPatience <= 0) {
+        const { 
+          playerQuestion, 
+          guestResponse, 
+          patiencePenalty, 
+          revealedInfo, 
+          caught, 
+          logMsg 
+        } = generateQuestionResponse({
+          field, 
+          client: prev.currentClient, 
+          reservations: prev.reservations, 
+          inGameMinutes: prev.inGameMinutes
+        });
+
+        const nextPatience = Math.max(0, prev.currentClient.patience - patiencePenalty);
+        const nextLogs = logMsg ? [logMsg, ...prev.logs].slice(0, 50) : prev.logs;
+
+        if (nextPatience <= 0) {
+          toastArgs = ['Client stormed out!', '★ −0.5', 'error'];
+          return {
+            ...prev,
+            currentClient: null,
+            rating: Math.max(0, prev.rating - 0.5),
+            logs: [`Client stormed out of the desk!`, ...nextLogs].slice(0, 50)
+          };
+        }
+
+        const newHistory: ChatMessage[] = [
+          ...prev.currentClient.chatHistory,
+          { sender: 'maitre-d', text: playerQuestion },
+          { sender: 'guest', text: guestResponse }
+        ];
+
         return {
           ...prev,
-          currentClient: null,
-          rating: Math.max(0, prev.rating - 0.5),
-          logs: [`Client stormed out of the desk!`, ...nextLogs].slice(0, 50)
+          currentClient: {
+            ...prev.currentClient,
+            ...revealedInfo,
+            patience: nextPatience,
+            isCaught: caught || prev.currentClient.isCaught,
+            lastMessage: guestResponse,
+            chatHistory: newHistory
+          },
+          logs: nextLogs
         };
-      }
-
-      const newHistory: ChatMessage[] = [
-        ...prev.currentClient.chatHistory,
-        { sender: 'maitre-d', text: playerQuestion },
-        { sender: 'guest', text: guestResponse }
-      ];
-
-      return {
-        ...prev,
-        currentClient: {
-          ...prev.currentClient,
-          ...revealedInfo,
-          patience: nextPatience,
-          isCaught: caught || prev.currentClient.isCaught,
-          lastMessage: guestResponse,
-          chatHistory: newHistory
-        },
-        logs: nextLogs
-      };
+      });
     });
-  }, [setGameState]);
+
+    if (toastArgs) showToast(...toastArgs);
+  }, [setGameState, showToast]);
 
   return { askQuestion };
 }

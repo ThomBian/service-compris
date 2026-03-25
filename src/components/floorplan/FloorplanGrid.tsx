@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { useGame } from "../../context/GameContext";
+import { useToast } from "../../context/ToastContext";
 import { CellState, PhysicalState } from "../../types";
+import { canSelectCell } from "../../logic/gameLogic";
 import { Check, X, Users } from "lucide-react";
 import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
@@ -9,6 +11,7 @@ import { useContainerSize } from "../../hooks/useContainerSize";
 export const FloorplanGrid: React.FC = () => {
   const { gameState, toggleCellSelection, confirmSeating, refuseSeatedParty } =
     useGame();
+  const { showToast } = useToast();
 
   const { grid, currentClient } = gameState;
   const isSeating = currentClient?.physicalState === PhysicalState.SEATING;
@@ -24,6 +27,20 @@ export const FloorplanGrid: React.FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { width, height } = useContainerSize(wrapperRef);
   const gridSize = Math.min(width, height);
+
+  const handleCellClick = useCallback((x: number, y: number) => {
+    if (!isSeating) return;
+    const cell = grid[y][x];
+    if (cell.state === CellState.OCCUPIED) {
+      showToast('Table is occupied', `${cell.mealDuration ?? 0}m remaining`, 'info', 1500);
+      return;
+    }
+    if (cell.state === CellState.EMPTY && !canSelectCell(cell, selectedCells)) {
+      showToast('Must be adjacent', 'Select a cell next to an existing selection', 'info', 1500);
+      return;
+    }
+    toggleCellSelection(x, y);
+  }, [isSeating, grid, selectedCells, toggleCellSelection, showToast]);
 
   // Auto-confirm when party size is reached
   useEffect(() => {
@@ -116,8 +133,8 @@ export const FloorplanGrid: React.FC = () => {
               return (
                 <button
                   key={cell.id}
-                  onClick={() => isSeating && toggleCellSelection(x, y)}
-                  disabled={!isSeating || cell.state === CellState.OCCUPIED}
+                  onClick={() => handleCellClick(x, y)}
+                  disabled={!isSeating}
                   className={`
                     aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5
                     ${cell.state === CellState.EMPTY ? "bg-white" : ""}
