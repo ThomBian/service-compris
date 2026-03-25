@@ -69,6 +69,7 @@ export interface Vip {
   aliasLastName?: string;                // fake last name if arrivalMO = RESERVATION_ALIAS
   expectedPartySize: number;
   consequenceTier: VipConsequenceTier;
+  cashFinePenalty?: number;              // required when consequenceTier = 'CASH_FINE'; cash to subtract
   consequenceDescription: string;        // e.g. "Devastating star loss" or "You're fired"
 }
 ```
@@ -79,11 +80,12 @@ Add `vipId?: string` after `isCaught`. Set at spawn if this client is a VIP inst
 
 ### `GameState` — `src/types.ts`
 
-Add two fields:
+Add three fields:
 
 ```ts
 dailyVips: Vip[];        // populated once at game start, scaled by difficulty
 seatedVipIds: string[];  // pushed to when a VIP client reaches SEATING state
+gameOver: boolean;       // set to true when a GAME_OVER consequence fires
 ```
 
 ### `VIP_ROSTER` — `src/logic/vipRoster.ts` (new file)
@@ -130,7 +132,7 @@ export const VIP_ROSTER: Vip[] = [
 export function generateDailyVips(difficulty: number, roster: Vip[]): Vip[]
 ```
 
-Returns a subset of `roster` based on `difficulty`. Below a threshold (difficulty < 1): returns `[]`. At difficulty 1: returns 1 randomly selected VIP. Higher difficulties may return 2+. Uses a seeded or `Math.random()` pick — no deterministic requirement here. Called once during game initialisation.
+For the initial implementation, always returns exactly 1 randomly selected VIP from `roster` (`Math.random()` pick). The `difficulty` parameter is accepted but ignored — full difficulty scaling (0 VIPs early, 2+ VIPs later) is out of scope until a progression system exists. Called once during game initialisation with `VIP_ROSTER`.
 
 ### Trait exclusion — `src/logic/gameLogic.ts`
 
@@ -148,9 +150,9 @@ Exact-match comparison means checking all 6 base fields plus `hat`, `facialHair`
 
 When `generateDailyVips` produces VIPs at game start, each VIP affects spawning differently based on `arrivalMO`:
 
-- **`RESERVATION_ALIAS`**: A fake reservation is injected into `GameState.reservations[]` using the VIP's `aliasFirstName`, `aliasLastName`, and `expectedPartySize`. When that reservation's client spawns, it receives the VIP's `visualTraits` and `vipId`.
-- **`WALK_IN`**: A walk-in client is generated with the VIP's `visualTraits` and `vipId` set, spawned at a time determined by difficulty.
-- **`LATE`**: Same as `WALK_IN` but `isLate` is forced `true` and `spawnTime` is offset to ensure a late arrival.
+- **`RESERVATION_ALIAS`**: At game initialisation, a fake `Reservation` is injected into `GameState.reservations[]` with `firstName = vip.aliasFirstName`, `lastName = vip.aliasLastName`, `partySize = vip.expectedPartySize`, `time = START_TIME + 60` (20:30 — mid first hour, giving the player time to consult the clipboard), `arrived = false`, `partySeated = false`. A unique `id` is generated (`'vip-res-' + vip.id`). When the client spawner creates a client for this reservation, it detects the `vip-res-` prefix and assigns `visualTraits = vip.visualTraits` and `vipId = vip.id`.
+- **`WALK_IN`**: A walk-in client is generated with `visualTraits = vip.visualTraits` and `vipId = vip.id`. Their `spawnTime` is `START_TIME + 90` (fixed — 21:00, well into the shift). `isLate` is `false`.
+- **`LATE`**: Same as `WALK_IN` but `isLate = true` and `spawnTime = START_TIME + 91` (just past the 30-minute late threshold relative to a notional 20:30 booking time, triggering the `isLate` flag in `createNewClient`).
 
 ### Consequence on REFUSE — `src/logic/useDecisionActions.ts`
 
@@ -159,8 +161,8 @@ When `currentClient.vipId` is set and REFUSE fires:
 1. Look up the `Vip` entry in `gameState.dailyVips` by `vipId`
 2. Apply consequence by tier:
    - `RATING`: subtract 1.5 stars (clamped to 0)
-   - `CASH_FINE`: subtract a fixed cash penalty
-   - `GAME_OVER`: set a `gameOver: true` flag on `GameState` (separate concern from rating/cash)
+   - `CASH_FINE`: subtract `vip.cashFinePenalty` from `gameState.cash` (clamped to 0)
+   - `GAME_OVER`: set `gameState.gameOver = true`. The existing win/loss screen (`src/components/BottomPanel.tsx`) already reads game-end state — the implementer should check whether it already handles a `gameOver` flag or needs a new condition added.
 3. Fire a toast with the VIP's `consequenceDescription`
 
 ### Success on SEATING — `src/logic/useDecisionActions.ts`
@@ -178,7 +180,7 @@ When `currentClient.vipId` is set and SEATING fires:
 
 The VIP tab currently shows "coming soon". Replace it with a list of `VipDossierEntry` elements sourced from `gameState.dailyVips`. Each entry:
 
-- Mini avatar rendered by `<ClientAvatar traits={vip.visualTraits} />` (no `animState`)
+- Mini avatar rendered by `<ClientAvatar traits={vip.visualTraits} />` (no `animState`), wrapped in a fixed `40px × 40px` container with `overflow: hidden` so portrait height variation does not affect layout
 - VIP name (bold)
 - Arrival info: alias name (if `RESERVATION_ALIAS`), walk-in note, or late-arrival note
 - Consequence badge: colour-coded by tier (amber for `RATING`, orange for `CASH_FINE`, dark red + skull for `GAME_OVER`)
