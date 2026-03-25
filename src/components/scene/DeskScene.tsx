@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Users, DoorClosed, DoorOpen } from 'lucide-react';
+import { DoorClosed, DoorOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGame } from '../../context/GameContext';
 import { PhysicalState } from '../../types';
+import { seedTraits } from '../../logic/gameLogic';
+import { ClientAvatar } from './ClientAvatar';
+import { MaitreDAvatar } from './MaitreDAvatar';
 
 const STORM_OUT_LINES = [
   "This is outrageous!",
@@ -17,8 +20,6 @@ interface SpeechBubbleProps {
   variant?: 'default' | 'storm';
 }
 
-// Rendered absolutely above each character — floats without affecting layout height.
-// key={text} gives a clean fade-out → fade-in on every new message.
 const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, variant = 'default' }) => {
   const isStorm = variant === 'storm';
   const words = text?.split(' ') ?? [];
@@ -71,9 +72,11 @@ interface DeskSceneProps {
 export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   const { gameState: { currentClient, queue }, callOutLie } = useGame();
   const isClientAtDesk = currentClient?.physicalState === PhysicalState.AT_DESK;
-  const canSeat = isClientAtDesk; // used by the door/seat button
+  const canSeat = isClientAtDesk;
 
   const [isPartyHovered, setIsPartyHovered] = useState(false);
+  const [maitreDAnimState, setMaitreDAnimState] = useState<'bow' | 'stop' | 'shrug' | null>(null);
+  const [guestAnimState, setGuestAnimState] = useState<'entrance' | 'accused' | 'refused' | null>(null);
 
   const maitreDMessage = currentClient?.chatHistory.filter(m => m.sender === 'maitre-d').at(-1)?.text;
   const guestMessage = currentClient?.lastMessage || undefined;
@@ -82,22 +85,24 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   const prevQueueRef = useRef<typeof queue>([]);
   const stormTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Delayed guest message — shows after maitre-d speaks, like a real conversation
   const [displayedGuestMessage, setDisplayedGuestMessage] = useState<string | undefined>(undefined);
   const guestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Immediately clear when a new client arrives at the desk
   useEffect(() => {
     if (guestTimerRef.current) clearTimeout(guestTimerRef.current);
     setDisplayedGuestMessage(undefined);
   }, [currentClient?.id]);
 
-  // Reset hover state when a new client arrives
   useEffect(() => {
     setIsPartyHovered(false);
   }, [currentClient?.id]);
 
-  // Delay the guest message by 900ms so maitre-d speaks first
+  useEffect(() => {
+    if (currentClient?.id) {
+      setGuestAnimState('entrance');
+    }
+  }, [currentClient?.id]);
+
   useEffect(() => {
     if (guestTimerRef.current) clearTimeout(guestTimerRef.current);
     if (!guestMessage) return;
@@ -109,9 +114,24 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   }, []);
 
   useEffect(() => {
+    if (currentClient?.isCaught) {
+      setGuestAnimState('accused');
+      setMaitreDAnimState('bow');
+    }
+  }, [currentClient?.isCaught]);
+
+  useEffect(() => {
+    if (currentClient?.physicalState === PhysicalState.REFUSED) {
+      setGuestAnimState('refused');
+      setMaitreDAnimState('stop');
+    } else if (currentClient?.physicalState === PhysicalState.SEATING) {
+      setMaitreDAnimState('bow');
+    }
+  }, [currentClient?.physicalState]);
+
+  useEffect(() => {
     const prev = prevQueueRef.current;
     const currentIds = new Set(queue.map(c => c.id));
-
     for (const client of prev) {
       if (!currentIds.has(client.id) && client.patience <= 1 && currentClient?.id !== client.id) {
         if (stormTimerRef.current) clearTimeout(stormTimerRef.current);
@@ -121,17 +141,17 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         break;
       }
     }
-
     prevQueueRef.current = queue;
-    // No cleanup return here — returning a cleanup would cancel the timer
-    // on every queue tick. The unmount cleanup is in a separate effect (Step 5).
   }, [queue, currentClient]);
 
   useEffect(() => {
-    return () => {
-      if (stormTimerRef.current) clearTimeout(stormTimerRef.current);
-    };
-  }, []); // empty deps — runs cleanup only on unmount
+    return () => { if (stormTimerRef.current) clearTimeout(stormTimerRef.current); };
+  }, []);
+
+  const handleSizeAccusation = () => {
+    setMaitreDAnimState('shrug');
+    callOutLie('size');
+  };
 
   return (
     <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible">
@@ -140,11 +160,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         type="button"
         onClick={canSeat ? onSeatParty : undefined}
         disabled={!canSeat}
-        title={
-          canSeat
-            ? 'Seat party — choose tables on the floorplan'
-            : 'No party at the desk to seat'
-        }
+        title={canSeat ? 'Seat party — choose tables on the floorplan' : 'No party at the desk to seat'}
         className={`group flex flex-col items-center gap-1 rounded-xl p-2 transition-all duration-150 ${
           canSeat
             ? 'cursor-pointer border-2 border-transparent hover:border-emerald-600 hover:bg-emerald-50 hover:shadow-[2px_2px_0px_0px_rgba(4,120,87,0.3)]'
@@ -154,16 +170,8 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
           {canSeat ? (
             <>
-              <DoorClosed
-                size={40}
-                className="absolute text-[#141414] transition-opacity duration-150 group-hover:opacity-0"
-                aria-hidden
-              />
-              <DoorOpen
-                size={40}
-                className="absolute text-emerald-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                aria-hidden
-              />
+              <DoorClosed size={40} className="absolute text-[#141414] transition-opacity duration-150 group-hover:opacity-0" aria-hidden />
+              <DoorOpen size={40} className="absolute text-emerald-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100" aria-hidden />
             </>
           ) : (
             <DoorClosed size={40} className="text-stone-500" aria-hidden />
@@ -179,26 +187,10 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
           <SpeechBubble text={maitreDMessage} />
         </div>
-        <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Head */}
-          <circle cx="24" cy="12" r="10" fill="#141414"/>
-          {/* Neck */}
-          <rect x="21" y="21" width="6" height="5" fill="#141414"/>
-          {/* Bow tie */}
-          <polygon points="18,26 24,29 18,32" fill="#555"/>
-          <polygon points="30,26 24,29 30,32" fill="#555"/>
-          <circle cx="24" cy="29" r="1.5" fill="#333"/>
-          {/* Suit body */}
-          <rect x="14" y="26" width="20" height="26" rx="3" fill="#141414"/>
-          {/* White shirt front */}
-          <rect x="21" y="28" width="6" height="20" rx="1" fill="white"/>
-          {/* Arms */}
-          <line x1="14" y1="30" x2="6" y2="48" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
-          <line x1="34" y1="30" x2="42" y2="48" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
-          {/* Legs */}
-          <line x1="19" y1="52" x2="14" y2="70" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
-          <line x1="29" y1="52" x2="34" y2="70" stroke="#141414" strokeWidth="5" strokeLinecap="round"/>
-        </svg>
+        <MaitreDAvatar
+          animState={maitreDAnimState}
+          onAnimationComplete={() => setMaitreDAnimState(null)}
+        />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">Maître D'</span>
       </div>
 
@@ -228,7 +220,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
               whileHover={isClientAtDesk ? { y: -2 } : undefined}
               onMouseEnter={() => setIsPartyHovered(true)}
               onMouseLeave={() => setIsPartyHovered(false)}
-              onClick={isClientAtDesk ? () => callOutLie('size') : undefined}
+              onClick={isClientAtDesk ? handleSizeAccusation : undefined}
               style={isClientAtDesk && isPartyHovered ? { boxShadow: '2px 2px 0px 0px rgba(20,20,20,0.12)' } : undefined}
             >
               <AnimatePresence>
@@ -245,12 +237,13 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className="flex flex-wrap gap-1 max-w-[120px]">
+              <div className="flex flex-wrap gap-2 max-w-[140px] items-end">
                 {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
-                  <Users
+                  <ClientAvatar
                     key={i}
-                    size={20}
-                    className={isPartyHovered && isClientAtDesk ? 'text-orange-500' : 'text-[#141414]'}
+                    traits={i === 0 ? currentClient.visualTraits : seedTraits(currentClient.id, i)}
+                    animState={i === 0 ? guestAnimState : null}
+                    onAnimationComplete={i === 0 ? () => setGuestAnimState(null) : undefined}
                   />
                 ))}
               </div>
@@ -262,48 +255,25 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         ) : (
           <motion.div
             key="empty"
-            className="flex flex-col items-center gap-1 min-w-[60px]"
+            className="flex flex-col items-center gap-2 opacity-30"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 0.3 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
-            <div className="opacity-20 text-[10px] uppercase tracking-widest">— empty —</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Queue */}
-      <div className="flex items-end gap-2 flex-1 overflow-x-auto pb-1">
-        {queue.length === 0 && !stormedOut && (
-          <span className="text-xs italic opacity-30">Queue is empty</span>
-        )}
-        {queue.map((c) => (
-          <div key={c.id} className="flex flex-col items-center gap-0.5 shrink-0">
-            <div
-              className="h-1 rounded-full bg-emerald-500"
-              style={{ width: Math.max(2, (c.patience / 100) * 20) }}
-            />
-            <Users size={16} className="opacity-60" />
-          </div>
-        ))}
-      </div>
-
-      {/* Stormed-out client — outside the scrollable queue so the bubble isn't clipped */}
-      <AnimatePresence>
-        {stormedOut && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="relative flex flex-col items-center gap-0.5 shrink-0 pb-1 mr-6"
-          >
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
-              <SpeechBubble text={stormedOut.message} variant="storm" />
-            </div>
-            <Users size={16} className="text-red-500 opacity-70" />
-            <div className="w-1 h-0.5 rounded-full bg-red-400" />
+            <AnimatePresence>
+              {stormedOut && (
+                <motion.div
+                  key="storm"
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <SpeechBubble text={stormedOut.message} variant="storm" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <span className="text-[9px] font-bold uppercase tracking-widest mt-8">No guests</span>
           </motion.div>
         )}
       </AnimatePresence>
