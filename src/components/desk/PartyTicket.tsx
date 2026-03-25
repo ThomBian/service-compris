@@ -60,6 +60,16 @@ export const PartyTicket: React.FC = () => {
         )}
       </div>
 
+      {/* System stamp: when they hit the queue (compare vs ledger reservation times). */}
+      <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-[#141414]/25 bg-[#141414]/4 px-2 py-1.5 shrink-0">
+        <span className="text-[9px] font-bold uppercase tracking-widest text-[#141414]/45">
+          Joined queue
+        </span>
+        <span className="text-[13px] font-bold font-mono tabular-nums text-[#141414]">
+          {formatTime(currentClient.spawnTime)}
+        </span>
+      </div>
+
       {/* Ticket fields */}
       <div className="flex flex-col gap-2 flex-1">
         <TicketField

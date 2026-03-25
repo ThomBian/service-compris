@@ -40,16 +40,16 @@ function GameContent() {
         {gameState.timeMultiplier === 0 && (
           <button
             type="button"
-            className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center border-0 bg-[#141414]/50 p-0 backdrop-blur-[3px] transition-colors hover:bg-[#141414]/55 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0]"
+            className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
             onClick={() => setTimeMultiplier(1)}
             aria-label="Resume game at normal speed"
           >
-            <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-3 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-8 py-6 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
+            <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-2 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-6 py-4 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
               <span className="flex items-center gap-2 text-[#141414]">
-                <Pause size={28} strokeWidth={2.5} className="shrink-0" aria-hidden />
-                <span className="text-3xl font-bold uppercase tracking-[0.2em]">Paused</span>
+                <Pause size={24} strokeWidth={2.5} className="shrink-0" aria-hidden />
+                <span className="text-2xl font-bold uppercase tracking-[0.2em] sm:text-3xl">Paused</span>
               </span>
-              <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#141414]/80">
+              <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#141414]/80 sm:text-sm">
                 <Play size={16} className="shrink-0" aria-hidden />
                 Click anywhere to resume
               </span>

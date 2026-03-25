@@ -160,16 +160,29 @@ describe('generateClientData', () => {
 });
 
 describe('generateClientData — impersonator logic', () => {
-  const res1 = makeReservation({ id: 'res-1', firstName: 'Sophie', lastName: 'Blanc', time: 1200 });
-  const res2 = makeReservation({ id: 'res-2', firstName: 'Marc', lastName: 'Dupont', time: 1210 });
+  const res1 = makeReservation({
+    id: 'res-1',
+    firstName: 'Sophie',
+    lastName: 'Blanc',
+    time: 1200,
+    legitQueuedAt: 1195,
+  });
+  const res2 = makeReservation({
+    id: 'res-2',
+    firstName: 'Marc',
+    lastName: 'Dupont',
+    time: 1210,
+    legitQueuedAt: 1198,
+  });
   const allRes = [res1, res2];
-  // currentInGameMinutes = 1260 means res.time + 45 <= 1260 for both (1245 and 1255)
   const currentMinutes = 1260;
+  /** Legit parties for these rows already spawned earlier in the shift. */
+  const spawnedIds = ['res-1', 'res-2'];
 
   it('scammer true name is never a reservation name', () => {
     const reservationNames = allRes.map(r => r.firstName);
     const results = Array.from({ length: 200 }, () =>
-      generateClientData(undefined, allRes, currentMinutes)
+      generateClientData(undefined, allRes, currentMinutes, spawnedIds),
     );
     const scammers = results.filter(r => r.type === ClientType.SCAMMER);
     scammers.forEach(r => {
@@ -179,7 +192,7 @@ describe('generateClientData — impersonator logic', () => {
 
   it('impersonator rate is ~10% among scammers when qualifying reservations exist', () => {
     const results = Array.from({ length: 500 }, () =>
-      generateClientData(undefined, allRes, currentMinutes)
+      generateClientData(undefined, allRes, currentMinutes, spawnedIds),
     );
     const scammers = results.filter(r => r.type === ClientType.SCAMMER);
     const impersonators = scammers.filter(r => r.claimedReservationId !== undefined);
@@ -188,22 +201,37 @@ describe('generateClientData — impersonator logic', () => {
     expect(rate).toBeLessThanOrEqual(0.18);
   });
 
-  it('claimedReservationId always points to a qualifying reservation', () => {
+  it('claimedReservationId always points to a reservation whose legit party queued earlier', () => {
     const results = Array.from({ length: 200 }, () =>
-      generateClientData(undefined, allRes, currentMinutes)
+      generateClientData(undefined, allRes, currentMinutes, spawnedIds),
     );
     const impersonators = results.filter(r => r.claimedReservationId !== undefined);
     impersonators.forEach(r => {
       const match = allRes.find(res => res.id === r.claimedReservationId);
       expect(match).toBeDefined();
-      expect(match!.time + 45).toBeLessThanOrEqual(currentMinutes);
+      expect(match!.legitQueuedAt).toBeDefined();
+      expect(currentMinutes).toBeGreaterThan(match!.legitQueuedAt!);
     });
   });
 
-  it('no impersonator is assigned when no qualifying reservations exist (all too recent)', () => {
-    const recentRes = [makeReservation({ id: 'r', time: 1250 })]; // time + 45 = 1295 > 1260
+  it('no impersonator is assigned when legit parties have not spawned yet', () => {
+    const unspawned = [makeReservation({ id: 'r', time: 1250 })];
     const results = Array.from({ length: 100 }, () =>
-      generateClientData(undefined, recentRes, currentMinutes)
+      generateClientData(undefined, unspawned, currentMinutes, []),
+    );
+    const impersonators = results.filter(r => r.claimedReservationId !== undefined);
+    expect(impersonators.length).toBe(0);
+  });
+
+  it('no impersonator on the same in-game minute the legit party joined', () => {
+    const sameMinute = 1260;
+    const resRow = makeReservation({
+      id: 'r-same',
+      time: 1200,
+      legitQueuedAt: sameMinute,
+    });
+    const results = Array.from({ length: 150 }, () =>
+      generateClientData(undefined, [resRow], sameMinute, ['r-same']),
     );
     const impersonators = results.filter(r => r.claimedReservationId !== undefined);
     expect(impersonators.length).toBe(0);

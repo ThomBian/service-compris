@@ -52,6 +52,8 @@ export interface Reservation {
   arrived: boolean;
   /** True after this booking's party was seated at least once (still dining or finished). */
   partySeated: boolean;
+  /** In-game minute when the legitimate party for this booking joined the queue (set on spawn). */
+  legitQueuedAt?: number;
 }
 
 export interface ChatMessage {

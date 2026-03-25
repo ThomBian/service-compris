@@ -1,7 +1,7 @@
 import { Reservation } from "./types";
 
 export const START_TIME = 1170; // 19:30
-export const TICK_RATE = 1000; // 1 in-game minute = 1 real-world seconds (at 1x)
+export const TICK_RATE = 2500; // 1 in-game minute = 1 real-world seconds (at 1x)
 
 export const FIRST_NAMES = [
   "James",

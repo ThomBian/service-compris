@@ -41,7 +41,12 @@ export const createInitialGrid = (): Cell[][] => {
 
 // --- Client Spawning Logic ---
 
-export const generateClientData = (res?: Reservation, allReservations: Reservation[] = [], currentInGameMinutes?: number): {
+export const generateClientData = (
+  res?: Reservation,
+  allReservations: Reservation[] = [],
+  currentInGameMinutes?: number,
+  spawnedReservationIds: string[] = [],
+): {
   type: ClientType;
   trueFirstName: string;
   trueLastName: string;
@@ -86,9 +91,15 @@ export const generateClientData = (res?: Reservation, allReservations: Reservati
       trueLastName = getRandom(LAST_NAMES);
       truePartySize = Math.floor(Math.random() * 4) + 2;
 
-      // 10% chance to impersonate a reservation whose window has passed
+      // Impersonators only target bookings whose real party already joined the queue, on a later
+      // in-game minute — never the same tick, so "Joined queue" can distinguish them.
       if (currentInGameMinutes !== undefined && Math.random() < 0.1) {
-        const qualifying = allReservations.filter(r => r.time + 45 <= currentInGameMinutes);
+        const qualifying = allReservations.filter(
+          (r) =>
+            spawnedReservationIds.includes(r.id) &&
+            r.legitQueuedAt !== undefined &&
+            currentInGameMinutes > r.legitQueuedAt,
+        );
         if (qualifying.length > 0) {
           claimedReservationId = getRandom(qualifying).id;
         }

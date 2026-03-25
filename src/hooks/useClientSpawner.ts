@@ -11,17 +11,33 @@ export function useClientSpawner(
 ) {
   const spawnClient = useCallback((res?: Reservation) => {
     setGameState(prev => {
-      const clientData = generateClientData(res, prev.reservations, prev.inGameMinutes);
+      const clientData = generateClientData(
+        res,
+        prev.reservations,
+        prev.inGameMinutes,
+        prev.spawnedReservationIds,
+      );
       const newClient = createNewClient({
-        data: clientData, 
-        currentMinutes: prev.inGameMinutes, 
-        res
+        data: clientData,
+        currentMinutes: prev.inGameMinutes,
+        res,
       });
+
+      const nextSpawned = res
+        ? [...prev.spawnedReservationIds, res.id]
+        : prev.spawnedReservationIds;
+      const nextReservations =
+        res != null
+          ? prev.reservations.map((r) =>
+              r.id === res.id ? { ...r, legitQueuedAt: prev.inGameMinutes } : r,
+            )
+          : prev.reservations;
 
       return {
         ...prev,
         queue: [...prev.queue, newClient],
-        spawnedReservationIds: res ? [...prev.spawnedReservationIds, res.id] : prev.spawnedReservationIds
+        spawnedReservationIds: nextSpawned,
+        reservations: nextReservations,
       };
     });
   }, [setGameState]);
