@@ -56,6 +56,15 @@ function GameContent() {
             </span>
           </button>
         )}
+        {gameState.gameOver && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#141414]/80">
+            <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-8 py-6 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
+              <span className="text-4xl">☠️</span>
+              <span className="text-2xl font-bold uppercase tracking-[0.2em]">Game Over</span>
+              <span className="text-sm opacity-60">You have been fired.</span>
+            </div>
+          </div>
+        )}
       </div>
       <ToastContainer />
     </div>
