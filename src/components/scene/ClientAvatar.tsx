@@ -1,0 +1,160 @@
+import React from 'react';
+import { motion } from 'motion/react';
+import { VisualTraits } from '../../types';
+
+interface ClientAvatarProps {
+  traits: VisualTraits;
+  animState?: 'entrance' | 'accused' | 'refused' | null;
+  onAnimationComplete?: () => void;
+}
+
+const SKIN_TONES    = ['#fde8d0', '#f5c5a3', '#d4956a', '#a0624a', '#5c3317'] as const;
+const HAIR_COLORS   = ['#1a0f0a', '#4a2c17', '#d4a843', '#c0392b', '#888888', '#f0f0f0'] as const;
+const CLOTHING_COLORS = ['#141414', '#c0392b', '#2c3e50', '#27ae60', '#8e44ad'] as const;
+const SVG_HEIGHTS   = [52, 66, 80] as const;
+
+function Hair({ style, color }: { style: number; color: string }) {
+  switch (style) {
+    case 0: return ( // short
+      <g>
+        <ellipse cx="24" cy="10" rx="10" ry="9" fill={color} />
+        <rect x="14" y="10" width="20" height="6" fill={color} />
+      </g>
+    );
+    case 1: return ( // long
+      <g>
+        <ellipse cx="24" cy="10" rx="10" ry="9" fill={color} />
+        <rect x="14" y="10" width="4" height="26" rx="2" fill={color} />
+        <rect x="30" y="10" width="4" height="26" rx="2" fill={color} />
+      </g>
+    );
+    case 2: return ( // curly
+      <g>
+        <circle cx="24" cy="9" r="9" fill={color} />
+        <circle cx="15" cy="12" r="5" fill={color} />
+        <circle cx="33" cy="12" r="5" fill={color} />
+        <circle cx="18" cy="7" r="5" fill={color} />
+        <circle cx="30" cy="7" r="5" fill={color} />
+      </g>
+    );
+    case 3: return null; // bald
+    case 4: return ( // bun
+      <g>
+        <ellipse cx="24" cy="12" rx="9" ry="8" fill={color} />
+        <circle cx="24" cy="4" r="4" fill={color} />
+      </g>
+    );
+    default: return null;
+  }
+}
+
+function Clothing({ style, color, skin }: { style: number; color: string; skin: string }) {
+  switch (style) {
+    case 0: return ( // formal jacket
+      <g>
+        <rect x="13" y="27" width="22" height="24" rx="2" fill="#141414" />
+        <polygon points="13,27 21,27 17,43" fill="#1c1c1c" />
+        <polygon points="35,27 27,27 31,43" fill="#1c1c1c" />
+        <rect x="21" y="29" width="6" height="20" rx="1" fill="white" />
+        <circle cx="24" cy="33" r="0.8" fill="#d4af37" />
+        <circle cx="24" cy="37" r="0.8" fill="#d4af37" />
+        <circle cx="24" cy="41" r="0.8" fill="#d4af37" />
+        <rect x="5" y="27" width="9" height="20" rx="4" fill="#141414" />
+        <rect x="34" y="27" width="9" height="20" rx="4" fill="#141414" />
+        <ellipse cx="9" cy="48" rx="4" ry="3" fill={skin} />
+        <ellipse cx="39" cy="48" rx="4" ry="3" fill={skin} />
+        <rect x="14" y="50" width="9" height="24" rx="3" fill="#2c3e50" />
+        <rect x="25" y="50" width="9" height="24" rx="3" fill="#2c3e50" />
+      </g>
+    );
+    case 1: return ( // casual shirt
+      <g>
+        <rect x="13" y="27" width="22" height="23" rx="3" fill={color} />
+        <rect x="5" y="27" width="9" height="18" rx="4" fill={color} />
+        <rect x="34" y="27" width="9" height="18" rx="4" fill={color} />
+        <ellipse cx="9" cy="46" rx="4" ry="3" fill={skin} />
+        <ellipse cx="39" cy="46" rx="4" ry="3" fill={skin} />
+        <rect x="14" y="49" width="9" height="25" rx="3" fill="#2c3e50" />
+        <rect x="25" y="49" width="9" height="25" rx="3" fill="#2c3e50" />
+      </g>
+    );
+    case 2: return ( // dress
+      <g>
+        <rect x="14" y="27" width="20" height="14" rx="2" fill={color} />
+        <polygon points="9,41 39,41 43,76 5,76" fill={color} />
+        <rect x="5" y="27" width="10" height="14" rx="4" fill={color} />
+        <rect x="33" y="27" width="10" height="14" rx="4" fill={color} />
+        <ellipse cx="10" cy="42" rx="4" ry="3" fill={skin} />
+        <ellipse cx="38" cy="42" rx="4" ry="3" fill={skin} />
+      </g>
+    );
+    case 3: return ( // smart-casual blazer
+      <g>
+        <rect x="13" y="27" width="22" height="23" rx="2" fill={color} />
+        <polygon points="13,27 20,27 16,41" fill={color} />
+        <polygon points="35,27 28,27 32,41" fill={color} />
+        <rect x="21" y="29" width="6" height="19" rx="1" fill="white" />
+        <rect x="5" y="27" width="9" height="19" rx="4" fill={color} />
+        <rect x="34" y="27" width="9" height="19" rx="4" fill={color} />
+        <ellipse cx="9" cy="47" rx="4" ry="3" fill={skin} />
+        <ellipse cx="39" cy="47" rx="4" ry="3" fill={skin} />
+        <rect x="14" y="49" width="9" height="25" rx="3" fill="#141414" />
+        <rect x="25" y="49" width="9" height="25" rx="3" fill="#141414" />
+      </g>
+    );
+    default: return null;
+  }
+}
+
+export const ClientAvatar: React.FC<ClientAvatarProps> = ({ traits, animState, onAnimationComplete }) => {
+  const skin          = SKIN_TONES[traits.skinTone];
+  const hairColor     = HAIR_COLORS[traits.hairColor];
+  const clothingColor = CLOTHING_COLORS[traits.clothingColor];
+  const svgHeight     = SVG_HEIGHTS[traits.height];
+  const svgWidth      = Math.round(svgHeight * 48 / 80);
+
+  const motionProps =
+    animState === 'entrance' ? {
+      initial: { y: 16, opacity: 0 },
+      animate: { y: 0, opacity: 1 },
+      transition: { type: 'spring' as const, stiffness: 200, damping: 20 },
+    } : animState === 'accused' ? {
+      animate: { x: [0, -6, 6, -4, 4, 0] },
+      transition: { duration: 0.4 },
+    } : animState === 'refused' ? {
+      animate: { y: 6, opacity: 0.4 },
+      transition: { duration: 0.3 },
+    } : {};
+
+  return (
+    <motion.div
+      {...motionProps}
+      onAnimationComplete={animState ? onAnimationComplete : undefined}
+    >
+      <svg
+        width={svgWidth}
+        height={svgHeight}
+        viewBox="0 0 48 80"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <Hair style={traits.hairStyle} color={hairColor} />
+        <ellipse cx="24" cy="16" rx="9" ry="10" fill={skin} />
+        <ellipse cx="20.5" cy="14" rx="1.5" ry="1.8" fill="#141414" />
+        <ellipse cx="27.5" cy="14" rx="1.5" ry="1.8" fill="#141414" />
+        <circle cx="21.1" cy="13.2" r="0.5" fill="white" />
+        <circle cx="28.1" cy="13.2" r="0.5" fill="white" />
+        <path d="M23 18.5 Q24 20.5 25 18.5" stroke="#00000030" strokeWidth="0.8" fill="none" />
+        <path d="M21 22 Q24 24 27 22" stroke="#141414" strokeWidth="0.8" fill="none" />
+        <rect x="21" y="26" width="6" height="4" fill={skin} />
+        <Clothing style={traits.clothingStyle} color={clothingColor} skin={skin} />
+        {traits.clothingStyle !== 2 && (
+          <>
+            <ellipse cx="18" cy="76" rx="6" ry="2.5" fill="#141414" />
+            <ellipse cx="30" cy="76" rx="6" ry="2.5" fill="#141414" />
+          </>
+        )}
+      </svg>
+    </motion.div>
+  );
+};
