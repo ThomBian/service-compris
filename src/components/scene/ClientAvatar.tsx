@@ -106,6 +106,61 @@ function Clothing({ style, color, skin }: { style: number; color: string; skin: 
   }
 }
 
+function Accessories({ hat, facialHair, neckwear, hairColor }: {
+  hat?: 0 | 1 | 2;
+  facialHair?: 0 | 1;
+  neckwear?: 0 | 1 | 2;
+  hairColor: string;
+}) {
+  return (
+    <>
+      {facialHair === 0 && (
+        <g>
+          <path d="M19 20.5 Q21 18.5 24 19.5 Q27 18.5 29 20.5" stroke={hairColor} strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <path d="M19 20.5 Q17.5 22.5 19.5 22" stroke={hairColor} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          <path d="M29 20.5 Q30.5 22.5 28.5 22" stroke={hairColor} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+      {facialHair === 1 && (
+        <path d="M15 20 Q15 28 24 30 Q33 28 33 20 Q29 23 24 23.5 Q19 23 15 20Z" fill={hairColor} />
+      )}
+      {neckwear === 0 && (
+        <g>
+          <polygon points="22,27 26,27 25,44 24,46 23,44" fill="#c0392b" />
+          <polygon points="22,27 26,27 24.5,31 23.5,31" fill="#e74c3c" />
+        </g>
+      )}
+      {neckwear === 1 && (
+        <g>
+          <path d="M20,27 Q24,33 28,27" fill="#d4af37" stroke="#b8960c" strokeWidth="0.5" />
+          <circle cx="24" cy="28.5" r="2" fill="#b8960c" />
+        </g>
+      )}
+      {neckwear === 2 && (
+        <path d="M16,27 Q18,30 24,29 Q30,30 32,27 Q30,32 26,33 L24,38 L22,33 Q18,32 16,27Z" fill="#c0392b" />
+      )}
+      {hat === 0 && (
+        <g>
+          <rect x="17" y="1" width="14" height="12" rx="1" fill="#1a1a1a" />
+          <rect x="12" y="12" width="24" height="3" rx="1" fill="#141414" />
+        </g>
+      )}
+      {hat === 1 && (
+        <g>
+          <ellipse cx="24" cy="9" rx="13" ry="7" fill="#8B0000" />
+          <circle cx="30" cy="7" r="2" fill="#6b0000" />
+        </g>
+      )}
+      {hat === 2 && (
+        <g>
+          <rect x="18" y="1" width="12" height="12" rx="2" fill="white" stroke="#ddd" strokeWidth="0.5" />
+          <rect x="15" y="12" width="18" height="2.5" rx="1" fill="#ddd" />
+        </g>
+      )}
+    </>
+  );
+}
+
 export const ClientAvatar: React.FC<ClientAvatarProps> = ({ traits, animState, onAnimationComplete }) => {
   const skin          = SKIN_TONES[traits.skinTone];
   const hairColor     = HAIR_COLORS[traits.hairColor];
@@ -148,6 +203,12 @@ export const ClientAvatar: React.FC<ClientAvatarProps> = ({ traits, animState, o
         <path d="M21 22 Q24 24 27 22" stroke="#141414" strokeWidth="0.8" fill="none" />
         <rect x="21" y="26" width="6" height="4" fill={skin} />
         <Clothing style={traits.clothingStyle} color={clothingColor} skin={skin} />
+        <Accessories
+          hat={traits.hat}
+          facialHair={traits.facialHair}
+          neckwear={traits.neckwear}
+          hairColor={hairColor}
+        />
         {traits.clothingStyle !== 2 && (
           <>
             <ellipse cx="18" cy="76" rx="6" ry="2.5" fill="#141414" />
