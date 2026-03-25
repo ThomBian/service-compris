@@ -82,6 +82,7 @@ export function useDecisionActions(
               cash: outcome.cash,
               rating: outcome.rating,
               gameOver: outcome.gameOver,
+              timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
               logs: [`VIP refused: ${vip.name}.`, ...prev.logs].slice(0, 50),
             };
           }
