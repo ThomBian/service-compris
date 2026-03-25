@@ -1,5 +1,13 @@
-import React from 'react';
-import { Clock, Star, DollarSign, Play, Pause, FastForward, Heart } from 'lucide-react';
+import React from "react";
+import {
+  Clock,
+  Star,
+  DollarSign,
+  Play,
+  Pause,
+  FastForward,
+  Heart,
+} from "lucide-react";
 
 interface TopBarProps {
   inGameMinutes: number;
@@ -25,11 +33,15 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-8">
         <div className="flex items-center gap-2">
           <Clock size={20} />
-          <span className="font-mono text-xl font-bold">{formatTime(inGameMinutes)}</span>
+          <span className="font-mono text-xl font-bold">
+            {formatTime(inGameMinutes)}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Star size={20} className="text-yellow-600 fill-yellow-600" />
-          <span className="font-mono text-xl font-bold">{rating.toFixed(1)}</span>
+          <span className="font-mono text-xl font-bold">
+            {rating.toFixed(1)}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Heart size={20} className="text-red-500 fill-red-500" />
@@ -37,26 +49,44 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <DollarSign size={20} className="text-emerald-700" />
-          <span className="font-mono text-xl font-bold">{cash}</span>
+          <span className="font-mono text-xl font-bold">
+            {Math.round(cash)}
+          </span>
         </div>
       </div>
 
       <div className="flex items-center gap-2 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
-        {[0, 1, 2, 3].map(m => (
+        {[0, 1, 2, 3].map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setTimeMultiplier(m)}
-            title={m === 0 ? 'Pause' : m === 1 ? '1× speed' : m === 2 ? '2× speed' : '3× speed'}
+            title={
+              m === 0
+                ? "Pause"
+                : m === 1
+                  ? "1× speed"
+                  : m === 2
+                    ? "2× speed"
+                    : "3× speed"
+            }
             className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
               timeMultiplier === m
                 ? m === 0
-                  ? 'bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]'
-                  : 'bg-[#141414] text-[#E4E3E0]'
-                : 'hover:bg-[#141414]/10'
+                  ? "bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]"
+                  : "bg-[#141414] text-[#E4E3E0]"
+                : "hover:bg-[#141414]/10"
             }`}
           >
-            {m === 0 ? <Pause size={14} /> : m === 1 ? <Play size={14} /> : m === 2 ? <FastForward size={14} /> : '3x'}
+            {m === 0 ? (
+              <Pause size={14} />
+            ) : m === 1 ? (
+              <Play size={14} />
+            ) : m === 2 ? (
+              <FastForward size={14} />
+            ) : (
+              "3x"
+            )}
           </button>
         ))}
       </div>
