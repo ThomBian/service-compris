@@ -52,7 +52,7 @@ describe('generateDailyVips', () => {
   });
 
   it('returns 2 unique VIPs at difficulty 2', () => {
-    const result = generateDailyVips(2, [FOOD_CRITIC, THE_OWNER]);
+    const result = generateDailyVips(2, [FOOD_CRITIC, THE_OWNER, THE_INSPECTOR]);
     expect(result).toHaveLength(2);
     const ids = result.map(v => v.id);
     expect(new Set(ids).size).toBe(2); // no duplicates
