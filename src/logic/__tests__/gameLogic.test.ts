@@ -95,6 +95,9 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   rating: 3.0,
   morale: 50,
   logs: [],
+  dailyVips: [],
+  seatedVipIds: [],
+  gameOver: false,
   ...overrides,
 });
 

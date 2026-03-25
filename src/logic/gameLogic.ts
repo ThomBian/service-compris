@@ -20,6 +20,7 @@ import {
   GRID_SIZE
 } from '../constants';
 import { getRandom, formatTime } from '../utils';
+import { traitsMatch } from './vipLogic';
 
 export function seedTraits(id: string, index: number): VisualTraits {
   const seed = id + String(index);
@@ -69,6 +70,7 @@ export const generateClientData = (
   allReservations: Reservation[] = [],
   currentInGameMinutes?: number,
   spawnedReservationIds: string[] = [],
+  excludeTraits?: VisualTraits[],
 ): {
   type: ClientType;
   trueFirstName: string;
@@ -131,14 +133,17 @@ export const generateClientData = (
     }
   }
 
-  const visualTraits: VisualTraits = {
-    skinTone:      Math.floor(Math.random() * 5) as VisualTraits['skinTone'],
-    hairStyle:     Math.floor(Math.random() * 5) as VisualTraits['hairStyle'],
-    hairColor:     Math.floor(Math.random() * 6) as VisualTraits['hairColor'],
-    clothingStyle: Math.floor(Math.random() * 4) as VisualTraits['clothingStyle'],
-    clothingColor: Math.floor(Math.random() * 5) as VisualTraits['clothingColor'],
-    height:        Math.floor(Math.random() * 3) as VisualTraits['height'],
-  };
+  let visualTraits: VisualTraits;
+  do {
+    visualTraits = {
+      skinTone:      Math.floor(Math.random() * 5) as VisualTraits['skinTone'],
+      hairStyle:     Math.floor(Math.random() * 5) as VisualTraits['hairStyle'],
+      hairColor:     Math.floor(Math.random() * 6) as VisualTraits['hairColor'],
+      clothingStyle: Math.floor(Math.random() * 4) as VisualTraits['clothingStyle'],
+      clothingColor: Math.floor(Math.random() * 5) as VisualTraits['clothingColor'],
+      height:        Math.floor(Math.random() * 3) as VisualTraits['height'],
+    };
+  } while (excludeTraits?.some((e) => traitsMatch(e, visualTraits)));
 
   return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, claimedReservationId, visualTraits };
 };

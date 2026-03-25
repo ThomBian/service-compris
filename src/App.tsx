@@ -9,8 +9,9 @@ import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
 
 function GameContent() {
-  const { gameState, seatParty, setTimeMultiplier } = useGame();
+  const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
+  const [difficulty, setDifficulty] = React.useState(1);
 
   React.useEffect(() => {
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
@@ -23,6 +24,11 @@ function GameContent() {
     setView('floorplan');
   };
 
+  const handleDifficultyChange = (d: number) => {
+    setDifficulty(d);
+    resetGame(d);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       <TopBar
@@ -33,6 +39,8 @@ function GameContent() {
         timeMultiplier={gameState.timeMultiplier}
         setTimeMultiplier={setTimeMultiplier}
         formatTime={formatTime}
+        difficulty={difficulty}
+        onDifficultyChange={handleDifficultyChange}
       />
       <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
         <ScenePanel view={view} onSeatParty={handleSeatParty} />
@@ -55,6 +63,15 @@ function GameContent() {
               </span>
             </span>
           </button>
+        )}
+        {gameState.gameOver && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#141414]/80">
+            <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-8 py-6 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
+              <span className="text-4xl">☠️</span>
+              <span className="text-2xl font-bold uppercase tracking-[0.2em]">Game Over</span>
+              <span className="text-sm opacity-60">You have been fired.</span>
+            </div>
+          </div>
         )}
       </div>
       <ToastContainer />

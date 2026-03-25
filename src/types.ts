@@ -50,6 +50,25 @@ export interface VisualTraits {
   clothingStyle: 0 | 1 | 2 | 3;
   clothingColor: 0 | 1 | 2 | 3 | 4;
   height:        0 | 1 | 2;
+  // VIP-only accessories — undefined on regular clients
+  hat?:        0 | 1 | 2;  // 0=top hat, 1=beret, 2=chef's toque
+  facialHair?: 0 | 1;       // 0=curled moustache, 1=full beard
+  neckwear?:   0 | 1 | 2;  // 0=red tie, 1=gold cravat, 2=red scarf
+}
+
+export type VipConsequenceTier = 'RATING' | 'CASH_FINE' | 'GAME_OVER';
+
+export interface Vip {
+  id: string;
+  name: string;
+  visualTraits: VisualTraits;
+  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
+  aliasFirstName?: string;
+  aliasLastName?: string;
+  expectedPartySize: number;
+  consequenceTier: VipConsequenceTier;
+  cashFinePenalty?: number;
+  consequenceDescription: string;
 }
 
 export interface Reservation {
@@ -95,7 +114,8 @@ export interface Client {
   hasLied: boolean; // Flag for "Grateful Liar" or "Justified Refusal"
   visualTraits: VisualTraits;
   isCaught: boolean; // Flag for successful accusation
-  
+  vipId?: string;
+
   // Dialogue
   lastMessage: string;
   chatHistory: ChatMessage[];
@@ -113,4 +133,7 @@ export interface GameState {
   rating: number; // 0-5 stars
   morale: number; // 0-100
   logs: string[];
+  dailyVips: Vip[];
+  seatedVipIds: string[];
+  gameOver: boolean;
 }

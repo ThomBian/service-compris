@@ -14,6 +14,7 @@ import {
   handleSeatingRefusal,
   canSelectCell,
 } from "../logic/gameLogic";
+import { computeVipRefusalOutcome } from '../logic/vipLogic';
 import { type Toast } from "../context/ToastContext";
 
 type ShowToast = (
@@ -64,6 +65,29 @@ export function useDecisionActions(
         if (!prev.currentClient) return prev;
 
         const deskClient = prev.currentClient;
+
+        // VIP REFUSE — short-circuit normal logic
+        if (deskClient.vipId) {
+          const vip = prev.dailyVips.find(v => v.id === deskClient.vipId);
+          if (vip) {
+            const outcome = computeVipRefusalOutcome(vip, {
+              cash: prev.cash,
+              rating: prev.rating,
+              gameOver: prev.gameOver,
+            });
+            toastArgs = [vip.consequenceDescription, undefined, 'error'];
+            return {
+              ...prev,
+              currentClient: null,
+              cash: outcome.cash,
+              rating: outcome.rating,
+              gameOver: outcome.gameOver,
+              timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
+              logs: [`VIP refused: ${vip.name}.`, ...prev.logs].slice(0, 50),
+            };
+          }
+        }
+
         const { nextRating, nextMorale, nextLogs } = handleRefusedClient(
           deskClient,
           prev.rating,
@@ -224,6 +248,17 @@ export function useDecisionActions(
             )
           : prev.reservations;
 
+        const nextSeatedVipIds = client.vipId
+          ? [...prev.seatedVipIds, client.vipId]
+          : prev.seatedVipIds;
+
+        if (client.vipId) {
+          const vip = prev.dailyVips.find(v => v.id === client.vipId);
+          if (vip) {
+            toastArgs = [`Well handled — ${vip.name} has been seated.`, undefined, 'success'];
+          }
+        }
+
         return {
           ...prev,
           currentClient: null,
@@ -233,6 +268,7 @@ export function useDecisionActions(
           rating: nextRating,
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
+          seatedVipIds: nextSeatedVipIds,
         };
       });
     });

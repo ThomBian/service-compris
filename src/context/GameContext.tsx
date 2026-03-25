@@ -14,6 +14,7 @@ interface GameContextType {
   refuseSeatedParty: () => void;
   toggleReservationArrived: (id: string) => void;
   setTimeMultiplier: (m: number) => void;
+  resetGame: (difficulty: number) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
