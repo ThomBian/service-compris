@@ -10,7 +10,7 @@ import {
   Vip,
 } from '../types';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
-import { START_TIME } from '../constants';
+import { START_TIME, FIRST_NAMES, LAST_NAMES } from '../constants';
 
 export function useClientSpawner(
   gameState: GameState,
@@ -68,8 +68,8 @@ export function useClientSpawner(
         physicalState: PhysicalState.IN_QUEUE,
         dialogueState: DialogueState.AWAITING_GREETING,
         spawnTime: prev.inGameMinutes,
-        trueFirstName: v.name,
-        trueLastName: '',
+        trueFirstName: FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)],
+        trueLastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
         truePartySize: v.expectedPartySize,
         isLate: v.arrivalMO === 'LATE',
         lieType: LieType.NONE,

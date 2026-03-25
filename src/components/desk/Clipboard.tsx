@@ -48,10 +48,12 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
       }`}
     >
       <div
-        className="shrink-0 w-10 h-10 overflow-hidden flex items-end justify-center"
+        className="shrink-0 w-10 flex items-end justify-center"
         style={{ opacity: isSeated ? 0.6 : 1 }}
       >
-        <ClientAvatar traits={vip.visualTraits} />
+        <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
+          <ClientAvatar traits={vip.visualTraits} />
+        </div>
       </div>
       <div className={`flex flex-col gap-1 flex-1 ${isSeated ? 'opacity-70' : ''}`}>
         <div className={`text-[10px] font-bold ${isSeated ? 'text-green-700' : 'text-[#141414]'}`}>
