@@ -106,7 +106,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
               difficulty === d
                 ? 'bg-[#141414] text-[#E4E3E0]'
-                : 'bg-[#141414]/10'
+                : 'hover:bg-[#141414]/10'
             }`}
           >
             {d}
