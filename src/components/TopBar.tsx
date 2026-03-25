@@ -17,6 +17,8 @@ interface TopBarProps {
   timeMultiplier: number;
   setTimeMultiplier: (m: number) => void;
   formatTime: (minutes: number) => string;
+  difficulty: number;
+  onDifficultyChange: (d: number) => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -27,6 +29,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   timeMultiplier,
   setTimeMultiplier,
   formatTime,
+  difficulty,
+  onDifficultyChange,
 }) => {
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
@@ -87,6 +91,25 @@ export const TopBar: React.FC<TopBarProps> = ({
             ) : (
               "3x"
             )}
+          </button>
+        ))}
+      </div>
+      <div className="w-px h-5 bg-[#141414]/20 mx-1" />
+      <div className="flex items-center gap-1 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
+        <span className="text-[10px] font-bold uppercase tracking-wider opacity-40 px-1">VIPs</span>
+        {[0, 1, 2, 3].map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => onDifficultyChange(d)}
+            title={d === 0 ? 'No VIPs tonight' : `${d} VIP${d > 1 ? 's' : ''} tonight`}
+            className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
+              difficulty === d
+                ? 'bg-[#141414] text-[#E4E3E0]'
+                : 'bg-[#141414]/10'
+            }`}
+          >
+            {d}
           </button>
         ))}
       </div>

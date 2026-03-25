@@ -9,8 +9,9 @@ import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
 
 function GameContent() {
-  const { gameState, seatParty, setTimeMultiplier } = useGame();
+  const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
+  const [difficulty, setDifficulty] = React.useState(1);
 
   React.useEffect(() => {
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
@@ -23,6 +24,11 @@ function GameContent() {
     setView('floorplan');
   };
 
+  const handleDifficultyChange = (d: number) => {
+    setDifficulty(d);
+    resetGame(d);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       <TopBar
@@ -33,6 +39,8 @@ function GameContent() {
         timeMultiplier={gameState.timeMultiplier}
         setTimeMultiplier={setTimeMultiplier}
         formatTime={formatTime}
+        difficulty={difficulty}
+        onDifficultyChange={handleDifficultyChange}
       />
       <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
         <ScenePanel view={view} onSeatParty={handleSeatParty} />

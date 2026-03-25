@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { GameState } from "../types";
 import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
 import { createInitialGrid } from "../logic/gameLogic";
@@ -13,27 +13,33 @@ import { useDecisionActions } from "./useDecisionActions";
 import { useReservationActions } from "./useReservationActions";
 import { useToast } from "../context/ToastContext";
 
+function buildInitialState(difficulty: number): GameState {
+  const dailyVips = generateDailyVips(difficulty, VIP_ROSTER);
+  const reservations = injectVipReservations(dailyVips, INITIAL_RESERVATIONS);
+  return {
+    inGameMinutes: START_TIME,
+    timeMultiplier: 1,
+    reservations,
+    spawnedReservationIds: [],
+    queue: [],
+    currentClient: null,
+    grid: createInitialGrid(),
+    cash: 0,
+    rating: 5.0,
+    morale: 100,
+    logs: ["Welcome to The Maitre D'. The doors are open."],
+    dailyVips,
+    seatedVipIds: [],
+    gameOver: false,
+  };
+}
+
 export function useGameEngine() {
-  const [gameState, setGameState] = useState<GameState>(() => {
-    const dailyVips = generateDailyVips(1, VIP_ROSTER);
-    const reservations = injectVipReservations(dailyVips, INITIAL_RESERVATIONS);
-    return {
-      inGameMinutes: START_TIME,
-      timeMultiplier: 1,
-      reservations,
-      spawnedReservationIds: [],
-      queue: [],
-      currentClient: null,
-      grid: createInitialGrid(),
-      cash: 0,
-      rating: 5.0,
-      morale: 100,
-      logs: ["Welcome to The Maitre D'. The doors are open."],
-      dailyVips,
-      seatedVipIds: [],
-      gameOver: false,
-    };
-  });
+  const [gameState, setGameState] = useState<GameState>(() => buildInitialState(1));
+
+  const resetGame = useCallback((difficulty: number) => {
+    setGameState(buildInitialState(difficulty));
+  }, []);
 
   const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
@@ -64,5 +70,6 @@ export function useGameEngine() {
     refuseSeatedParty,
     toggleReservationArrived,
     setTimeMultiplier,
+    resetGame,
   };
 }
