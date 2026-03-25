@@ -25,7 +25,7 @@ const panels = [
 
 export const HowToPlay: React.FC<HowToPlayProps> = ({ onClose }) => {
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#141414]/80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#141414]/80">
       <div className="flex w-full max-w-md flex-col gap-5 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-8 py-6 shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
         <h2 className="text-center text-2xl font-bold uppercase tracking-[0.2em] text-[#141414]">
           How to Play
