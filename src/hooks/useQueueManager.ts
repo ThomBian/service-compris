@@ -21,8 +21,7 @@ export function useQueueManager(
     if (gameState.timeMultiplier === 0) return;
 
     setGameState(prev => {
-      const next = processQueueTick(prev);
-      const stormedCount = prev.queue.filter(c => c.patience <= 0).length;
+      const { state: next, stormedCount } = processQueueTick(prev);
       if (stormedCount > 0) {
         const ratingLoss = (0.5 * stormedCount).toFixed(1);
         const label = stormedCount === 1 ? 'A guest stormed out!' : `${stormedCount} guests stormed out!`;

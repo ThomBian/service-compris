@@ -636,7 +636,7 @@ describe('processQueueTick', () => {
       queue: [makeClient({ patience: 80 }), makeClient({ id: 'c2', patience: 50 })],
       currentClient: occupant,
     });
-    const next = processQueueTick(state);
+    const { state: next } = processQueueTick(state);
     expect(next.queue[0].patience).toBe(79);
     expect(next.queue[1].patience).toBe(49);
   });
@@ -648,9 +648,10 @@ describe('processQueueTick', () => {
       queue: [makeClient({ patience: 0 }), makeClient({ id: 'c2', patience: 50 })],
       currentClient: occupant,
     });
-    const next = processQueueTick(state);
+    const { state: next, stormedCount } = processQueueTick(state);
     expect(next.queue.length).toBe(1);
     expect(next.queue[0].id).toBe('c2');
+    expect(stormedCount).toBe(1);
   });
 
   it('storm out reduces rating', () => {
@@ -658,7 +659,7 @@ describe('processQueueTick', () => {
       queue: [makeClient({ patience: 0 })],
       rating: 3.0,
     });
-    const next = processQueueTick(state);
+    const { state: next } = processQueueTick(state);
     expect(next.rating).toBeLessThan(3.0);
   });
 
@@ -667,11 +668,12 @@ describe('processQueueTick', () => {
       queue: [makeClient({ id: 'first' })],
       currentClient: null,
     });
-    const next = processQueueTick(state);
+    const { state: next, stormedCount } = processQueueTick(state);
     expect(next.currentClient).not.toBeNull();
     expect(next.currentClient!.physicalState).toBe(PhysicalState.AT_DESK);
     expect(next.currentClient!.dialogueState).toBe(DialogueState.OPENING_GAMBIT);
     expect(next.queue.length).toBe(0);
+    expect(stormedCount).toBe(0);
   });
 
   it('does not promote when desk is already occupied', () => {
@@ -680,7 +682,7 @@ describe('processQueueTick', () => {
       queue: [makeClient({ id: 'queued' })],
       currentClient: occupant,
     });
-    const next = processQueueTick(state);
+    const { state: next } = processQueueTick(state);
     expect(next.currentClient!.id).toBe('occupant');
     expect(next.queue.length).toBe(1);
   });
@@ -689,7 +691,7 @@ describe('processQueueTick', () => {
     const grid = createInitialGrid();
     grid[0][0] = { ...grid[0][0], state: CellState.OCCUPIED, mealDuration: 5 };
     const state = makeGameState({ grid });
-    const next = processQueueTick(state);
+    const { state: next } = processQueueTick(state);
     expect(next.grid[0][0].mealDuration).toBe(4);
   });
 
@@ -697,7 +699,7 @@ describe('processQueueTick', () => {
     const grid = createInitialGrid();
     grid[0][0] = { ...grid[0][0], state: CellState.OCCUPIED, mealDuration: 1 };
     const state = makeGameState({ grid });
-    const next = processQueueTick(state);
+    const { state: next } = processQueueTick(state);
     expect(next.grid[0][0].state).toBe(CellState.EMPTY);
     expect(next.grid[0][0].mealDuration).toBeUndefined();
   });

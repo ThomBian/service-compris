@@ -254,7 +254,12 @@ function tryMoveToDesk(queue: Client[], currentClient: Client | null, logs: stri
   return { nextQueue: rest, nextCurrentClient, nextLogs, occurred: true };
 }
 
-export function processQueueTick(prev: GameState): GameState {
+export interface QueueTickResult {
+  state: GameState;
+  stormedCount: number;
+}
+
+export function processQueueTick(prev: GameState): QueueTickResult {
   let nextQueue = prev.queue;
   let nextCurrentClient = prev.currentClient;
   let nextRating = prev.rating;
@@ -269,30 +274,30 @@ export function processQueueTick(prev: GameState): GameState {
     }
     return cell;
   }));
-  let changed = true; // Always changed because of grid decay or patience
 
-  // 1. Drain patience for queue
   nextQueue = updateQueuePatience(nextQueue);
 
-  // 2. Check for storm outs
   const stormResult = handleStormOuts(nextQueue, nextRating, nextLogs);
   nextQueue = stormResult.nextQueue;
   nextRating = stormResult.nextRating;
   nextLogs = stormResult.nextLogs;
+  const stormedCount = prev.queue.length - nextQueue.length;
 
-  // 3. Move to desk if empty
   const moveResult = tryMoveToDesk(nextQueue, nextCurrentClient, nextLogs);
   nextQueue = moveResult.nextQueue;
   nextCurrentClient = moveResult.nextCurrentClient;
   nextLogs = moveResult.nextLogs;
 
   return {
-    ...prev,
-    queue: nextQueue,
-    currentClient: nextCurrentClient,
-    grid: nextGrid,
-    rating: nextRating,
-    logs: nextLogs
+    state: {
+      ...prev,
+      queue: nextQueue,
+      currentClient: nextCurrentClient,
+      grid: nextGrid,
+      rating: nextRating,
+      logs: nextLogs
+    },
+    stormedCount,
   };
 }
 
