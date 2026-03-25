@@ -50,6 +50,8 @@ export interface Reservation {
   lastName: string;
   partySize: number;
   arrived: boolean;
+  /** True after this booking's party was seated at least once (still dining or finished). */
+  partySeated: boolean;
 }
 
 export interface ChatMessage {

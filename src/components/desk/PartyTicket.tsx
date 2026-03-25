@@ -84,7 +84,7 @@ export const PartyTicket: React.FC = () => {
             onAsk={() => askQuestion('time')}
             onAccuse={() => callOutLie('time')}
           />
-          {currentClient.isLate && (
+          {currentClient.knownTime !== undefined && currentClient.isLate && (
             <div className="text-[10px] font-bold uppercase tracking-widest text-red-600 flex items-center gap-1 px-2">
               <AlertCircle size={10} />
               LATE ARRIVAL

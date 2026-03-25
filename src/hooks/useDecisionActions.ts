@@ -216,10 +216,19 @@ export function useDecisionActions(
           }),
         );
 
+        const seatedReservationId =
+          client.trueReservationId ?? client.claimedReservationId;
+        const nextReservations = seatedReservationId
+          ? prev.reservations.map((r) =>
+              r.id === seatedReservationId ? { ...r, partySeated: true } : r,
+            )
+          : prev.reservations;
+
         return {
           ...prev,
           currentClient: null,
           grid: nextGrid,
+          reservations: nextReservations,
           cash: nextCash,
           rating: nextRating,
           morale: nextMorale,

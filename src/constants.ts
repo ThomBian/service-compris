@@ -381,6 +381,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Smith",
     partySize: 2,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-2",
@@ -389,6 +390,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Johnson",
     partySize: 4,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-3",
@@ -397,6 +399,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Williams",
     partySize: 6,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-4",
@@ -405,6 +408,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Brown",
     partySize: 2,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-5",
@@ -413,6 +417,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Garcia",
     partySize: 3,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-6",
@@ -421,6 +426,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Miller",
     partySize: 5,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-7",
@@ -429,6 +435,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Davis",
     partySize: 2,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-8",
@@ -437,6 +444,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Rodriguez",
     partySize: 4,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-9",
@@ -445,6 +453,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Martinez",
     partySize: 2,
     arrived: false,
+    partySeated: false,
   },
   {
     id: "res-10",
@@ -453,6 +462,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     lastName: "Jones",
     partySize: 8,
     arrived: false,
+    partySeated: false,
   },
 ];
 

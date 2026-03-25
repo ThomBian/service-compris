@@ -34,6 +34,7 @@ const makeReservation = (overrides?: Partial<Reservation>): Reservation => ({
   partySize: 2,
   time: 1200,
   arrived: false,
+  partySeated: false,
   ...overrides,
 });
 
