@@ -1,11 +1,11 @@
 import type { Vip, Reservation, VisualTraits } from '../types';
-import { START_TIME } from '../constants';
+import { START_TIME, SPAWN_PROBABILITY } from '../constants';
 
 export function generateDailyVips(difficulty: number, roster: Vip[]): Vip[] {
-  if (difficulty <= 0 || roster.length === 0) return [];
-  const count = Math.min(difficulty, roster.length);
+  if (difficulty === 0 || roster.length === 0) return [];
+  const p = SPAWN_PROBABILITY[Math.min(difficulty, 3)];
   const shuffled = [...roster].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  return shuffled.filter(() => Math.random() < p);
 }
 
 export function injectVipReservations(
@@ -50,6 +50,8 @@ export function traitsMatch(a: VisualTraits, b: VisualTraits): boolean {
     a.height        === b.height &&
     a.hat           === b.hat &&
     a.facialHair    === b.facialHair &&
-    a.neckwear      === b.neckwear
+    a.neckwear      === b.neckwear &&
+    a.glasses       === b.glasses &&
+    a.eyebrows      === b.eyebrows
   );
 }

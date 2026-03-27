@@ -365,6 +365,14 @@ export const MEAL_DURATION_PER_EXTRA_GUEST_MINUTES = 20;
 /** Cells with mealDuration ≤ this value turn amber to signal the table is about to free up. */
 export const TABLE_TURNING_SOON_THRESHOLD = 10;
 
+export const SPAWN_PROBABILITY: readonly number[] = [0, 0.5, 0.7, 0.9];
+
+export const SALARY_COST = 200;
+export const ELECTRICITY_COST = 40;
+export const FOOD_COST_PER_COVER = 23;
+export const OVERTIME_MORALE_DRAIN_PER_MINUTE = 1;
+export const LAST_CALL_RATING_PENALTY = 0.1;
+
 export function mealDurationForPartySize(partySize: number): number {
   const n = Math.max(0, Math.floor(partySize) - 1);
   return (

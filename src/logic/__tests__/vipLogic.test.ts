@@ -45,22 +45,27 @@ describe('generateDailyVips', () => {
     expect(generateDailyVips(0, [FOOD_CRITIC, THE_OWNER])).toEqual([]);
   });
 
-  it('returns exactly 1 VIP at difficulty 1', () => {
-    const result = generateDailyVips(1, [FOOD_CRITIC, THE_OWNER]);
-    expect(result).toHaveLength(1);
-    expect([FOOD_CRITIC, THE_OWNER]).toContainEqual(result[0]);
+  it('never returns duplicates across 50 runs', () => {
+    for (let i = 0; i < 50; i++) {
+      const result = generateDailyVips(2, [FOOD_CRITIC, THE_OWNER, THE_INSPECTOR]);
+      const ids = result.map(v => v.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
   });
 
-  it('returns 2 unique VIPs at difficulty 2', () => {
-    const result = generateDailyVips(2, [FOOD_CRITIC, THE_OWNER, THE_INSPECTOR]);
-    expect(result).toHaveLength(2);
-    const ids = result.map(v => v.id);
-    expect(new Set(ids).size).toBe(2); // no duplicates
+  it('never returns more VIPs than roster size', () => {
+    for (let i = 0; i < 50; i++) {
+      const result = generateDailyVips(3, [FOOD_CRITIC, THE_OWNER]);
+      expect(result.length).toBeLessThanOrEqual(2);
+    }
   });
 
-  it('caps at roster size when difficulty exceeds roster length', () => {
-    const result = generateDailyVips(99, [FOOD_CRITIC]);
-    expect(result).toHaveLength(1);
+  it('is probabilistic at difficulty 1 — count varies across 200 runs', () => {
+    const counts = new Set<number>();
+    for (let i = 0; i < 200; i++) {
+      counts.add(generateDailyVips(1, [FOOD_CRITIC, THE_OWNER, THE_INSPECTOR]).length);
+    }
+    expect(counts.size).toBeGreaterThan(1);
   });
 });
 
