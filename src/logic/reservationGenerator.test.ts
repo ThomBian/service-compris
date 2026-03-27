@@ -8,11 +8,16 @@ describe('generateReservations', () => {
     expect(result.length).toBeLessThanOrEqual(16);
   });
 
-  it('uses rating to adjust count — high rating produces more than low (bounds respected)', () => {
+  it('rating bonus adjusts count — 5★ yields more than 1★ at same nightNumber', () => {
+    // Run multiple times to reduce flakiness from randomness in other factors
+    // But N itself is deterministic (formula is deterministic):
+    // nightNumber=2, rating=5.0: N = clamp(8 + 1 + 4, 4, 16) = 13
+    // nightNumber=2, rating=1.0: N = clamp(8 + 1 + (-4), 4, 16) = 5
+    // Collision injection does not change N, only firstName/time values
     const high = generateReservations({ nightNumber: 2, rating: 5.0 });
     const low = generateReservations({ nightNumber: 2, rating: 1.0 });
-    expect(high.length).toBeLessThanOrEqual(16);
-    expect(low.length).toBeGreaterThanOrEqual(4);
+    expect(high.length).toBe(13);
+    expect(low.length).toBe(5);
   });
 
   it('each reservation has required fields', () => {
@@ -36,6 +41,15 @@ describe('generateReservations', () => {
     for (const r of result) {
       expect((r.time - 1170) % 15).toBe(0);
     }
+  });
+
+  it('at least some time collisions are injected', () => {
+    // For N=11 (nightNumber:5, rating:4.0), floor(11*0.15)=1 guaranteed time collision
+    const result = generateReservations({ nightNumber: 5, rating: 4.0 });
+    if (result.length < 2) return;
+    const times = result.map(r => r.time);
+    const hasDuplicate = times.some((t, i) => times.indexOf(t) !== i);
+    expect(hasDuplicate).toBe(true);
   });
 
   it('at least some first-name collisions are injected', () => {
