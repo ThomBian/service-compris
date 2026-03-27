@@ -13,6 +13,7 @@ import {
   handleRefusedClient,
   handleSeatingRefusal,
   canSelectCell,
+  applyMoraleGameOver,
 } from "../logic/gameLogic";
 import { computeVipRefusalOutcome } from '../logic/vipLogic';
 import { type Toast } from "../context/ToastContext";
@@ -113,13 +114,14 @@ export function useDecisionActions(
             : ["Unjustified Refusal", detail, "error"];
         }
 
-        return {
+        const nextState = {
           ...prev,
           currentClient: null,
           rating: nextRating,
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
         };
+        return applyMoraleGameOver(nextState);
       });
     });
 
@@ -259,7 +261,7 @@ export function useDecisionActions(
           }
         }
 
-        return {
+        const nextState = {
           ...prev,
           currentClient: null,
           grid: nextGrid,
@@ -272,6 +274,7 @@ export function useDecisionActions(
           coversSeated: prev.coversSeated + client.truePartySize,
           shiftRevenue: prev.shiftRevenue + Math.max(0, nextCash - prev.cash),
         };
+        return applyMoraleGameOver(nextState);
       });
     });
 
@@ -311,7 +314,7 @@ export function useDecisionActions(
               : cell,
           ),
         );
-        return {
+        const nextState = {
           ...prev,
           currentClient: null,
           grid: nextGrid,
@@ -319,6 +322,7 @@ export function useDecisionActions(
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
         };
+        return applyMoraleGameOver(nextState);
       });
     });
 

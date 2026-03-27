@@ -13,6 +13,7 @@ import {
   processQueueTick,
   generateQuestionResponse,
   seedTraits,
+  applyMoraleGameOver,
 } from '../gameLogic';
 import {
   ClientType,
@@ -818,5 +819,38 @@ describe('visualTraits', () => {
     const a = seedTraits('abc123', 0);
     const b = seedTraits('abc123', 1);
     expect(a).not.toEqual(b);
+  });
+});
+
+describe('applyMoraleGameOver', () => {
+  it('sets gameOver and stops clock when morale is 0', () => {
+    const state = makeGameState({ morale: 0 });
+    const result = applyMoraleGameOver(state);
+    expect(result.gameOver).toBe(true);
+    expect(result.timeMultiplier).toBe(0);
+  });
+
+  it('clears all OCCUPIED cells', () => {
+    const gridWithOccupied = createInitialGrid();
+    gridWithOccupied[0][0] = {
+      ...gridWithOccupied[0][0],
+      state: CellState.OCCUPIED,
+      mealDuration: 10,
+      partyId: 'p1',
+    };
+    const state = makeGameState({ morale: 0, grid: gridWithOccupied });
+    const result = applyMoraleGameOver(state);
+    expect(result.grid[0][0].state).toBe(CellState.EMPTY);
+    expect(result.grid[0][0].partyId).toBeUndefined();
+  });
+
+  it('returns state unchanged when morale > 0', () => {
+    const state = makeGameState({ morale: 50 });
+    expect(applyMoraleGameOver(state)).toBe(state);
+  });
+
+  it('returns state unchanged when gameOver already true', () => {
+    const state = makeGameState({ morale: 0, gameOver: true });
+    expect(applyMoraleGameOver(state)).toBe(state);
   });
 });
