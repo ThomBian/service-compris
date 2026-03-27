@@ -60,21 +60,37 @@ dailyBanned: Banned[];
 seatedBannedIds: string[];   // IDs of banned customers the player accidentally seated
 ```
 
+### `VisualTraits` extensions — `src/types.ts`
+
+Two new optional fields, exclusive to banned characters, added alongside the existing VIP accessory block:
+
+```ts
+// Banned-only accessories — undefined on regular clients and VIPs
+glasses?:  0 | 1;  // 0=round wire-frame, 1=oversized sunglasses
+eyebrows?: 0 | 1;  // 0=heavy furrowed brow, 1=droopy half-closed lids (drunk)
+```
+
+Regular clients and VIPs always have these as `undefined`. Because `traitsMatch` uses strict equality (`undefined !== 0`), a regular client can never match a banned character's trait object even if their 6 base traits coincide — the accessory field alone breaks the match.
+
+`traitsMatch` in `src/logic/vipLogic.ts` is extended to compare both new fields.
+
+The `Accessories` component in `src/components/scene/ClientAvatar.tsx` renders all 4 values. `eyebrows=1` (skin-coloured lid flaps) requires the `skin` colour to be threaded into `Accessories` as a new prop (alongside existing `hairColor`).
+
 ---
 
 ## Roster — `src/logic/bannedRoster.ts`
 
 Five banned characters across four consequence tiers (CASH_FINE is used twice, at different severity):
 
-| id | Name | Arrival | Party | Tier | Penalty | Lore |
-|----|------|---------|-------|------|---------|------|
-| `fake-hipster` | The Fake Hipster | WALK_IN | 1 | CASH_FINE | 80 | Dressed like a hipster, skips the bill |
-| `drunk-group` | The Drunk Group | LATE | 4 | MORALE | 30 | Rowdy crew — staff morale tanks |
-| `small-spender` | The Small Spender | WALK_IN | 2 | CASH_FINE | 30 | Books a table, orders tap water and shares a starter |
-| `fake-influencer` | The Fake Influencer | RESERVATION_ALIAS | 1 | RATING | 1.5 | Charm-comps their meal, posts a hit piece |
-| `the-dictator` | The Dictator | RESERVATION_ALIAS | 3 | GAME_OVER | — | Didn't like the food. Attacked the restaurant. |
+| id | Name | Arrival | Party | Tier | Penalty | glasses | eyebrows | Lore |
+|----|------|---------|-------|------|---------|---------|----------|------|
+| `fake-hipster` | The Fake Hipster | WALK_IN | 1 | CASH_FINE | 80 | 0 | — | Dressed like a hipster, skips the bill |
+| `drunk-group` | The Drunk Group | LATE | 4 | MORALE | 30 | — | 1 | Rowdy crew — staff morale tanks |
+| `small-spender` | The Small Spender | WALK_IN | 2 | CASH_FINE | 30 | 0 | 0 | Books a table, orders tap water and shares a starter |
+| `fake-influencer` | The Fake Influencer | RESERVATION_ALIAS | 1 | RATING | 1.5 | 1 | — | Charm-comps their meal, posts a hit piece |
+| `the-dictator` | The Dictator | RESERVATION_ALIAS | 3 | GAME_OVER | — | — | 0 | Didn't like the food. Attacked the restaurant. |
 
-Each character gets a `visualTraits` object using existing `VisualTraits` fields (base traits only — no accessories required, accessories remain VIP-exclusive). Traits must not collide with any VIP roster entry (enforced by the existing `traitsMatch` exclusion in `generateClientData`).
+Each character gets a `visualTraits` object that includes at least one banned-exclusive accessory (`glasses` or `eyebrows`). Base traits must be distinct from all VIP roster entries. The Fake Hipster and Small Spender both use `glasses=0` but have different base traits — the player checks which wire-frame-glasses person matches the client at the desk.
 
 ---
 
@@ -242,6 +258,29 @@ Consequence badge colors:
 - `RATING`: amber background, ⭐ icon (crossed out)
 
 The Banned tab renders `gameState.dailyBanned.map(...)`. If `dailyBanned` is empty (difficulty 0), show a single line: _"No trouble expected tonight."_
+
+---
+
+## ClientAvatar Rendering — `src/components/scene/ClientAvatar.tsx`
+
+The `Accessories` function gains `glasses`, `eyebrows`, and `skin` props. All 4 values render as SVG elements inside the 48×80 viewBox, after the existing hat/facialHair/neckwear blocks.
+
+**`glasses=0`** — round wire-frame glasses:
+- Two `<circle>` stroke-only frames centred on the eye positions (cx=20.5/27.5, cy=14, r=3.2, stroke=`#2a2a2a`, strokeWidth=0.8, fill=none)
+- Bridge `<line>` between lenses; arm `<line>` elements to face edge
+- Sits over the existing eye ellipses (Accessories renders last)
+
+**`glasses=1`** — oversized sunglasses:
+- Single wide `<rect>` spanning both eyes (x=16, y=11.5, width=16, height=5.5, rx=2, fill=`#141414`, opacity=0.85)
+- Arm lines to face edge — fully obscures the eye ellipses beneath
+
+**`eyebrows=0`** — heavy furrowed brow (stern/authoritarian):
+- Two thick curved `<path>` strokes angled inward toward the nose bridge (strokeWidth=2.2, strokeLinecap=round)
+- Left: `M16 11 Q19 10 21 11.5` — Right: `M32 11 Q29 10 27 11.5`
+
+**`eyebrows=1`** — droopy half-closed lids (drunk/glazed):
+- Two `<ellipse>` flaps in skin colour sitting over the top half of each eye (cx=20.5/27.5, cy=12.8, rx=2.8, ry=2.2, fill={skin})
+- Covers ~60% of each eye, creating a slit appearance; requires `skin` prop
 
 ---
 
