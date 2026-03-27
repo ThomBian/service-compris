@@ -54,9 +54,29 @@ export interface VisualTraits {
   hat?:        0 | 1 | 2;  // 0=top hat, 1=beret, 2=chef's toque
   facialHair?: 0 | 1;       // 0=curled moustache, 1=full beard
   neckwear?:   0 | 1 | 2;  // 0=red tie, 1=gold cravat, 2=red scarf
+  // Banned-only accessories — undefined on regular clients and VIPs
+  glasses?:  0 | 1;  // 0=round wire-frame, 1=oversized sunglasses
+  eyebrows?: 0 | 1;  // 0=heavy furrowed brow, 1=droopy half-closed lids (drunk)
 }
 
 export type VipConsequenceTier = 'RATING' | 'CASH_FINE' | 'GAME_OVER';
+
+export type BannedConsequenceTier = 'CASH_FINE' | 'MORALE' | 'RATING' | 'GAME_OVER';
+
+export interface Banned {
+  id: string;
+  name: string;
+  visualTraits: VisualTraits;
+  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
+  aliasFirstName?: string;
+  aliasLastName?: string;
+  expectedPartySize: number;
+  consequenceTier: BannedConsequenceTier;
+  cashFinePenalty?: number;
+  moralePenalty?: number;
+  ratingPenalty?: number;
+  consequenceDescription: string;
+}
 
 export interface Vip {
   id: string;
@@ -115,6 +135,7 @@ export interface Client {
   visualTraits: VisualTraits;
   isCaught: boolean; // Flag for successful accusation
   vipId?: string;
+  bannedId?: string;
 
   // Dialogue
   lastMessage: string;
@@ -135,5 +156,7 @@ export interface GameState {
   logs: string[];
   dailyVips: Vip[];
   seatedVipIds: string[];
+  dailyBanned: Banned[];
+  seatedBannedIds: string[];
   gameOver: boolean;
 }

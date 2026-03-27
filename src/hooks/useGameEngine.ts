@@ -30,6 +30,8 @@ function buildInitialState(difficulty: number): GameState {
     logs: ["Welcome to The Maitre D'. The doors are open."],
     dailyVips,
     seatedVipIds: [],
+    dailyBanned: [],
+    seatedBannedIds: [],
     gameOver: false,
   };
 }
