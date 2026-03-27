@@ -29,7 +29,7 @@ The game currently ends the shift by freezing the clock at 23:30 with no summary
 ### Trigger
 At `inGameMinutes >= 1560` (23:30): doors close. No new clients spawn. The queue drains naturally (remaining queued clients leave). The clock continues ticking.
 
-The existing `timeMultiplier = 0` freeze in `useGameClock` at minute 1560 is **removed entirely** and replaced by the overtime trigger described here.
+The existing `timeMultiplier = 0` freeze in `useGameClock` at minute 1560 is **removed entirely** and replaced by the overtime trigger described here. After removal, the tick function must allow `inGameMinutes` to increment to 1560 and beyond — the overtime trigger condition `inGameMinutes >= 1560` only fires correctly if the clock actually reaches that value.
 
 ### Summary trigger
 The end-of-night summary screen is shown when **either** of these two conditions is true:
@@ -181,11 +181,13 @@ function buildInitialState(
 ```
 When `persist` is omitted, the function behaves exactly as today (night 1 / new game).
 
-The `resetGame` function and its signature in `useGameEngine` and `GameContext` must be updated to accept the optional `persist` parameter:
+The `resetGame` function and its signature must be updated in **both** `useGameEngine.ts` and the `GameContextType` interface in `GameContext.tsx` (line 17) to accept the optional `persist` parameter:
 ```typescript
 resetGame: (difficulty: number, persist?: { cash: number; rating: number; morale: number; nightNumber: number }) => void
 ```
 The summary screen component receives `resetGame` via the `useGame()` context hook, same as other actions.
+
+Additionally: the hardcoded `buildInitialState(1)` in `useGameEngine.ts` (line 38) must be replaced with the actual difficulty value from `App.tsx` state. The `resetGame(difficulty)` call at game start already does this via `App.tsx`'s `GameContent.useEffect`, but the initial `useState` call ignores difficulty. Fix: change the initial state to `() => buildInitialState(0)` (or use a sentinel) and rely solely on the `resetGame(initialDifficulty)` effect call to set the correct starting state.
 
 ---
 
