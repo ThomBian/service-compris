@@ -269,6 +269,8 @@ export function useDecisionActions(
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
           seatedVipIds: nextSeatedVipIds,
+          coversSeated: prev.coversSeated + client.truePartySize,
+          shiftRevenue: prev.shiftRevenue + Math.max(0, nextCash - prev.cash),
         };
       });
     });
