@@ -194,10 +194,17 @@ Additionally: the hardcoded `buildInitialState(1)` in `useGameEngine.ts` (line 3
 
 ## 6. Procedural Reservation Generation
 
-Replaces `INITIAL_RESERVATIONS` for nights 2+. Night 1 continues to use the curated hardcoded list for tutorial familiarity.
+Replaces `INITIAL_RESERVATIONS` for nights 2+. Night 1 continues to use the curated hardcoded list for tutorial familiarity. The `rating` value used in the pool size formula is the carried-over `persist.rating` (or `5.0` on night 1). `buildInitialState` receives it via the `persist` parameter and uses it when calling the procedural generator.
 
 ### Pool size
-Generate `N` base reservations where `N = 8 + Math.floor(nightNumber * 0.5)`, capped at 16. VIP reservations are injected **on top** of this base pool via the existing `injectVipReservations` logic — they do not count toward the cap of 16. The difficulty selector caps VIP count at 0–3, so the combined maximum is 19 reservations. This is within acceptable UI bounds.
+The number of base reservations `N` is influenced by both night progression and the restaurant's carried-over `rating`:
+
+```
+ratingBonus = Math.round((rating - 3.0) * 2)   // +2 at 5★, 0 at 3★, −4 at 1★
+N = clamp(8 + Math.floor(nightNumber * 0.5) + ratingBonus, 4, 16)
+```
+
+A high rating attracts more bookings; a damaged reputation drives customers away. Minimum is 4 (the restaurant can always survive a quiet night). VIP reservations are injected **on top** of this base pool via the existing `injectVipReservations` logic — they do not count toward the cap. The difficulty selector caps VIP count at 0–3, so the combined maximum is 19 reservations.
 
 ### Base reservation algorithm
 For each of the N reservations:
