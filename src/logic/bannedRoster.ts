@@ -1,0 +1,77 @@
+import type { Banned } from '../types';
+
+export const BANNED_ROSTER: Banned[] = [
+  {
+    id: 'fake-hipster',
+    name: 'The Fake Hipster',
+    visualTraits: {
+      skinTone: 3, hairStyle: 4, hairColor: 2,
+      clothingStyle: 1, clothingColor: 3, height: 1,
+      glasses: 0,
+    },
+    arrivalMO: 'WALK_IN',
+    expectedPartySize: 1,
+    consequenceTier: 'CASH_FINE',
+    cashFinePenalty: 80,
+    consequenceDescription: 'The Fake Hipster skips the bill. -€80.',
+  },
+  {
+    id: 'drunk-group',
+    name: 'The Drunk Group',
+    visualTraits: {
+      skinTone: 2, hairStyle: 1, hairColor: 0,
+      clothingStyle: 2, clothingColor: 1, height: 2,
+      eyebrows: 1,
+    },
+    arrivalMO: 'LATE',
+    expectedPartySize: 4,
+    consequenceTier: 'MORALE',
+    moralePenalty: 30,
+    consequenceDescription: "Rowdy crew all night. Staff morale tanks. -30 morale.",
+  },
+  {
+    id: 'small-spender',
+    name: 'The Small Spender',
+    visualTraits: {
+      skinTone: 0, hairStyle: 3, hairColor: 4,
+      clothingStyle: 3, clothingColor: 4, height: 0,
+      glasses: 0, eyebrows: 0,
+    },
+    arrivalMO: 'WALK_IN',
+    expectedPartySize: 2,
+    consequenceTier: 'CASH_FINE',
+    cashFinePenalty: 30,
+    consequenceDescription: 'They order tap water and share a starter. -€30.',
+  },
+  {
+    id: 'fake-influencer',
+    name: 'The Fake Influencer',
+    visualTraits: {
+      skinTone: 4, hairStyle: 0, hairColor: 3,
+      clothingStyle: 1, clothingColor: 2, height: 1,
+      glasses: 1,
+    },
+    arrivalMO: 'RESERVATION_ALIAS',
+    aliasFirstName: 'Chloé',
+    aliasLastName: 'Lacroix',
+    expectedPartySize: 1,
+    consequenceTier: 'RATING',
+    ratingPenalty: 1.5,
+    consequenceDescription: 'Charmed a free meal, then posted a hit piece. -1.5 stars.',
+  },
+  {
+    id: 'the-dictator',
+    name: 'The Dictator',
+    visualTraits: {
+      skinTone: 1, hairStyle: 2, hairColor: 1,
+      clothingStyle: 0, clothingColor: 4, height: 2,
+      eyebrows: 0,
+    },
+    arrivalMO: 'RESERVATION_ALIAS',
+    aliasFirstName: 'Viktor',
+    aliasLastName: 'Blanc',
+    expectedPartySize: 3,
+    consequenceTier: 'GAME_OVER',
+    consequenceDescription: "Didn't like the food. Attacked the restaurant.",
+  },
+];
