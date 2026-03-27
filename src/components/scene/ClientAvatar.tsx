@@ -106,11 +106,14 @@ function Clothing({ style, color, skin }: { style: number; color: string; skin: 
   }
 }
 
-function Accessories({ hat, facialHair, neckwear, hairColor }: {
+function Accessories({ hat, facialHair, neckwear, hairColor, glasses, eyebrows, skin }: {
   hat?: 0 | 1 | 2;
   facialHair?: 0 | 1;
   neckwear?: 0 | 1 | 2;
   hairColor: string;
+  glasses?: 0 | 1;
+  eyebrows?: 0 | 1;
+  skin: string;
 }) {
   return (
     <>
@@ -155,6 +158,34 @@ function Accessories({ hat, facialHair, neckwear, hairColor }: {
         <g>
           <rect x="18" y="1" width="12" height="12" rx="2" fill="white" stroke="#ddd" strokeWidth="0.5" />
           <rect x="15" y="12" width="18" height="2.5" rx="1" fill="#ddd" />
+        </g>
+      )}
+      {eyebrows === 0 && (
+        <g>
+          <path d="M16 11 Q19 10 21 11.5" stroke="#141414" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+          <path d="M32 11 Q29 10 27 11.5" stroke="#141414" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+      {eyebrows === 1 && (
+        <g>
+          <ellipse cx="20.5" cy="12.8" rx="2.8" ry="2.2" fill={skin} />
+          <ellipse cx="27.5" cy="12.8" rx="2.8" ry="2.2" fill={skin} />
+        </g>
+      )}
+      {glasses === 0 && (
+        <g>
+          <circle cx="20.5" cy="14" r="3.2" stroke="#2a2a2a" strokeWidth="0.8" fill="none" />
+          <circle cx="27.5" cy="14" r="3.2" stroke="#2a2a2a" strokeWidth="0.8" fill="none" />
+          <line x1="23.7" y1="14" x2="24.3" y2="14" stroke="#2a2a2a" strokeWidth="0.8" />
+          <line x1="17.3" y1="14" x2="14" y2="13" stroke="#2a2a2a" strokeWidth="0.8" />
+          <line x1="30.7" y1="14" x2="34" y2="13" stroke="#2a2a2a" strokeWidth="0.8" />
+        </g>
+      )}
+      {glasses === 1 && (
+        <g>
+          <rect x="16" y="11.5" width="16" height="5.5" rx="2" fill="#141414" opacity="0.85" />
+          <line x1="16" y1="14" x2="13" y2="13" stroke="#141414" strokeWidth="0.8" opacity="0.85" />
+          <line x1="32" y1="14" x2="35" y2="13" stroke="#141414" strokeWidth="0.8" opacity="0.85" />
         </g>
       )}
     </>
@@ -208,6 +239,9 @@ export const ClientAvatar: React.FC<ClientAvatarProps> = ({ traits, animState, o
           facialHair={traits.facialHair}
           neckwear={traits.neckwear}
           hairColor={hairColor}
+          glasses={traits.glasses}
+          eyebrows={traits.eyebrows}
+          skin={skin}
         />
         {traits.clothingStyle !== 2 && (
           <>
