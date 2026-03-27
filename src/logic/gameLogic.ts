@@ -614,3 +614,25 @@ export function canSelectCell(cell: Cell, selectedCells: Cell[]): boolean {
   if (selectedCells.length === 0) return true;
   return selectedCells.some(selected => isAdjacent(cell, selected));
 }
+
+/**
+ * If morale has hit 0, atomically set gameOver, clear all occupied cells,
+ * and stop the clock. Returns state unchanged if morale > 0.
+ */
+export function applyMoraleGameOver(state: GameState): GameState {
+  if (state.morale > 0 || state.gameOver) return state;
+  const clearedGrid = state.grid.map(row =>
+    row.map(cell =>
+      cell.state === CellState.OCCUPIED
+        ? { ...cell, state: CellState.EMPTY, mealDuration: undefined, partyId: undefined }
+        : cell
+    )
+  );
+  return {
+    ...state,
+    grid: clearedGrid,
+    gameOver: true,
+    timeMultiplier: 0,
+    logs: ['Staff morale collapsed. Shift ended.', ...state.logs].slice(0, 50),
+  };
+}

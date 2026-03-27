@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { GameState } from '../types';
-import { TICK_RATE } from '../constants';
+import { TICK_RATE, OVERTIME_MORALE_DRAIN_PER_MINUTE } from '../constants';
+import { applyMoraleGameOver } from '../logic/gameLogic';
 
 export function useGameClock(
   gameState: GameState,
@@ -10,22 +11,34 @@ export function useGameClock(
 
   const tickTime = useCallback(() => {
     setGameState(prev => {
-      if (prev.timeMultiplier === 0) return prev;
+      if (prev.timeMultiplier === 0 || prev.gameOver) return prev;
 
       const nextMinutes = prev.inGameMinutes + 1;
-      
-      if (nextMinutes >= 1560) {
-        return {
-          ...prev,
-          timeMultiplier: 0,
-          logs: ['Shift ended. Doors closed.', ...prev.logs].slice(0, 50)
-        };
+      const isOvertime = nextMinutes >= 1560;
+      const wasOvertime = prev.inGameMinutes >= 1560;
+
+      const nextMultiplier = isOvertime && !wasOvertime && prev.timeMultiplier < 4
+        ? 4
+        : prev.timeMultiplier;
+
+      let nextMorale = prev.morale;
+      let nextLogs = prev.logs;
+      if (isOvertime) {
+        nextMorale = Math.max(0, prev.morale - OVERTIME_MORALE_DRAIN_PER_MINUTE);
+        if (!wasOvertime) {
+          nextLogs = ['23:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
+        }
       }
 
-      return {
+      const next: GameState = {
         ...prev,
         inGameMinutes: nextMinutes,
+        timeMultiplier: nextMultiplier,
+        morale: nextMorale,
+        logs: nextLogs,
       };
+
+      return applyMoraleGameOver(next);
     });
   }, [setGameState]);
 

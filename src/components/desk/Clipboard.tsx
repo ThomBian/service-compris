@@ -3,7 +3,7 @@ import { Clipboard as ClipboardIcon } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { ClientAvatar } from "../scene/ClientAvatar";
 import { ActivityLog } from "../ActivityLog";
-import type { Vip } from "../../types";
+import type { Vip, Banned } from "../../types";
 
 const TABS = ["VIPs", "Menu", "Banned", "Log"] as const;
 
@@ -84,6 +84,82 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
   );
 };
 
+interface BannedDossierEntryProps {
+  banned: Banned;
+  isSeated: boolean;
+}
+
+const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
+  banned,
+  isSeated,
+}) => {
+  const arrivalText =
+    banned.arrivalMO === "RESERVATION_ALIAS"
+      ? `Books as "${banned.aliasFirstName} ${banned.aliasLastName}" · Party of ${banned.expectedPartySize}`
+      : banned.arrivalMO === "WALK_IN"
+        ? `Walk-in, no reservation · Party of ${banned.expectedPartySize}`
+        : `Late arrival · Party of ${banned.expectedPartySize}`;
+
+  const consequenceBadge = isSeated ? (
+    <div className="inline-flex items-center gap-1 rounded bg-red-100 border border-red-400 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">⚠️</span>
+      <span className="text-[8px] text-red-700 font-semibold">Slipped through</span>
+    </div>
+  ) : banned.consequenceTier === "GAME_OVER" ? (
+    <div className="inline-flex items-center gap-1 rounded bg-[#1a0a0a] border border-[#5a1010] px-1 py-0.5 w-fit">
+      <span className="text-[9px]">☠️</span>
+      <span className="text-[8px] text-[#ff6b6b] font-semibold">Game over</span>
+    </div>
+  ) : banned.consequenceTier === "CASH_FINE" ? (
+    <div className="inline-flex items-center gap-1 rounded bg-orange-50 border border-orange-300 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">💸</span>
+      <span className="text-[8px] text-orange-700 font-semibold">Cash fine</span>
+    </div>
+  ) : banned.consequenceTier === "MORALE" ? (
+    <div className="inline-flex items-center gap-1 rounded bg-purple-50 border border-purple-300 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">😵</span>
+      <span className="text-[8px] text-purple-700 font-semibold">Morale hit</span>
+    </div>
+  ) : (
+    <div className="inline-flex items-center gap-1 rounded bg-amber-50 border border-amber-300 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">⭐</span>
+      <span className="text-[8px] text-amber-700 font-semibold">Rating loss</span>
+    </div>
+  );
+
+  return (
+    <div
+      className={`relative rounded-md border p-2 flex gap-2 items-start ${
+        isSeated
+          ? "border-red-500 bg-red-50"
+          : "bg-white/60 border-[#141414]/10"
+      }`}
+    >
+      <div
+        className="shrink-0 w-10 flex items-end justify-center"
+        style={{ opacity: isSeated ? 0.6 : 1 }}
+      >
+        <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
+          <ClientAvatar traits={banned.visualTraits} />
+        </div>
+      </div>
+      <div
+        className={`flex flex-col gap-1 flex-1 ${isSeated ? "opacity-70" : ""}`}
+      >
+        <div
+          className={`text-[10px] font-bold ${isSeated ? "text-red-700" : "text-[#141414]"}`}
+        >
+          {banned.name}
+        </div>
+        <div className="text-[8px] text-[#666] leading-tight">
+          {arrivalText}
+        </div>
+        {consequenceBadge}
+      </div>
+    </div>
+  );
+};
+
 export const Clipboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("VIPs");
   const { gameState } = useGame();
@@ -145,6 +221,22 @@ export const Clipboard: React.FC = () => {
           </div>
         ) : activeTab === "Log" ? (
           <ActivityLog logs={gameState.logs} />
+        ) : activeTab === "Banned" ? (
+          <div className="flex flex-col gap-2 p-1">
+            {gameState.dailyBanned.length === 0 ? (
+              <p className="text-[10px] opacity-40 italic p-1">
+                No trouble expected tonight.
+              </p>
+            ) : (
+              gameState.dailyBanned.map((banned) => (
+                <BannedDossierEntry
+                  key={banned.id}
+                  banned={banned}
+                  isSeated={gameState.seatedBannedIds.includes(banned.id)}
+                />
+              ))
+            )}
+          </div>
         ) : (
           <div className="p-2 text-[10px] opacity-40 italic">
             {activeTab} — coming soon

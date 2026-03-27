@@ -7,14 +7,16 @@ import {
   ClientType,
   LieType,
 } from "../types";
-import { mealDurationForPartySize } from "../constants";
+import { mealDurationForPartySize, LAST_CALL_RATING_PENALTY } from "../constants";
 import {
   handleAcceptedClient,
   handleRefusedClient,
   handleSeatingRefusal,
   canSelectCell,
+  applyMoraleGameOver,
 } from "../logic/gameLogic";
 import { computeVipRefusalOutcome } from '../logic/vipLogic';
+import { computeBannedSeatingOutcome } from '../logic/bannedLogic';
 import { type Toast } from "../context/ToastContext";
 
 type ShowToast = (
@@ -113,13 +115,13 @@ export function useDecisionActions(
             : ["Unjustified Refusal", detail, "error"];
         }
 
-        return {
+        return applyMoraleGameOver({
           ...prev,
           currentClient: null,
           rating: nextRating,
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
-        };
+        });
       });
     });
 
@@ -197,6 +199,40 @@ export function useDecisionActions(
           .filter((c) => c.state === CellState.SELECTED);
         if (selectedCells.length === 0) return prev;
 
+        const deskClient = prev.currentClient;
+        if (deskClient.bannedId) {
+          const banned = prev.dailyBanned.find((b) => b.id === deskClient.bannedId);
+          if (banned) {
+            const outcome = computeBannedSeatingOutcome(banned, {
+              cash: prev.cash,
+              morale: prev.morale,
+              rating: prev.rating,
+              gameOver: prev.gameOver,
+            });
+            toastArgs = [banned.consequenceDescription, undefined, 'error'];
+            const gridClearedSelection = prev.grid.map((row) =>
+              row.map((c) =>
+                c.state === CellState.SELECTED ? { ...c, state: CellState.EMPTY } : c,
+              ),
+            );
+            return applyMoraleGameOver({
+              ...prev,
+              currentClient: null,
+              grid: gridClearedSelection,
+              cash: outcome.cash,
+              morale: outcome.morale,
+              rating: outcome.rating,
+              gameOver: outcome.gameOver,
+              timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
+              seatedBannedIds: [...prev.seatedBannedIds, banned.id],
+              logs: [`Banned customer seated: ${banned.name}.`, ...prev.logs].slice(
+                0,
+                50,
+              ),
+            });
+          }
+        }
+
         const { nextCash, nextRating, nextMorale, nextLogs } =
           handleAcceptedClient(
             prev.currentClient,
@@ -259,7 +295,7 @@ export function useDecisionActions(
           }
         }
 
-        return {
+        return applyMoraleGameOver({
           ...prev,
           currentClient: null,
           grid: nextGrid,
@@ -269,7 +305,9 @@ export function useDecisionActions(
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
           seatedVipIds: nextSeatedVipIds,
-        };
+          coversSeated: prev.coversSeated + client.truePartySize,
+          shiftRevenue: prev.shiftRevenue + Math.max(0, nextCash - prev.cash),
+        });
       });
     });
 
@@ -309,19 +347,38 @@ export function useDecisionActions(
               : cell,
           ),
         );
-        return {
+        return applyMoraleGameOver({
           ...prev,
           currentClient: null,
           grid: nextGrid,
           rating: nextRating,
           morale: nextMorale,
           logs: nextLogs.slice(0, 50),
-        };
+        });
       });
     });
 
     if (toastArgs) showToast(...toastArgs);
   }, [setGameState, showToast]);
+
+  const lastCallTable = useCallback((partyId: string) => {
+    setGameState(prev => {
+      const nextGrid = prev.grid.map(row =>
+        row.map(cell =>
+          cell.state === CellState.OCCUPIED && cell.partyId === partyId
+            ? { ...cell, mealDuration: 0 }
+            : cell
+        )
+      );
+      const nextRating = Math.max(1.0, prev.rating - LAST_CALL_RATING_PENALTY);
+      return {
+        ...prev,
+        grid: nextGrid,
+        rating: nextRating,
+        logs: ['Rushed table — party asked to leave early.', ...prev.logs].slice(0, 50),
+      };
+    });
+  }, [setGameState]);
 
   return {
     handleDecision,
@@ -330,5 +387,6 @@ export function useDecisionActions(
     toggleCellSelection,
     confirmSeating,
     refuseSeatedParty,
+    lastCallTable,
   };
 }

@@ -34,4 +34,19 @@ export function useQueueManager(
   useEffect(() => {
     prevQueueLenRef.current = gameState.queue.length;
   }, [gameState.queue.length]);
+
+  useEffect(() => {
+    if (gameState.timeMultiplier === 0) return;
+    if (gameState.inGameMinutes < 1560) return;
+    if (gameState.queue.length === 0) return;
+
+    setGameState(prev => {
+      if (prev.queue.length === 0 || prev.inGameMinutes < 1560) return prev;
+      return {
+        ...prev,
+        queue: [],
+        logs: ['Remaining guests in queue sent away — doors closed.', ...prev.logs].slice(0, 50),
+      };
+    });
+  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.queue.length, setGameState]);
 }

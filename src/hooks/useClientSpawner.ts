@@ -8,6 +8,7 @@ import {
   DialogueState,
   LieType,
   Vip,
+  Banned,
 } from '../types';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
 import { START_TIME, FIRST_NAMES, LAST_NAMES } from '../constants';
@@ -18,7 +19,10 @@ export function useClientSpawner(
 ) {
   const spawnClient = useCallback((res?: Reservation) => {
     setGameState(prev => {
-      const excludeTraits = prev.dailyVips.map(v => v.visualTraits);
+      const excludeTraits = [
+        ...prev.dailyVips.map((v) => v.visualTraits),
+        ...prev.dailyBanned.map((b) => b.visualTraits),
+      ];
       const clientData = generateClientData(
         res,
         prev.reservations,
@@ -38,6 +42,18 @@ export function useClientSpawner(
         const vip = prev.dailyVips.find(v => v.id === vipId);
         if (vip) {
           newClient = { ...newClient, visualTraits: vip.visualTraits, vipId: vip.id };
+        }
+      }
+
+      if (res?.id.startsWith('banned-res-')) {
+        const bannedId = res.id.slice('banned-res-'.length);
+        const banned = prev.dailyBanned.find((b) => b.id === bannedId);
+        if (banned) {
+          newClient = {
+            ...newClient,
+            visualTraits: banned.visualTraits,
+            bannedId: banned.id,
+          };
         }
       }
 
@@ -88,8 +104,40 @@ export function useClientSpawner(
     });
   }, [setGameState]);
 
+  const spawnBannedWalkIn = useCallback((b: Banned) => {
+    setGameState((prev) => {
+      const walkinKey = 'banned-walkin-' + b.id;
+      if (prev.spawnedReservationIds.includes(walkinKey)) return prev;
+      const newClient: Client = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: ClientType.WALK_IN,
+        patience: 100,
+        physicalState: PhysicalState.IN_QUEUE,
+        dialogueState: DialogueState.AWAITING_GREETING,
+        spawnTime: prev.inGameMinutes,
+        trueFirstName: FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)],
+        trueLastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
+        truePartySize: b.expectedPartySize,
+        isLate: b.arrivalMO === 'LATE',
+        lieType: LieType.NONE,
+        hasLied: false,
+        visualTraits: b.visualTraits,
+        isCaught: false,
+        bannedId: b.id,
+        lastMessage: 'Waiting in line...',
+        chatHistory: [],
+      };
+      return {
+        ...prev,
+        queue: [...prev.queue, newClient],
+        spawnedReservationIds: [...prev.spawnedReservationIds, walkinKey],
+      };
+    });
+  }, [setGameState]);
+
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
+    if (gameState.inGameMinutes >= 1560) return;
 
     const toSpawn = gameState.reservations.filter(res => {
       if (gameState.spawnedReservationIds.includes(res.id)) return false;
@@ -117,7 +165,20 @@ export function useClientSpawner(
           spawnVipWalkIn(v);
         }
       });
-  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyVips, spawnClient, spawnVipWalkIn]);
 
-  return { spawnClient, spawnVipWalkIn };
+    gameState.dailyBanned
+      .filter((b) => b.arrivalMO === 'WALK_IN' || b.arrivalMO === 'LATE')
+      .forEach((b) => {
+        const walkinKey = 'banned-walkin-' + b.id;
+        const spawnAt = b.arrivalMO === 'LATE' ? START_TIME + 91 : START_TIME + 90;
+        if (
+          gameState.inGameMinutes >= spawnAt &&
+          !gameState.spawnedReservationIds.includes(walkinKey)
+        ) {
+          spawnBannedWalkIn(b);
+        }
+      });
+  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyVips, gameState.dailyBanned, spawnClient, spawnVipWalkIn, spawnBannedWalkIn]);
+
+  return { spawnClient, spawnVipWalkIn, spawnBannedWalkIn };
 }

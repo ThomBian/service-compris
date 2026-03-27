@@ -5,9 +5,10 @@ import { FloorplanGrid } from './floorplan/FloorplanGrid';
 
 interface BottomPanelProps {
   view: 'desk' | 'floorplan';
+  isOvertime: boolean;
 }
 
-export const BottomPanel: React.FC<BottomPanelProps> = ({ view }) => {
+export const BottomPanel: React.FC<BottomPanelProps> = ({ view, isOvertime }) => {
   return (
     <div className="flex-1 min-h-0 overflow-hidden">
       <AnimatePresence mode="wait">
@@ -31,7 +32,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({ view }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <FloorplanGrid />
+            <FloorplanGrid isOvertime={isOvertime} />
           </motion.div>
         )}
       </AnimatePresence>

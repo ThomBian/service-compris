@@ -159,4 +159,7 @@ export interface GameState {
   dailyBanned: Banned[];
   seatedBannedIds: string[];
   gameOver: boolean;
+  nightNumber: number;
+  coversSeated: number;
+  shiftRevenue: number;
 }

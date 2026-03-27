@@ -3,7 +3,10 @@ import { GameState } from "../types";
 import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
 import { createInitialGrid } from "../logic/gameLogic";
 import { generateDailyVips, injectVipReservations } from '../logic/vipLogic';
+import { generateDailyBanned, injectBannedReservations } from '../logic/bannedLogic';
 import { VIP_ROSTER } from '../logic/vipRoster';
+import { BANNED_ROSTER } from '../logic/bannedRoster';
+import { generateReservations } from '../logic/reservationGenerator';
 import { useGameClock } from "./useGameClock";
 import { useClientSpawner } from "./useClientSpawner";
 import { useQueueManager } from "./useQueueManager";
@@ -13,9 +16,23 @@ import { useDecisionActions } from "./useDecisionActions";
 import { useReservationActions } from "./useReservationActions";
 import { useToast } from "../context/ToastContext";
 
-function buildInitialState(difficulty: number): GameState {
+type PersistState = { cash: number; rating: number; morale: number; nightNumber: number };
+
+function buildInitialState(difficulty: number, persist?: PersistState): GameState {
+  const nightNumber = persist?.nightNumber ?? 1;
+  const rating = persist ? Math.max(1.0, persist.rating) : 5.0;
+
   const dailyVips = generateDailyVips(difficulty, VIP_ROSTER);
-  const reservations = injectVipReservations(dailyVips, INITIAL_RESERVATIONS);
+  const dailyBanned = generateDailyBanned(difficulty, BANNED_ROSTER);
+
+  const baseReservations = nightNumber === 1
+    ? INITIAL_RESERVATIONS
+    : generateReservations({ nightNumber, rating });
+  const reservations = injectBannedReservations(
+    dailyBanned,
+    injectVipReservations(dailyVips, baseReservations),
+  );
+
   return {
     inGameMinutes: START_TIME,
     timeMultiplier: 1,
@@ -24,23 +41,26 @@ function buildInitialState(difficulty: number): GameState {
     queue: [],
     currentClient: null,
     grid: createInitialGrid(),
-    cash: 0,
-    rating: 5.0,
-    morale: 100,
+    cash: persist?.cash ?? 0,
+    rating,
+    morale: persist ? Math.max(0, persist.morale) : 100,
     logs: ["Welcome to The Maitre D'. The doors are open."],
     dailyVips,
     seatedVipIds: [],
-    dailyBanned: [],
+    dailyBanned,
     seatedBannedIds: [],
     gameOver: false,
+    nightNumber,
+    coversSeated: 0,
+    shiftRevenue: 0,
   };
 }
 
 export function useGameEngine() {
-  const [gameState, setGameState] = useState<GameState>(() => buildInitialState(1));
+  const [gameState, setGameState] = useState<GameState>(() => buildInitialState(0));
 
-  const resetGame = useCallback((difficulty: number) => {
-    setGameState(buildInitialState(difficulty));
+  const resetGame = useCallback((difficulty: number, persist?: PersistState) => {
+    setGameState(buildInitialState(difficulty, persist));
   }, []);
 
   const { showToast } = useToast();
@@ -57,6 +77,7 @@ export function useGameEngine() {
     toggleCellSelection,
     confirmSeating,
     refuseSeatedParty,
+    lastCallTable,
   } = useDecisionActions(setGameState, showToast);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
@@ -73,5 +94,6 @@ export function useGameEngine() {
     toggleReservationArrived,
     setTimeMultiplier,
     resetGame,
+    lastCallTable,
   };
 }

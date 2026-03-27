@@ -13,6 +13,7 @@ import {
   processQueueTick,
   generateQuestionResponse,
   seedTraits,
+  applyMoraleGameOver,
 } from '../gameLogic';
 import {
   ClientType,
@@ -100,6 +101,9 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   dailyBanned: [],
   seatedBannedIds: [],
   gameOver: false,
+  nightNumber: 1,
+  coversSeated: 0,
+  shiftRevenue: 0,
   ...overrides,
 });
 
@@ -785,6 +789,34 @@ describe('generateQuestionResponse — impersonator lies', () => {
       inGameMinutes: 1260,
     });
     expect(result.revealedInfo.knownFirstName).toBe('TrueFake');
+  });
+});
+
+describe('applyMoraleGameOver', () => {
+  it('sets gameOver and stops clock when morale is 0', () => {
+    const state = makeGameState({ morale: 0, gameOver: false });
+    const result = applyMoraleGameOver(state);
+    expect(result.gameOver).toBe(true);
+    expect(result.timeMultiplier).toBe(0);
+  });
+
+  it('clears all OCCUPIED cells', () => {
+    const grid = createInitialGrid();
+    grid[0][0] = { ...grid[0][0], state: CellState.OCCUPIED, mealDuration: 10, partyId: 'p1' };
+    const state = makeGameState({ morale: 0, gameOver: false, grid });
+    const result = applyMoraleGameOver(state);
+    expect(result.grid[0][0].state).toBe(CellState.EMPTY);
+    expect(result.grid[0][0].partyId).toBeUndefined();
+  });
+
+  it('returns state unchanged when morale > 0', () => {
+    const state = makeGameState({ morale: 50 });
+    expect(applyMoraleGameOver(state)).toBe(state);
+  });
+
+  it('returns state unchanged when gameOver already true', () => {
+    const state = makeGameState({ morale: 0, gameOver: true });
+    expect(applyMoraleGameOver(state)).toBe(state);
   });
 });
 

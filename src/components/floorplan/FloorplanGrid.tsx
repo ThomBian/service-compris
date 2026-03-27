@@ -8,8 +8,12 @@ import { Check, X, Users } from "lucide-react";
 import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
 
-export const FloorplanGrid: React.FC = () => {
-  const { gameState, toggleCellSelection, confirmSeating, refuseSeatedParty } =
+interface FloorplanGridProps {
+  isOvertime?: boolean;
+}
+
+export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false }) => {
+  const { gameState, toggleCellSelection, confirmSeating, refuseSeatedParty, lastCallTable } =
     useGame();
   const { showToast } = useToast();
 
@@ -51,6 +55,12 @@ export const FloorplanGrid: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [selectedCells.length, partySize, isSeating, confirmSeating]);
+
+  const occupiedPartyIds = [...new Set<string>(
+    gameState.grid.flat()
+      .filter(c => c.state === CellState.OCCUPIED && c.partyId)
+      .map(c => c.partyId!)
+  )];
 
   return (
     <div className="flex flex-col gap-4 bg-stone-100 p-6 h-full overflow-hidden">
@@ -107,6 +117,23 @@ export const FloorplanGrid: React.FC = () => {
           </div>
         )}
       </div>
+
+      {isOvertime && occupiedPartyIds.length > 0 && (
+        <div className="flex flex-wrap gap-2 shrink-0 border-b-2 border-amber-300 pb-3">
+          <span className="text-xs font-bold uppercase tracking-wide text-amber-700 w-full">
+            Last Call — rush a table
+          </span>
+          {occupiedPartyIds.map(partyId => (
+            <button
+              key={partyId}
+              onClick={() => lastCallTable(partyId)}
+              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-all"
+            >
+              Rush table ({partyId.slice(0, 6)})
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Grid wrapper — flex-1 gives it all remaining height; hook measures it */}
       <div

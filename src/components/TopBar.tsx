@@ -21,6 +21,8 @@ interface TopBarProps {
   difficulty: number;
   onDifficultyChange: (d: number) => void;
   onHelpClick: () => void;
+  nightNumber: number;
+  isOvertime: boolean;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -34,15 +36,26 @@ export const TopBar: React.FC<TopBarProps> = ({
   difficulty,
   onDifficultyChange,
   onHelpClick,
+  nightNumber,
+  isOvertime,
 }) => {
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
       <div className="flex items-center gap-8">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Night</span>
+          <span className="font-mono text-xl font-bold">{nightNumber}</span>
+        </div>
+        <div className={`flex items-center gap-2 ${isOvertime ? 'text-amber-600' : ''}`}>
           <Clock size={20} />
           <span className="font-mono text-xl font-bold">
             {formatTime(inGameMinutes)}
           </span>
+          {isOvertime && (
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] bg-amber-500 text-white rounded px-1.5 py-0.5 animate-pulse">
+              Overtime
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Star size={20} className="text-yellow-600 fill-yellow-600" />
