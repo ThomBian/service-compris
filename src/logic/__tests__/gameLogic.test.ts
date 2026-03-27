@@ -98,6 +98,9 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   dailyVips: [],
   seatedVipIds: [],
   gameOver: false,
+  nightNumber: 1,
+  coversSeated: 0,
+  shiftRevenue: 0,
   ...overrides,
 });
 

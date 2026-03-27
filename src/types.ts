@@ -136,4 +136,7 @@ export interface GameState {
   dailyVips: Vip[];
   seatedVipIds: string[];
   gameOver: boolean;
+  nightNumber: number;   // starts at 1, increments each "Next Shift"
+  coversSeated: number;  // guests seated this shift; reset each night
+  shiftRevenue: number;  // gross cash earned this shift (positives only); reset each night
 }

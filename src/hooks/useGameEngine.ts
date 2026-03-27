@@ -31,6 +31,9 @@ function buildInitialState(difficulty: number): GameState {
     dailyVips,
     seatedVipIds: [],
     gameOver: false,
+    nightNumber: 1,
+    coversSeated: 0,
+    shiftRevenue: 0,
   };
 }
 
