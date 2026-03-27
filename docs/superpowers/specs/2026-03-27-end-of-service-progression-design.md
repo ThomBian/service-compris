@@ -83,7 +83,7 @@ cash_after      = cash_before + net
 | `OVERTIME_MORALE_DRAIN_PER_MINUTE` | 1 | Morale lost per in-game minute in overtime |
 | `LAST_CALL_RATING_PENALTY` | 0.1 | Rating penalty per rushed table |
 
-`coversSeated` = total guests seated this night — incremented by `truePartySize` each time `confirmSeating` succeeds. It is **not decremented** if a party is later refused after seating via `refuseSeatedParty` — food was prepared regardless, so the variable cost still applies. This is intentional.
+`coversSeated` = total guests seated this night — incremented by `truePartySize` each time `confirmSeating` succeeds. `refuseSeatedParty` fires while the client is still in `PhysicalState.SEATING` (before `confirmSeating`), so a refused party is never counted. There is no decrement path.
 
 VIP and special-event bill modifiers are out of scope for this spec (deferred to lore/VIP design).
 
@@ -168,7 +168,9 @@ On night 1, `persist` is omitted and starting values match existing `buildInitia
 - New reservations procedurally generated (see §6)
 
 ### Difficulty across nights
-`difficulty` is not part of `GameState` — it is React component state in `App.tsx` / `GameContent`, same as today. It is passed as a parameter to `buildInitialState`. The summary screen's "Night [N+1] →" button triggers a callback that calls `resetGame(difficulty, persist)` with the current `difficulty` value, which is preserved in React state across nights.
+`difficulty` is not part of `GameState` — it is React component state in `App.tsx` / `GameContent`, same as today. It takes values `0` (Chill), `1` (Normal), `2` (Busy), `3` (Hell), matching the existing `DIFFICULTIES` array in `LandingPage.tsx`. `generateDailyVips(difficulty, VIP_ROSTER)` uses this value directly as the VIP count, giving 0–3 VIPs.
+
+`difficulty` is passed as a parameter to `buildInitialState` and preserved in React state across nights. The summary screen's "Night [N+1] →" button triggers a callback that calls `resetGame(difficulty, persist)` with the current `difficulty` value.
 
 The `buildInitialState()` function gains an optional `persist` parameter:
 ```typescript
@@ -178,6 +180,12 @@ function buildInitialState(
 ): GameState
 ```
 When `persist` is omitted, the function behaves exactly as today (night 1 / new game).
+
+The `resetGame` function and its signature in `useGameEngine` and `GameContext` must be updated to accept the optional `persist` parameter:
+```typescript
+resetGame: (difficulty: number, persist?: { cash: number; rating: number; morale: number; nightNumber: number }) => void
+```
+The summary screen component receives `resetGame` via the `useGame()` context hook, same as other actions.
 
 ---
 
