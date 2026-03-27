@@ -36,8 +36,9 @@ The end-of-night summary screen is shown when **either** of these two conditions
 
 1. **Natural end**: `inGameMinutes >= 1560 && grid has no OCCUPIED cells` (all tables cleared after closing)
 2. **Staff walkout**: `gameOver === true` (morale hit 0 during the shift or overtime)
+3. **VIP not accepted is Game Over**
 
-The app watches both signals. Condition 1 is checked on every tick. Condition 2 uses the existing `gameOver` reactive flag. Both conditions route to the same summary screen component with the appropriate variant.
+The app watches these signals. Condition 1 is checked on every tick. Conditions 2 and 3 use the existing `gameOver` reactive flag (all paths that set `gameOver = true` route to the summary). All conditions route to the same summary screen component with the appropriate variant.
 
 If condition 1 is already true at exactly 23:30 (all tables cleared at the closing minute), overtime duration is zero — no morale drain occurs, no overtime badge is shown. This is valid.
 
@@ -45,9 +46,9 @@ If morale is already 0 at the exact moment overtime begins (first overtime tick)
 
 ### During overtime
 - **TopBar** shows an `OVERTIME` badge replacing the normal clock styling. Clock value turns amber.
-- **Morale drain**: `−1 morale per in-game minute` during overtime (constant: `OVERTIME_MORALE_DRAIN_PER_MINUTE = 1`). This drain can itself trigger the staff-walkout game over.
+- **Morale drain**: `−1 morale per in-game minute` during overtime (constant: `OVERTIME_MORALE_DRAIN_PER_MINUTE = 1`). This drain can itself trigger the staff-walkout game over and Morale counter is animated showing slow decrease. 
 - **Auto fast-forward**: time multiplier is automatically set to `4x` when overtime begins (player can adjust manually)
-- **Last Call button**: each occupied table on the floorplan grid shows a "Last Call" action — available only during overtime. Pressing it force-expires the table: iterate `grid.flat().filter(c => c.partyId === targetPartyId)` and set each cell's `mealDuration = 0`, clearing them on the next tick via existing meal-timer logic. Rating penalty: `LAST_CALL_RATING_PENALTY = 0.1` per rushed table. `coversSeated` is **not affected** (guests were already counted at seating). Activity log entry added: `"Rushed table — party asked to leave early."`
+- **Last Call button**: Views is set to Floorplan only. Each occupied table on the floorplan grid shows a "Last Call" action — available only during overtime. Pressing it force-expires the table: iterate `grid.flat().filter(c => c.partyId === targetPartyId)` and set each cell's `mealDuration = 0`, clearing them on the next tick via existing meal-timer logic. Rating penalty: `LAST_CALL_RATING_PENALTY = 0.1` per rushed table. `coversSeated` is **not affected** (guests were already counted at seating). Activity log entry added: `"Rushed table — party asked to leave early."`
 
 ### Morale game over (pre-23:30 and overtime)
 If `morale` hits `0` at any point during the shift — whether during normal service or overtime morale drain — this fires **synchronously within the same state update**:
@@ -62,10 +63,10 @@ This happens in a single atomic `setGameState` call to prevent the grid-empty de
 
 ## 2. Bill Calculation
 
-Computed once when the end-of-service summary is triggered. Reads `GameState.coversSeated` directly.
+Computed once when the end-of-service summary is triggered. Reads `GameState.shiftRevenue` and `GameState.coversSeated` directly.
 
 ```
-revenue         = coversSeated × REVENUE_PER_COVER
+revenue         = shiftRevenue   // all cash earned this shift: seatings, VIP bonuses, grateful liar bonuses, etc.
 fixed_cost      = SALARY_COST + ELECTRICITY_COST
 food_cost       = coversSeated × FOOD_COST_PER_COVER
 bill            = fixed_cost + food_cost
@@ -73,10 +74,11 @@ net             = revenue − bill
 cash_after      = cash_before + net
 ```
 
+`shiftRevenue` replaces the old `covers × REVENUE_PER_COVER` formula. Every place in the codebase that increases `GameState.cash` must also increase `shiftRevenue` by the same amount (it is a running tally of cash earned, not a replacement for `cash`). `REVENUE_PER_COVER` is removed from the constants — per-cover cash is already calculated elsewhere when seating is confirmed.
+
 ### Constants (initial values, tunable)
 | Constant | Value | Notes |
 |---|---|---|
-| `REVENUE_PER_COVER` | €60 | Per guest seated |
 | `SALARY_COST` | €200 | Fixed nightly |
 | `ELECTRICITY_COST` | €40 | Fixed nightly |
 | `FOOD_COST_PER_COVER` | €23 | Per guest seated |
@@ -85,13 +87,11 @@ cash_after      = cash_before + net
 
 `coversSeated` = total guests seated this night — incremented by `truePartySize` each time `confirmSeating` succeeds. `refuseSeatedParty` fires while the client is still in `PhysicalState.SEATING` (before `confirmSeating`), so a refused party is never counted. There is no decrement path.
 
-VIP and special-event bill modifiers are out of scope for this spec (deferred to lore/VIP design).
-
 ### Loss condition: bankruptcy
 If `cash_after < 0` → loss screen variant "can't pay the bill." Because a loss always resolves before the next night begins, `cash_before` is always ≥ 0 at the start of any night; the check `cash_after < 0` is therefore equivalent to "tonight's result caused bankruptcy."
 
 ### Balance note
-`buildInitialState` currently sets `cash: 0` (confirmed in existing code). With fixed costs of €240, a player needs to seat at least 7 covers to break even (`⌈240 / (60 − 23)⌉ = 7`). The curated night-1 reservation list is designed to make this achievable if played reasonably. This tension is intentional.
+`buildInitialState` currently sets `cash: 0` (confirmed in existing code). With fixed costs of €240, a player needs enough `shiftRevenue` to cover the bill. This tension is intentional.
 
 ---
 
@@ -100,11 +100,12 @@ If `cash_after < 0` → loss screen variant "can't pay the bill." Because a loss
 ```typescript
 nightNumber: number;    // starts at 1, increments on "Next Shift"
 coversSeated: number;   // running total of guests seated this night; starts at 0, reset each night
+shiftRevenue: number;   // running total of all cash earned this night (seatings + bonuses); starts at 0, reset each night
 ```
 
-`coversSeated` starts at `0` in `buildInitialState` (both night 1 and subsequent nights). It is incremented by `truePartySize` each time `confirmSeating` succeeds.
+Both `coversSeated` and `shiftRevenue` start at `0` in `buildInitialState` (both night 1 and subsequent nights).
 
-The bill calculation in §2 reads `gameState.coversSeated` directly — it is not re-derived at summary time.
+`shiftRevenue` is incremented by the same amount as `cash` every time `cash` increases during the shift. The bill calculation in §2 reads `gameState.shiftRevenue` and `gameState.coversSeated` directly — they are not re-derived at summary time.
 
 ---
 
@@ -118,7 +119,7 @@ Lines appear one by one with a fade-in + slide-up transition (~220ms stagger). E
 
 1. Night label + headline + overtime badge (omitted if zero overtime)
 2. **Revenue** section label
-3. Covers seated line (counts up)
+3. Total revenue line — shows `shiftRevenue` (counts up); label: "Tonight's takings"
 4. **Fixed costs** section label
 5. Salaries line (counts up to negative)
 6. Electricity line (counts up to negative)
