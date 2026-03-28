@@ -1,4 +1,5 @@
 import { useCallback, useEffect, Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import {
   GameState,
   Reservation,
@@ -7,22 +8,27 @@ import {
   PhysicalState,
   DialogueState,
   LieType,
-  Vip,
-  Banned,
+  CellState,
+  CharacterDefinition,
 } from '../types';
+import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
+import { CHARACTER_ROSTER } from '../logic/characterRoster';
 import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
 
 export function useClientSpawner(
   gameState: GameState,
-  setGameState: Dispatch<SetStateAction<GameState>>
+  setGameState: Dispatch<SetStateAction<GameState>>,
+  characters: React.RefObject<Map<string, SpecialCharacter>>
 ) {
   const spawnClient = useCallback((res?: Reservation) => {
     setGameState(prev => {
-      const excludeTraits = [
-        ...prev.dailyVips.map((v) => v.visualTraits),
-        ...prev.dailyBanned.map((b) => b.visualTraits),
-      ];
+      const dailyCharsFromRoster = prev.dailyCharacterIds
+        .map(id => CHARACTER_ROSTER.find(c => c.id === id))
+        .filter((c): c is CharacterDefinition => c !== undefined);
+
+      const excludeTraits = dailyCharsFromRoster.map(c => c.visualTraits);
+
       const clientData = generateClientData(
         res,
         prev.reservations,
@@ -36,24 +42,12 @@ export function useClientSpawner(
         res,
       });
 
-      // VIP RESERVATION_ALIAS: override visualTraits + set vipId
-      if (res?.id.startsWith('vip-res-')) {
-        const vipId = res.id.slice('vip-res-'.length);
-        const vip = prev.dailyVips.find(v => v.id === vipId);
-        if (vip) {
-          newClient = { ...newClient, visualTraits: vip.visualTraits, vipId: vip.id };
-        }
-      }
-
-      if (res?.id.startsWith('banned-res-')) {
-        const bannedId = res.id.slice('banned-res-'.length);
-        const banned = prev.dailyBanned.find((b) => b.id === bannedId);
-        if (banned) {
-          newClient = {
-            ...newClient,
-            visualTraits: banned.visualTraits,
-            bannedId: banned.id,
-          };
+      // CHARACTER RESERVATION_ALIAS: override visualTraits + set characterId
+      if (res?.id.startsWith('char-res-')) {
+        const characterId = res.id.slice('char-res-'.length);
+        const charDef = dailyCharsFromRoster.find(c => c.id === characterId);
+        if (charDef) {
+          newClient = { ...newClient, visualTraits: charDef.visualTraits, characterId: charDef.id };
         }
       }
 
@@ -73,9 +67,9 @@ export function useClientSpawner(
     });
   }, [setGameState]);
 
-  const spawnVipWalkIn = useCallback((v: Vip) => {
+  const spawnCharacterWalkIn = useCallback((def: CharacterDefinition) => {
     setGameState(prev => {
-      const walkinKey = 'vip-walkin-' + v.id;
+      const walkinKey = 'char-walkin-' + def.id;
       if (prev.spawnedReservationIds.includes(walkinKey)) return prev;
       const newClient: Client = {
         id: Math.random().toString(36).substr(2, 9),
@@ -86,13 +80,13 @@ export function useClientSpawner(
         spawnTime: prev.inGameMinutes,
         trueFirstName: FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)],
         trueLastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
-        truePartySize: v.expectedPartySize,
-        isLate: v.arrivalMO === 'LATE',
+        truePartySize: def.expectedPartySize,
+        isLate: def.arrivalMO === 'LATE',
         lieType: LieType.NONE,
         hasLied: false,
-        visualTraits: v.visualTraits,
+        visualTraits: def.visualTraits,
         isCaught: false,
-        vipId: v.id,
+        characterId: def.id,
         lastMessage: 'Waiting in line...',
         chatHistory: [],
       };
@@ -104,36 +98,45 @@ export function useClientSpawner(
     });
   }, [setGameState]);
 
-  const spawnBannedWalkIn = useCallback((b: Banned) => {
-    setGameState((prev) => {
-      const walkinKey = 'banned-walkin-' + b.id;
+  const spawnBypassCharacter = useCallback((def: CharacterDefinition) => {
+    setGameState(prev => {
+      const walkinKey = 'char-walkin-' + def.id;
       if (prev.spawnedReservationIds.includes(walkinKey)) return prev;
-      const newClient: Client = {
+
+      const syndicateClient: Client = {
         id: Math.random().toString(36).substr(2, 9),
         type: ClientType.WALK_IN,
         patience: 100,
-        physicalState: PhysicalState.IN_QUEUE,
-        dialogueState: DialogueState.AWAITING_GREETING,
+        physicalState: PhysicalState.AT_DESK,
+        dialogueState: DialogueState.OPENING_GAMBIT,
         spawnTime: prev.inGameMinutes,
-        trueFirstName: FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)],
-        trueLastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
-        truePartySize: b.expectedPartySize,
-        isLate: b.arrivalMO === 'LATE',
+        trueFirstName: def.name,
+        trueLastName: '',
+        truePartySize: def.expectedPartySize,
+        isLate: false,
         lieType: LieType.NONE,
         hasLied: false,
-        visualTraits: b.visualTraits,
+        visualTraits: def.visualTraits,
         isCaught: false,
-        bannedId: b.id,
-        lastMessage: 'Waiting in line...',
-        chatHistory: [],
+        characterId: def.id,
+        lastMessage: "We require a table. Immediately.",
+        chatHistory: [
+          { sender: 'maitre-d', text: "Good evening! How may I help you?" },
+          { sender: 'guest', text: "We require a table. Immediately." },
+        ],
       };
+
+      const character = characters.current.get(def.id);
+      const queueUpdate = character?.onDesk ? character.onDesk(prev) : {};
+
       return {
         ...prev,
-        queue: [...prev.queue, newClient],
+        ...queueUpdate,
+        currentClient: syndicateClient,
         spawnedReservationIds: [...prev.spawnedReservationIds, walkinKey],
       };
     });
-  }, [setGameState]);
+  }, [setGameState, characters]);
 
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
@@ -153,32 +156,32 @@ export function useClientSpawner(
       spawnClient();
     }
 
-    gameState.dailyVips
-      .filter(v => v.arrivalMO === 'WALK_IN' || v.arrivalMO === 'LATE')
-      .forEach(v => {
-        const walkinKey = 'vip-walkin-' + v.id;
-        const spawnAt = v.arrivalMO === 'LATE' ? START_TIME + 91 : START_TIME + 90;
+    const dailyCharsFromRoster = gameState.dailyCharacterIds
+      .map(id => CHARACTER_ROSTER.find(c => c.id === id))
+      .filter((c): c is CharacterDefinition => c !== undefined);
+
+    dailyCharsFromRoster
+      .filter(c => c.arrivalMO === 'WALK_IN' || c.arrivalMO === 'LATE')
+      .forEach(c => {
+        const walkinKey = 'char-walkin-' + c.id;
+        const spawnAt = c.arrivalMO === 'LATE' ? START_TIME + 91 : START_TIME + 90;
         if (
           gameState.inGameMinutes >= spawnAt &&
           !gameState.spawnedReservationIds.includes(walkinKey)
         ) {
-          spawnVipWalkIn(v);
+          spawnCharacterWalkIn(c);
         }
       });
 
-    gameState.dailyBanned
-      .filter((b) => b.arrivalMO === 'WALK_IN' || b.arrivalMO === 'LATE')
-      .forEach((b) => {
-        const walkinKey = 'banned-walkin-' + b.id;
-        const spawnAt = b.arrivalMO === 'LATE' ? START_TIME + 91 : START_TIME + 90;
-        if (
-          gameState.inGameMinutes >= spawnAt &&
-          !gameState.spawnedReservationIds.includes(walkinKey)
-        ) {
-          spawnBannedWalkIn(b);
-        }
-      });
-  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyVips, gameState.dailyBanned, spawnClient, spawnVipWalkIn, spawnBannedWalkIn]);
+    // BYPASS characters — direct desk interrupt
+    const bypassChars = dailyCharsFromRoster.filter(c =>
+      c.arrivalMO === 'BYPASS' &&
+      !gameState.spawnedReservationIds.includes('char-walkin-' + c.id) &&
+      gameState.queue.length >= 3 &&
+      gameState.grid.flat().filter(cell => cell.state === CellState.EMPTY).length <= 4
+    );
+    bypassChars.forEach(c => spawnBypassCharacter(c));
+  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyCharacterIds, gameState.grid, spawnClient, spawnCharacterWalkIn, spawnBypassCharacter]);
 
-  return { spawnClient, spawnVipWalkIn, spawnBannedWalkIn };
+  return { spawnClient, spawnCharacterWalkIn };
 }
