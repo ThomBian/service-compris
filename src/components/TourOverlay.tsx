@@ -81,13 +81,13 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
 
   return createPortal(
     <div className="fixed inset-0 z-50">
-      {/* SVG spotlight overlay */}
-      {rect && (
-        <svg
-          className="absolute inset-0 w-full h-full"
-          style={{ pointerEvents: 'none' }}
-          aria-hidden
-        >
+      {/* SVG spotlight overlay — full black during countdown, masked spotlight otherwise */}
+      <svg
+        className="absolute inset-0 w-full h-full"
+        style={{ pointerEvents: 'none' }}
+        aria-hidden
+      >
+        {rect && countdown === null && (
           <defs>
             <mask id={maskId}>
               <rect width="100%" height="100%" fill="white" />
@@ -101,14 +101,14 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
               />
             </mask>
           </defs>
-          <rect
-            width="100%"
-            height="100%"
-            fill="rgba(0,0,0,0.72)"
-            mask={`url(#${maskId})`}
-          />
-        </svg>
-      )}
+        )}
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(0,0,0,0.88)"
+          mask={rect && countdown === null ? `url(#${maskId})` : undefined}
+        />
+      </svg>
 
       {/* Countdown screen */}
       {countdown !== null && (
