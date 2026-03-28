@@ -183,7 +183,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   };
 
   return (
-    <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible">
+    <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible" data-tour="queue">
       {/* Seat party — door opens on hover when a party is at the desk */}
       <button
         type="button"

@@ -63,7 +63,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   )];
 
   return (
-    <div className="flex flex-col gap-4 bg-stone-100 p-6 h-full overflow-hidden">
+    <div className="flex flex-col gap-4 bg-stone-100 p-6 h-full overflow-hidden" data-tour="floorplan">
       {/* Header */}
       <div className="flex items-center justify-between border-b-2 border-stone-200 pb-4 shrink-0">
         <div className="flex flex-col gap-1">
