@@ -40,7 +40,7 @@ export function useGameClock(
       if (isOvertime) {
         nextMorale = Math.max(0, prev.morale - OVERTIME_MORALE_DRAIN_PER_MINUTE);
         if (!wasOvertime) {
-          nextLogs = ['23:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
+          nextLogs = ['22:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
         }
       }
 

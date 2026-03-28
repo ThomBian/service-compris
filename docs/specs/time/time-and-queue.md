@@ -9,7 +9,7 @@ status: active
 
 ## 1. The Dual-Time System
 To ensure the game is fair to both the player and the customer, time is tracked via two distinct metrics:
-- **The Master Clock:** The continuous in-game time of the shift (e.g., 19:30 to 23:30).
+- **The Master Clock:** The continuous in-game time of the shift (e.g., 19:30 to 22:30).
 - **The Arrival Ticket:** A physical timestamp generated the exact millisecond a customer spawns into the queue.
 
 ## 2. Time Flow (The Relentless Clock)

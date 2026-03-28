@@ -2,7 +2,7 @@
 
 A browser-based **Maître D’ simulator**: run the door at an overbooked restaurant, catch lies at the podium, and fit parties on a **4×4 floorplan** like spatial Tetris—all in real time while the queue’s patience runs out.
 
-**Play online:** [service-compris.vercel.app](https://service-compris.vercel.app/)
+🎮 **Play online:** [service-compris.vercel.app](https://service-compris.vercel.app/)
 
 ## What you do
 
@@ -10,7 +10,7 @@ A browser-based **Maître D’ simulator**: run the door at an overbooked restau
 2. **Desk** — Cross-check what guests *say* against the booking list. Ask questions, spot scammers and time cheats, then **accept**, **refuse**, or **seat**.
 3. **Floorplan** — Seat a party by placing a contiguous block on the grid. Meal length scales with party size; when tables clear, you get space back for the next rush.
 
-The game cares about **cash**, **star rating**, **morale**, and making it through the night (roughly **19:30–23:30** in-game, with pause and time controls).
+The game cares about **cash**, **star rating**, **morale**, and making it through the night (roughly **19:30–22:30** in-game, with pause and time controls).
 
 Design intent and loop details live in [`docs/game-concept.md`](docs/game-concept.md).
 

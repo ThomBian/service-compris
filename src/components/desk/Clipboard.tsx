@@ -190,7 +190,7 @@ export const Clipboard: React.FC = () => {
   }, [gameState.logs.length, activeTab]);
 
   return (
-    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+    <div data-tour="clipboard" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
       <div className="flex items-center gap-1.5 shrink-0">
         <ClipboardIcon size={12} />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">

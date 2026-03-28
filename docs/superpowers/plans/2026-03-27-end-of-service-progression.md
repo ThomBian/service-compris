@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the hard freeze at 23:30 with an overtime phase, add an animated end-of-night P&L summary screen, and wire in multi-night persistence (cash/rating/morale carry over; procedural reservations from night 2 onwards).
+**Goal:** Replace the hard freeze at 22:30 with an overtime phase, add an animated end-of-night P&L summary screen, and wire in multi-night persistence (cash/rating/morale carry over; procedural reservations from night 2 onwards).
 
 **Architecture:** New constants + three new `GameState` fields (`nightNumber`, `coversSeated`, `shiftRevenue`) thread through existing hooks. A new pure function (`applyMoraleGameOver`) centralises the morale-zero game-over path. A new `reservationGenerator` module handles procedural nights. A new `EndOfNightSummary` overlay component handles the animated receipt and the "Next Shift / Try Again" flow.
 
@@ -21,9 +21,9 @@
 | **Create** | `src/logic/reservationGenerator.test.ts` | Tests for above |
 | Modify | `src/hooks/useGameEngine.ts` | `buildInitialState` persist param; fix hardcoded difficulty; `resetGame` signature |
 | Modify | `src/context/GameContext.tsx` | Update `GameContextType` with new `resetGame` + `lastCallTable` |
-| Modify | `src/hooks/useGameClock.ts` | Remove 1560 freeze; add overtime morale drain + 4x auto-forward |
+| Modify | `src/hooks/useGameClock.ts` | Remove 1410 freeze; add overtime morale drain + 4x auto-forward |
 | Modify | `src/hooks/useDecisionActions.ts` | Increment `coversSeated`/`shiftRevenue` in `confirmSeating`; add `lastCallTable` |
-| Modify | `src/hooks/useClientSpawner.ts` | Stop spawning when `inGameMinutes >= 1560` |
+| Modify | `src/hooks/useClientSpawner.ts` | Stop spawning when `inGameMinutes >= 1350` |
 | Modify | `src/hooks/useQueueManager.ts` | Drain queue during overtime |
 | **Create** | `src/components/EndOfNightSummary.tsx` | Animated receipt overlay |
 | Modify | `src/App.tsx` | Show summary, handle next-night/try-again, force floorplan during overtime |
@@ -553,7 +553,7 @@ git commit -m "feat: buildInitialState accepts persist for multi-night carry-ove
 **Files:**
 - Modify: `src/hooks/useGameClock.ts`
 
-The current clock freezes at minute 1560 by returning early without updating `inGameMinutes`. We remove that and instead add overtime logic.
+The current clock freezes at minute 1350 by returning early without updating `inGameMinutes`. We remove that and instead add overtime logic.
 
 - [ ] **Step 1: Rewrite `tickTime` in `src/hooks/useGameClock.ts`**
 
@@ -565,8 +565,8 @@ const tickTime = useCallback(() => {
     if (prev.timeMultiplier === 0 || prev.gameOver) return prev;
 
     const nextMinutes = prev.inGameMinutes + 1;
-    const isOvertime = nextMinutes >= 1560;
-    const wasOvertime = prev.inGameMinutes >= 1560;
+    const isOvertime = nextMinutes >= 1350;
+    const wasOvertime = prev.inGameMinutes >= 1350;
 
     // Auto fast-forward at overtime start
     const nextMultiplier = isOvertime && !wasOvertime && prev.timeMultiplier < 4
@@ -579,7 +579,7 @@ const tickTime = useCallback(() => {
     if (isOvertime) {
       nextMorale = Math.max(0, prev.morale - OVERTIME_MORALE_DRAIN_PER_MINUTE);
       if (!wasOvertime) {
-        nextLogs = ['23:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
+        nextLogs = ['22:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
       }
     }
 
@@ -630,7 +630,7 @@ At the top of the `useEffect` callback (line 91), add a guard before spawning ne
 ```typescript
 useEffect(() => {
   if (gameState.timeMultiplier === 0) return;
-  if (gameState.inGameMinutes >= 1560) return; // doors closed — no new arrivals
+  if (gameState.inGameMinutes >= 1350) return; // doors closed — no new arrivals
   // ... rest of existing code unchanged
 }, [...]);
 ```
@@ -644,11 +644,11 @@ The cleanest approach: in `useQueueManager`, add a separate effect:
 ```typescript
 useEffect(() => {
   if (gameState.timeMultiplier === 0) return;
-  if (gameState.inGameMinutes < 1560) return;
+  if (gameState.inGameMinutes < 1350) return;
   if (gameState.queue.length === 0) return;
 
   setGameState(prev => {
-    if (prev.queue.length === 0 || prev.inGameMinutes < 1560) return prev;
+    if (prev.queue.length === 0 || prev.inGameMinutes < 1350) return prev;
     return {
       ...prev,
       queue: [],
@@ -668,7 +668,7 @@ npm run lint
 
 ```bash
 git add src/hooks/useClientSpawner.ts src/hooks/useQueueManager.ts
-git commit -m "feat: stop spawning and drain queue when doors close at 23:30"
+git commit -m "feat: stop spawning and drain queue when doors close at 22:30"
 ```
 
 ---
@@ -952,7 +952,7 @@ git commit -m "feat: add EndOfNightSummary animated receipt component"
 Add these derivations inside `GameContent` after the state declarations:
 
 ```typescript
-const isOvertime = gameState.inGameMinutes >= 1560;
+const isOvertime = gameState.inGameMinutes >= 1350;
 const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
 const showSummary = gameState.gameOver || (isOvertime && !hasOccupiedCells);
 ```
@@ -1003,7 +1003,7 @@ React.useEffect(() => {
 Then build `summaryData`:
 
 ```typescript
-const overtimeMinutes = Math.max(0, gameState.inGameMinutes - 1560);
+const overtimeMinutes = Math.max(0, gameState.inGameMinutes - 1350);
 const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
 // gameState.cash is the running cash including all in-shift changes; the bill hasn't been
 // deducted from state yet (it's deducted on "Next Shift" confirm). No clamp before bill
@@ -1289,7 +1289,7 @@ git commit -m "feat: Last Call button per table during overtime in FloorplanGrid
 - [ ] **Smoke test the full game loop**
   1. Start game at difficulty 1
   2. Seat several parties
-  3. Let clock run to 23:30 — confirm `OVERTIME` badge appears, view locks to floorplan, morale starts draining
+  3. Let clock run to 22:30 — confirm `OVERTIME` badge appears, view locks to floorplan, morale starts draining
   4. Use Last Call on a table — confirm it clears and rating drops slightly
   5. Let grid empty — confirm summary screen appears with animated receipt
   6. Verify "Night 2 →" carries over cash/rating/morale

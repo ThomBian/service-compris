@@ -119,10 +119,6 @@ function GameContent({
     setView('floorplan');
   };
 
-  const handleDifficultyChange = (d: number) => {
-    resetGame(d);
-  };
-
   const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
   const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
   const cashAfter = gameState.cash - bill;
@@ -193,7 +189,6 @@ function GameContent({
           setTimeMultiplier={setTimeMultiplier}
           formatTime={formatTime}
           difficulty={gameState.difficulty}
-          onDifficultyChange={handleDifficultyChange}
           onTourClick={startTour}
           nightNumber={gameState.nightNumber}
           isOvertime={isOvertime && !showSummary}

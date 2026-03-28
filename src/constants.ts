@@ -1,8 +1,8 @@
 import { Reservation } from "./types";
 
 export const START_TIME = 1170; // 19:30
-/** End of seated service / doors closed — 23:30, minutes from midnight (must match formatTime). */
-export const DOORS_CLOSE_TIME = 23 * 60 + 30;
+/** End of seated service / doors closed — 22:30, minutes from midnight (must match formatTime). */
+export const DOORS_CLOSE_TIME = 22 * 60 + 30;
 export const TICK_RATE = 2500; // 1 in-game minute = 1 real-world seconds (at 1x)
 
 export const FIRST_NAMES = [

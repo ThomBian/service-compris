@@ -6,6 +6,8 @@ import { ClientAvatar } from './scene/ClientAvatar';
 export interface SummaryData {
   nightNumber: number;
   shiftRevenue: number;
+  /** Actual net for the night: (cash_end − bill) − cash_start. Accounts for in-shift penalties. */
+  shiftNet: number;
   coversSeated: number;
   overtimeMinutes: number;
   cashBefore: number;
@@ -78,7 +80,7 @@ function useCountUp(target: number, duration: number, active: boolean): number {
 
 export const EndOfNightSummary: React.FC<Props> = ({ data, onNextShift, onTryAgain }) => {
   const {
-    nightNumber, shiftRevenue, coversSeated, overtimeMinutes,
+    nightNumber, shiftRevenue, shiftNet, coversSeated, overtimeMinutes,
     cashBefore, ratingBefore, moraleBefore,
     cashAfter, ratingAfter, moraleAfter,
     loseReason,
@@ -88,7 +90,7 @@ export const EndOfNightSummary: React.FC<Props> = ({ data, onNextShift, onTryAga
 
   const foodCost = coversSeated * FOOD_COST_PER_COVER;
   const bill = SALARY_COST + ELECTRICITY_COST + foodCost;
-  const net = shiftRevenue - bill;
+  const net = shiftNet;
   const isLoss = loseReason !== 'none';
 
   const [step, setStep] = useState(0);

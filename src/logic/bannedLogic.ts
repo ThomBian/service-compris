@@ -14,9 +14,10 @@ export function injectBannedReservations(
 ): Reservation[] {
   const bannedReservations: Reservation[] = dailyBanned
     .filter(b => b.arrivalMO === 'RESERVATION_ALIAS')
-    .map(b => ({
+    .map((b, index) => ({
       id: 'banned-res-' + b.id,
-      time: START_TIME + 60,
+      // Stagger times by 15 min per banned alias so multiple aliases don't collide.
+      time: START_TIME + 60 + index * 15,
       firstName: b.aliasFirstName ?? b.name,
       lastName: b.aliasLastName ?? '',
       partySize: b.expectedPartySize,

@@ -376,6 +376,8 @@ export function useDecisionActions(
             : cell
         )
       );
+      // Floor at 1.0 (not 0) to avoid a death-spiral during overtime — rushing tables
+      // shouldn't be more punishing than normal rating penalties from bad decisions.
       const nextRating = Math.max(1.0, prev.rating - LAST_CALL_RATING_PENALTY);
       return {
         ...prev,

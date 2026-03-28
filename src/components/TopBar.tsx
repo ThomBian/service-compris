@@ -19,7 +19,6 @@ interface TopBarProps {
   setTimeMultiplier: (m: number) => void;
   formatTime: (minutes: number) => string;
   difficulty: number;
-  onDifficultyChange: (d: number) => void;
   onTourClick: () => void;
   nightNumber: number;
   isOvertime: boolean;
@@ -34,7 +33,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   setTimeMultiplier,
   formatTime,
   difficulty,
-  onDifficultyChange,
   onTourClick,
   nightNumber,
   isOvertime,
@@ -75,6 +73,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
+      <div className="flex items-center gap-2">
       <div className="flex items-center gap-2 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
         {difficulty === 3 ? (
           <div
@@ -124,25 +123,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           ))
         )}
       </div>
-      <div className="w-px h-5 bg-[#141414]/20 mx-1" />
-      <div className="flex items-center gap-1 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
-        <span className="text-[10px] font-bold uppercase tracking-wider opacity-40 px-1">VIPs</span>
-        {[0, 1, 2, 3].map((d) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => onDifficultyChange(d)}
-            title={d === 0 ? 'No VIPs tonight' : `${d} VIP${d > 1 ? 's' : ''} tonight`}
-            className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-              difficulty === d
-                ? 'bg-[#141414] text-[#E4E3E0]'
-                : 'hover:bg-[#141414]/10'
-            }`}
-          >
-            {d}
-          </button>
-        ))}
-      </div>
       <button
         type="button"
         onClick={onTourClick}
@@ -151,6 +131,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       >
         <HelpCircle size={20} />
       </button>
+      </div>
     </header>
   );
 };

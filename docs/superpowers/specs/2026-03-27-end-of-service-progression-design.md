@@ -9,7 +9,7 @@ status: approved
 
 ## Overview
 
-The game currently ends the shift by freezing the clock at 23:30 with no summary, no scoring, and no progression. This spec defines:
+The game currently ends the shift by freezing the clock at 22:30 with no summary, no scoring, and no progression. This spec defines:
 
 1. **Overtime phase** — the period between doors closing and the last table clearing
 2. **End-of-night summary** — an animated P&L receipt screen
@@ -27,20 +27,20 @@ The game currently ends the shift by freezing the clock at 23:30 with no summary
 ## 1. Overtime Phase
 
 ### Trigger
-At `inGameMinutes >= 1560` (23:30): doors close. No new clients spawn. The queue drains naturally (remaining queued clients leave). The clock continues ticking.
+At `inGameMinutes >= 1350` (22:30): doors close. No new clients spawn. The queue drains naturally (remaining queued clients leave). The clock continues ticking.
 
-The existing `timeMultiplier = 0` freeze in `useGameClock` at minute 1560 is **removed entirely** and replaced by the overtime trigger described here. After removal, the tick function must allow `inGameMinutes` to increment to 1560 and beyond — the overtime trigger condition `inGameMinutes >= 1560` only fires correctly if the clock actually reaches that value.
+The existing `timeMultiplier = 0` freeze in `useGameClock` at minute 1350 is **removed entirely** and replaced by the overtime trigger described here. After removal, the tick function must allow `inGameMinutes` to increment to 1410 and beyond — the overtime trigger condition `inGameMinutes >= 1350` only fires correctly if the clock actually reaches that value.
 
 ### Summary trigger
 The end-of-night summary screen is shown when **either** of these two conditions is true:
 
-1. **Natural end**: `inGameMinutes >= 1560 && grid has no OCCUPIED cells` (all tables cleared after closing)
+1. **Natural end**: `inGameMinutes >= 1350 && grid has no OCCUPIED cells` (all tables cleared after closing)
 2. **Staff walkout**: `gameOver === true` (morale hit 0 during the shift or overtime)
 3. **VIP not accepted is Game Over**
 
 The app watches these signals. Condition 1 is checked on every tick. Conditions 2 and 3 use the existing `gameOver` reactive flag (all paths that set `gameOver = true` route to the summary). All conditions route to the same summary screen component with the appropriate variant.
 
-If condition 1 is already true at exactly 23:30 (all tables cleared at the closing minute), overtime duration is zero — no morale drain occurs, no overtime badge is shown. This is valid.
+If condition 1 is already true at exactly 22:30 (all tables cleared at the closing minute), overtime duration is zero — no morale drain occurs, no overtime badge is shown. This is valid.
 
 If morale is already 0 at the exact moment overtime begins (first overtime tick), the walkout fires immediately — no morale drain is applied; the grid is force-cleared and the summary shows the staff-walkout variant.
 
@@ -50,7 +50,7 @@ If morale is already 0 at the exact moment overtime begins (first overtime tick)
 - **Auto fast-forward**: time multiplier is automatically set to `4x` when overtime begins (player can adjust manually)
 - **Last Call button**: Views is set to Floorplan only. Each occupied table on the floorplan grid shows a "Last Call" action — available only during overtime. Pressing it force-expires the table: iterate `grid.flat().filter(c => c.partyId === targetPartyId)` and set each cell's `mealDuration = 0`, clearing them on the next tick via existing meal-timer logic. Rating penalty: `LAST_CALL_RATING_PENALTY = 0.1` per rushed table. `coversSeated` is **not affected** (guests were already counted at seating). Activity log entry added: `"Rushed table — party asked to leave early."`
 
-### Morale game over (pre-23:30 and overtime)
+### Morale game over (pre-22:30 and overtime)
 If `morale` hits `0` at any point during the shift — whether during normal service or overtime morale drain — this fires **synchronously within the same state update**:
 
 1. `gameOver = true`
@@ -112,7 +112,7 @@ Both `coversSeated` and `shiftRevenue` start at `0` in `buildInitialState` (both
 ## 4. End-of-Night Summary Screen
 
 ### Trigger
-Either `gameOver === true` or `inGameMinutes >= 1560 && no OCCUPIED cells`. A full-screen overlay replaces the game UI. The TopBar is hidden while the summary is displayed.
+Either `gameOver === true` or `inGameMinutes >= 1350 && no OCCUPIED cells`. A full-screen overlay replaces the game UI. The TopBar is hidden while the summary is displayed.
 
 ### Animation
 Lines appear one by one with a fade-in + slide-up transition (~220ms stagger). Each monetary value counts up (or down for costs) from 0 to its final value using an ease-out cubic curve (~400ms per counter). Sequence:
@@ -208,7 +208,7 @@ A high rating attracts more bookings; a damaged reputation drives customers away
 
 ### Base reservation algorithm
 For each of the N reservations:
-- **Time**: uniform random slot from `{1170, 1185, ..., 1320}` (19:30–22:00 inclusive, 15-minute increments, 11 slots). A 22:00 reservation with a large party may still be dining at 23:30 and into overtime — this is intentional; overtime handles it.
+- **Time**: uniform random slot from `{1170, 1185, ..., 1320}` (19:30–22:00 inclusive, 15-minute increments, 11 slots). A 22:00 reservation with a large party may still be dining at 22:30 and into overtime — this is intentional; overtime handles it.
 - **Party size**: weighted random — 1–2 (40%), 3–4 (35%), 5–6 (20%), 7–8 (5%)
 - **Names**: sampled without replacement from the existing `FIRST_NAMES` / `LAST_NAMES` constant arrays in `src/constants.ts`
 

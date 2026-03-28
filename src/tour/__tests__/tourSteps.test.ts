@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TOUR_STEPS } from '../tourSteps';
 
 describe('TOUR_STEPS', () => {
-  it('has exactly 4 steps', () => {
-    expect(TOUR_STEPS).toHaveLength(4);
+  it('has exactly 7 steps', () => {
+    expect(TOUR_STEPS).toHaveLength(7);
   });
 
   it('each step has target, title, tooltip, and view', () => {
@@ -19,16 +19,19 @@ describe('TOUR_STEPS', () => {
     expect(TOUR_STEPS.map(s => s.target)).toEqual([
       'topbar',
       'queue',
-      'desk-tools',
+      'party-ticket',
+      'booking-ledger',
+      'clipboard',
+      'seat-party',
       'floorplan',
     ]);
   });
 
   it('last step targets floorplan view', () => {
-    expect(TOUR_STEPS[3].view).toBe('floorplan');
+    expect(TOUR_STEPS[TOUR_STEPS.length - 1].view).toBe('floorplan');
   });
 
-  it('first three steps target desk view', () => {
-    expect(TOUR_STEPS.slice(0, 3).every(s => s.view === 'desk')).toBe(true);
+  it('all steps except the last target desk view', () => {
+    expect(TOUR_STEPS.slice(0, -1).every(s => s.view === 'desk')).toBe(true);
   });
 });

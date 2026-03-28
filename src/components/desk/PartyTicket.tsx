@@ -15,7 +15,7 @@ export const PartyTicket: React.FC = () => {
 
   if (!currentClient) {
     return (
-      <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+      <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
         <div className="flex items-center gap-1.5 shrink-0">
           <Users size={12} />
           <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Party Ticket</span>
@@ -31,7 +31,7 @@ export const PartyTicket: React.FC = () => {
   }
 
   return (
-    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
+    <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
       {/* Patience bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
         <motion.div

@@ -187,6 +187,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       {/* Seat party — door opens on hover when a party is at the desk */}
       <button
         type="button"
+        data-tour="seat-party"
         onClick={canSeat ? onSeatParty : undefined}
         disabled={!canSeat}
         title={

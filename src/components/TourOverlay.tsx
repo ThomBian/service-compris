@@ -17,7 +17,7 @@ interface TourOverlayProps {
 }
 
 const PAD = 10;
-const TOOLTIP_WIDTH = 300;
+const TOOLTIP_WIDTH = 420;
 const TOOLTIP_MARGIN = 12;
 const EDGE_GUARD = 12;
 
@@ -43,25 +43,40 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
   const handleDone = () => setCountdown(COUNTDOWN_START);
 
   useEffect(() => {
-    const update = () => {
-      requestAnimationFrame(() => {
-        const el = document.querySelector(`[data-tour="${tourStep.target}"]`);
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        setRect({
-          x: r.left - PAD,
-          y: r.top - PAD,
-          width: r.width + PAD * 2,
-          height: r.height + PAD * 2,
-        });
+    let cancelled = false;
+
+    const measure = () => {
+      const el = document.querySelector(`[data-tour="${tourStep.target}"]`);
+      if (!el || cancelled) return;
+      const r = el.getBoundingClientRect();
+      setRect({
+        x: r.left - PAD,
+        y: r.top - PAD,
+        width: r.width + PAD * 2,
+        height: r.height + PAD * 2,
       });
     };
 
+    const update = () => requestAnimationFrame(measure);
+
     update();
 
-    const observer = new ResizeObserver(update);
-    observer.observe(document.documentElement);
-    return () => observer.disconnect();
+    const resizeObserver = new ResizeObserver(update);
+    resizeObserver.observe(document.documentElement);
+
+    // Watch for the target element mounting (e.g. floorplan view switch)
+    const mutationObserver = new MutationObserver(() => {
+      if (document.querySelector(`[data-tour="${tourStep.target}"]`)) {
+        update();
+      }
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      cancelled = true;
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [step, tourStep.target]);
 
   const vw = window.innerWidth;
@@ -71,8 +86,13 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
   const tooltipTop = rect
     ? tooltipBelow
       ? rect.y + rect.height + TOOLTIP_MARGIN
-      : rect.y - TOOLTIP_MARGIN
+      : EDGE_GUARD
     : vh / 2;
+  const tooltipMaxHeight = rect
+    ? tooltipBelow
+      ? vh - tooltipTop - EDGE_GUARD
+      : rect.y - EDGE_GUARD - TOOLTIP_MARGIN
+    : undefined;
   const tooltipCenterX = rect ? rect.x + rect.width / 2 : vw / 2;
   const tooltipLeft = Math.min(
     Math.max(tooltipCenterX - TOOLTIP_WIDTH / 2, EDGE_GUARD),
@@ -127,10 +147,9 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
         <div
           role="dialog"
           aria-label={`Tour step ${step + 1} of ${TOUR_STEPS.length}: ${tourStep.title}`}
-          className="absolute w-[300px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_rgba(20,20,20,1)]"
+          className="absolute w-[420px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_rgba(20,20,20,1)]"
           style={{
-            top: tooltipBelow ? tooltipTop : undefined,
-            bottom: tooltipBelow ? undefined : vh - tooltipTop,
+            top: tooltipTop,
             left: tooltipLeft,
           }}
         >
@@ -143,25 +162,25 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
           <p className="mt-2 text-sm leading-relaxed text-[#141414]/80">
             {tourStep.tooltip}
           </p>
-          <button
-            type="button"
-            onClick={isLastStep ? handleDone : onNext}
-            className="mt-4 w-full rounded-lg bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] transition-opacity hover:opacity-80"
-          >
-            {isLastStep ? "Let's go!" : 'Next →'}
-          </button>
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={isLastStep ? handleDone : onNext}
+              className="flex-1 rounded-lg bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] transition-opacity hover:opacity-80"
+            >
+              {isLastStep ? "Let's go!" : 'Next →'}
+            </button>
+            {!isLastStep && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="rounded-lg border-2 border-[#141414]/20 px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#141414]/40 transition-colors hover:border-[#141414]/40 hover:text-[#141414]/60"
+              >
+                Skip
+              </button>
+            )}
+          </div>
         </div>
-      )}
-
-      {/* Skip */}
-      {countdown === null && (
-        <button
-          type="button"
-          onClick={onSkip}
-          className="absolute top-4 right-4 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:text-white/90"
-        >
-          Skip tour
-        </button>
       )}
     </div>,
     document.body,

@@ -32,7 +32,7 @@ If you choose to seat a party, the game shifts to a 2D grid puzzle.
 - Once seated, they occupy that space for a set `mealDuration` before leaving and freeing up the grid for the next rush.
 
 ## 3. Win / Loss Conditions (The Shift)
-- **Goal:** Survive the night (e.g., from 19:30 to 23:30) while maximizing **Cash** and maintaining a high **Star Rating**.
+- **Goal:** Survive the night (e.g., from 19:30 to 22:30) while maximizing **Cash** and maintaining a high **Star Rating**.
 - **The Risk/Reward:** Seating a known liar grants a massive "Grateful Liar" bonus, but risks clogging up your Tetris grid and forcing you to turn away an honest reservation later—which carries a devastating penalty.
 
 ---

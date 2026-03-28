@@ -1,4 +1,11 @@
-export type TourTarget = 'topbar' | 'queue' | 'desk-tools' | 'floorplan';
+export type TourTarget =
+  | 'topbar'
+  | 'queue'
+  | 'party-ticket'
+  | 'booking-ledger'
+  | 'clipboard'
+  | 'seat-party'
+  | 'floorplan';
 
 export interface TourStep {
   target: TourTarget;
@@ -17,13 +24,31 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'queue',
     title: 'The Queue',
-    tooltip: "Each guest has a patience bar. Leave them waiting too long and they storm out — costing you rating. The front of the queue steps up to your desk automatically. Keep things moving.",
+    tooltip: "Guests line up here — each has a patience bar that ticks down while they wait. The front of the queue steps up to your desk automatically. Let someone storm out and you lose rating. Keep things moving.",
     view: 'desk',
   },
   {
-    target: 'desk-tools',
-    title: 'The Desk',
-    tooltip: 'Tap empty ticket fields (blue) to ask questions. Tap filled fields or the party group (orange) to call out a lie. Cross-check their claims against the Booking List on the right. Then Accept, Refuse, or hit the door to seat them.',
+    target: 'party-ticket',
+    title: 'The Ticket',
+    tooltip: 'Tap the blue fields to ask the guest their name and arrival time. Once filled, tap any field or their party to accuse them of lying. Use REFUSE to deny entry. Every unasked field is a risk — scammers rely on you skipping questions.',
+    view: 'desk',
+  },
+  {
+    target: 'booking-ledger',
+    title: 'Booking List',
+    tooltip: "Cross-check the guest's claimed name and time against tonight's reservations. A green row means they're on time. A red ⚠ row means someone by that name is already seated — classic scammer move.",
+    view: 'desk',
+  },
+  {
+    target: 'clipboard',
+    title: 'VIPs & Intel',
+    tooltip: 'Check VIPs before seating anyone — seat them correctly or the night ends. Check Banned guests — let one through and it\'s game over or a heavy fine. The Log tab records every call you\'ve made this shift.',
+    view: 'desk',
+  },
+  {
+    target: 'seat-party',
+    title: 'Seat Party',
+    tooltip: "When you're satisfied, click the door to seat the party. This is the most important action in the game — it takes you to the floorplan to pick tables. You can't undo a bad seating decision, so interrogate first.",
     view: 'desk',
   },
   {
