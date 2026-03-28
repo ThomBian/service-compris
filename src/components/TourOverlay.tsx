@@ -1,5 +1,5 @@
 // src/components/TourOverlay.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { TOUR_STEPS } from '@/src/tour/tourSteps';
 
@@ -25,6 +25,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
   const [rect, setRect] = useState<TargetRect | null>(null);
   const tourStep = TOUR_STEPS[step];
   const isLastStep = step === TOUR_STEPS.length - 1;
+  const maskId = useId().replace(/:/g, '_');
 
   useEffect(() => {
     const update = () => {
@@ -73,7 +74,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
           aria-hidden
         >
           <defs>
-            <mask id="tour-hole">
+            <mask id={maskId}>
               <rect width="100%" height="100%" fill="white" />
               <rect
                 x={rect.x}
@@ -89,7 +90,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
             width="100%"
             height="100%"
             fill="rgba(0,0,0,0.72)"
-            mask="url(#tour-hole)"
+            mask={`url(#${maskId})`}
           />
         </svg>
       )}
