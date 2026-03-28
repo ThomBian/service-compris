@@ -85,6 +85,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     visualTraits: { skinTone: 3, hairStyle: 4, hairColor: 2, clothingStyle: 1, clothingColor: 3, height: 1, glasses: 0 },
     cashPenalty: 80,
     consequenceDescription: 'The Fake Hipster skips the bill. -€80.',
+    refusalDescription: 'Good call — that one never pays.',
   },
   {
     id: 'drunk-group',
@@ -97,6 +98,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     visualTraits: { skinTone: 2, hairStyle: 1, hairColor: 0, clothingStyle: 2, clothingColor: 1, height: 2, eyebrows: 1 },
     moralePenalty: 30,
     consequenceDescription: "Rowdy crew all night. Staff morale tanks. -30 morale.",
+    refusalDescription: 'Staff relieved. The right call.',
   },
   {
     id: 'small-spender',
@@ -109,6 +111,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     visualTraits: { skinTone: 0, hairStyle: 3, hairColor: 4, clothingStyle: 3, clothingColor: 4, height: 0, glasses: 0, eyebrows: 0 },
     cashPenalty: 30,
     consequenceDescription: 'They order tap water and share a starter. -€30.',
+    refusalDescription: 'Saved a table for a paying guest.',
   },
   {
     id: 'fake-influencer',
@@ -123,6 +126,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     visualTraits: { skinTone: 4, hairStyle: 0, hairColor: 3, clothingStyle: 1, clothingColor: 2, height: 1, glasses: 1 },
     ratingPenalty: 1.5,
     consequenceDescription: 'Charmed a free meal, then posted a hit piece. -1.5 stars.',
+    refusalDescription: 'No free meals, no hit pieces. Well handled.',
   },
   {
     id: 'the-dictator',
@@ -137,6 +141,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     visualTraits: { skinTone: 1, hairStyle: 2, hairColor: 1, clothingStyle: 0, clothingColor: 4, height: 2, eyebrows: 0 },
     gameOver: true,
     consequenceDescription: "Didn't like the food. Attacked the restaurant.",
+    refusalDescription: 'Dictator turned away — catastrophic reputation damage avoided.',
   },
 ];
 

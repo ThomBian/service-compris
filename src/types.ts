@@ -79,7 +79,8 @@ export interface CharacterDefinition {
   ratingPenalty?:     number;
   moralePenalty?:     number;
   gameOver?:          boolean;
-  consequenceDescription: string;
+  consequenceDescription: string;   // shown when seated (bad outcome for BANNED, good outcome for VIP)
+  refusalDescription?: string;      // shown when refused (good outcome for BANNED, bad outcome for VIP)
 }
 
 export interface Reservation {

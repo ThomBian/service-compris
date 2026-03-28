@@ -79,7 +79,11 @@ export function useDecisionActions(
           if (ch) {
             const outcome = ch.onRefused(prev);
             const def = ch.def;
-            toastArgs = [def.consequenceDescription, undefined, 'error'];
+            if (def.role === 'BANNED') {
+              toastArgs = [def.refusalDescription ?? 'Banned guest turned away.', undefined, 'success'];
+            } else {
+              toastArgs = [def.consequenceDescription, undefined, 'error'];
+            }
             pathScoreEvent = { key: `${deskClient.characterId}:refused` };
             const next = {
               ...prev,
