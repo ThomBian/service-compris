@@ -61,10 +61,12 @@ function GameContent({
 
   const isOvertime = gameState.inGameMinutes >= DOORS_CLOSE_TIME;
   const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
-  const showSummary = gameState.gameOver || (isOvertime && !hasOccupiedCells);
+  const showSummary = gameState.gameOver || (isOvertime && !hasOccupiedCells && !gameState.currentClient);
 
+  // Night 1 always starts with cash:0, rating:5.0, morale:100 regardless of difficulty.
+  // Hardcode to avoid a race with the resetGame(initialDifficulty) useEffect below.
   const [nightStartStats, setNightStartStats] = React.useState({
-    cash: gameState.cash, rating: gameState.rating, morale: gameState.morale,
+    cash: 0, rating: 5.0, morale: 100,
   });
 
   React.useEffect(() => {
@@ -81,14 +83,19 @@ function GameContent({
     if (!localStorage.getItem(TOUR_SEEN_KEY)) {
       startTour();
     }
-  }, []);
+  }, [startTour]);
 
-  // Freeze clock during tour
+  // Freeze clock during tour; unfreeze when tour ends
+  const tourWasActiveRef = React.useRef(false);
   React.useEffect(() => {
     if (isTourActive) {
+      tourWasActiveRef.current = true;
       setTimeMultiplier(0);
+    } else if (tourWasActiveRef.current) {
+      tourWasActiveRef.current = false;
+      setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1);
     }
-  }, [isTourActive]);
+  }, [isTourActive, setTimeMultiplier, gameState.difficulty]);
 
   // Switch view to match the current tour step
   React.useEffect(() => {
@@ -97,6 +104,7 @@ function GameContent({
   }, [isTourActive, currentStep]);
 
   React.useEffect(() => {
+    if (isTourActive) return;
     if (isOvertime && !showSummary) {
       setView('floorplan');
       return;
@@ -104,7 +112,7 @@ function GameContent({
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
       setView('desk');
     }
-  }, [view, gameState.currentClient?.physicalState, isOvertime, showSummary]);
+  }, [view, gameState.currentClient?.physicalState, isOvertime, showSummary, isTourActive]);
 
   const handleSeatParty = () => {
     seatParty();
@@ -117,7 +125,6 @@ function GameContent({
 
   const handleTourSkip = () => {
     onTourSkip();
-    setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1);
   };
 
   const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
@@ -150,6 +157,9 @@ function GameContent({
   const summaryData = {
     nightNumber: gameState.nightNumber,
     shiftRevenue: gameState.shiftRevenue,
+    // Actual net = unclamped cashAfter minus night-start cash; accounts for penalties
+    // (scammer fines, banned CASH_FINE) that reduce cash but don't appear in shiftRevenue.
+    shiftNet: cashAfter - nightStartStats.cash,
     coversSeated: gameState.coversSeated,
     overtimeMinutes,
     cashBefore: nightStartStats.cash,
