@@ -7,9 +7,8 @@ export class AuraDrainVip extends VipCharacter {
   }
 
   onSeated(_state: GameState): Partial<GameState> {
-    return {
-      strikeActive: this.def.auraRecovery === 'ON_SEATING' ? false : undefined,
-    };
+    if (this.def.auraRecovery !== 'ON_SEATING') return {};
+    return { strikeActive: false };
   }
 
   onStormOut(_state: GameState): Partial<GameState> {
