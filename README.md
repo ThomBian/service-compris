@@ -2,6 +2,8 @@
 
 A browser-based **Maître D’ simulator**: run the door at an overbooked restaurant, catch lies at the podium, and fit parties on a **4×4 floorplan** like spatial Tetris—all in real time while the queue’s patience runs out.
 
+**Play online:** [service-compris.vercel.app](https://service-compris.vercel.app/)
+
 ## What you do
 
 1. **Queue** — Walk-ins and reservations arrive; if you ignore them too long, they leave and your rating suffers.
