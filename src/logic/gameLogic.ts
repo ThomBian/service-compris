@@ -22,7 +22,22 @@ import {
   PARTY_SIZE_TIP_PER_SEAT_PARTY,
 } from "../constants";
 import { getRandom, formatTime } from "../utils";
-import { traitsMatch } from "./vipLogic";
+
+function traitsMatch(a: VisualTraits, b: VisualTraits): boolean {
+  return (
+    a.skinTone      === b.skinTone &&
+    a.hairStyle     === b.hairStyle &&
+    a.hairColor     === b.hairColor &&
+    a.clothingStyle === b.clothingStyle &&
+    a.clothingColor === b.clothingColor &&
+    a.height        === b.height &&
+    a.hat           === b.hat &&
+    a.facialHair    === b.facialHair &&
+    a.neckwear      === b.neckwear &&
+    a.glasses       === b.glasses &&
+    a.eyebrows      === b.eyebrows
+  );
+}
 
 export function seedTraits(id: string, index: number): VisualTraits {
   const seed = id + String(index);
