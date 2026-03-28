@@ -5,6 +5,7 @@ import { DOORS_CLOSE_TIME } from '../constants';
 import { processQueueTick } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
 import { SpecialCharacter } from '../logic/characters/SpecialCharacter';
+import { tGame } from '../i18n/tGame';
 
 type ShowToast = (
   title: string,
@@ -41,7 +42,7 @@ export function useQueueManager(
 
       if (stormedCount > 0) {
         const ratingLoss = (0.5 * stormedCount).toFixed(1);
-        const label = stormedCount === 1 ? 'A guest stormed out!' : `${stormedCount} guests stormed out!`;
+        const label = stormedCount === 1 ? tGame('toastStormSingle') : tGame('toastStormMulti', { count: stormedCount });
         queueMicrotask(() => showToast(label, `★ −${ratingLoss}`, 'warning'));
       }
       return result;
@@ -62,7 +63,7 @@ export function useQueueManager(
       return {
         ...prev,
         queue: [],
-        logs: ['Remaining guests in queue sent away — doors closed.', ...prev.logs].slice(0, 50),
+        logs: [tGame('doorsClosedQueue'), ...prev.logs].slice(0, 50),
       };
     });
   }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.queue.length, setGameState]);

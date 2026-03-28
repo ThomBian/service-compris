@@ -1,0 +1,43 @@
+{
+  "topbar": {
+    "title": "Vos stats",
+    "tooltip": "Surveillez l’horloge (19h30 → 22h30), la note ★, le moral % et la caisse. La note baisse si des clients partent furieux ou si vous vous trompez. À 0 % de moral ou en installant le mauvais VIP, la soirée s’arrête."
+  },
+  "queue": {
+    "title": "La file",
+    "tooltip": "Les clients attendent ici — chacun a une jauge de patience qui descend. Le premier passe automatiquement au pupitre. Si quelqu’un part en colère, vous perdez des points de note. Gardez le flux."
+  },
+  "partyTicket": {
+    "title": "Le ticket",
+    "tooltip": "Touchez les champs bleus pour demander nom et heure d’arrivée. Une fois remplis, touchez un champ ou le groupe pour les accuser de mentir. REFUSER pour refuser l’entrée. Chaque question non posée est un risque."
+  },
+  "bookingLedger": {
+    "title": "Liste des résas",
+    "tooltip": "Recoupez nom et heure annoncés avec les réservations du soir. Une ligne verte : à l’heure. Une ligne rouge ⚠ : ce nom est déjà à table — classique arnaqueur."
+  },
+  "clipboard": {
+    "title": "VIP & infos",
+    "tooltip": "Vérifiez les VIP avant d’installer — une erreur peut tout arrêter. Vérifiez la liste des interdits — en laisser passer un peut coûter cher ou finir la partie. L’onglet Journal liste vos actions."
+  },
+  "seatParty": {
+    "title": "Installer le groupe",
+    "tooltip": "Quand vous êtes prêt, cliquez la porte pour placer le groupe. C’est l’action clé : vous passez au plan pour choisir les tables. Pas de retour en arrière après un mauvais placement."
+  },
+  "floorplan": {
+    "title": "Le plan",
+    "tooltip": "Touchez les cases pour former une table contiguë pour le groupe. Tout le monde assis = cash max. Moins de cases = vous rognez le groupe — perte de note mais plus de place. Les tables restent prises jusqu’à la fin du repas."
+  },
+  "countdown": {
+    "ready": "C’est parti !",
+    "go": "Go !"
+  },
+  "buttons": {
+    "letsGo": "Allons-y !",
+    "next": "Suivant →",
+    "skip": "Passer"
+  },
+  "aria": {
+    "stepOf": "Étape {{n}} sur {{total}}",
+    "stepProgress": "{{n}} / {{total}}"
+  }
+}

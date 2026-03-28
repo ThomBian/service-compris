@@ -1,26 +1,22 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslation } from "react-i18next";
 import type {
   LedgerData,
-  NightConfig,
-  FiredConfig,
   CorkboardVariant,
   CampaignPath,
 } from "../types/campaign";
-import { FIRED_CONFIG } from "../data/firedConfig";
+import { campaignNightsKeySegment } from "../i18n/campaignNightKey";
 
 interface CorkboardScreenProps {
   variant: CorkboardVariant;
   nightNumber: number;
   activePath: CampaignPath;
-  nightConfig?: NightConfig;
   ledger: LedgerData;
-  firedConfig?: FiredConfig;
+  firedReason?: "MORALE" | "VIP" | "BANNED";
   onOpenRestaurant: () => void;
   onLeave: () => void;
 }
-
-// ─── Shared doc wrapper ────────────────────────────────────────────────────────
 
 function DocPin() {
   return (
@@ -41,8 +37,6 @@ function DocPin() {
   );
 }
 
-// ─── Ledger ────────────────────────────────────────────────────────────────────
-
 function LedgerPaper({
   ledger,
   stamp,
@@ -52,47 +46,52 @@ function LedgerPaper({
   stamp?: string;
   animationStep: number;
 }) {
+  const { t } = useTranslation("campaign");
   const rows = [
     {
-      label: "Revenue",
+      label: t("corkboard.ledger.revenue"),
       value: `€${Math.round(ledger.shiftRevenue)}`,
       type: "income" as const,
     },
     {
-      label: "Covers Seated",
+      label: t("corkboard.ledger.coversSeated"),
       value: String(ledger.coversSeated),
       type: "info" as const,
     },
     { label: null, value: null, type: "divider" as const },
     {
-      label: "Salaries",
+      label: t("corkboard.ledger.salaries"),
       value: `-€${ledger.salaryCost}`,
       type: "expense" as const,
     },
     {
-      label: "Electricity",
+      label: t("corkboard.ledger.electricity"),
       value: `-€${ledger.electricityCost}`,
       type: "expense" as const,
     },
     {
-      label: `Food (${ledger.coversSeated} cvrs)`,
+      label: t("corkboard.ledger.foodWithCovers", {
+        count: ledger.coversSeated,
+      }),
       value: `-€${Math.round(ledger.foodCost)}`,
       type: "expense" as const,
     },
     { label: null, value: null, type: "divider" as const },
     {
-      label: "Net Profit",
+      label: t("corkboard.ledger.netProfit"),
       value: `€${Math.round(ledger.netProfit)}`,
       type: "total" as const,
     },
     {
-      label: "Cash on Hand",
+      label: t("corkboard.ledger.cashOnHand"),
       value: `€${Math.round(ledger.cash)}`,
       type: "total" as const,
     },
     {
-      label: "Rating",
-      value: `${ledger.rating.toFixed(1)} ⭐`,
+      label: t("corkboard.ledger.ratingLabel"),
+      value: t("corkboard.ledger.ratingStars", {
+        value: ledger.rating.toFixed(1),
+      }),
       type: "info" as const,
     },
   ];
@@ -108,10 +107,10 @@ function LedgerPaper({
       <div className="w-72 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
         <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
-            Le Solstice
+            {t("corkboard.ledger.venueName")}
           </p>
           <p className="text-xs font-black uppercase tracking-[0.15em] mt-0.5">
-            Shift Report
+            {t("corkboard.ledger.shiftReport")}
           </p>
         </div>
 
@@ -183,8 +182,6 @@ function LedgerPaper({
   );
 }
 
-// ─── Newspaper ────────────────────────────────────────────────────────────────
-
 function NewspaperPaper({
   headline,
   deck,
@@ -198,6 +195,7 @@ function NewspaperPaper({
   bodyRight: string;
   visible: boolean;
 }) {
+  const { t } = useTranslation("campaign");
   return (
     <AnimatePresence>
       {visible && (
@@ -209,25 +207,23 @@ function NewspaperPaper({
         >
           <DocPin />
           <div className="w-96 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
-            {/* Masthead */}
             <div className="border-b-2 border-[#141414] px-5 py-3 text-center">
               <p
                 className="text-2xl font-black uppercase tracking-[0.1em] text-[#141414]"
                 style={{ fontFamily: "Georgia, serif" }}
               >
-                L'Observateur
+                {t("corkboard.newspaper.masthead")}
               </p>
               <div className="flex justify-between mt-1.5 border-t border-[#141414]/20 pt-1.5">
                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#141414]/40">
-                  Édition du Soir
+                  {t("corkboard.newspaper.eveningEdition")}
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#141414]/40">
-                  Gratuit
+                  {t("corkboard.newspaper.free")}
                 </span>
               </div>
             </div>
 
-            {/* Headline */}
             <div className="px-5 pt-4 pb-0">
               <p
                 className="text-base font-black uppercase leading-tight tracking-[0.02em] text-[#141414]"
@@ -242,7 +238,6 @@ function NewspaperPaper({
               )}
             </div>
 
-            {/* Body columns */}
             {(bodyLeft || bodyRight) && (
               <div className="grid grid-cols-2 px-5 pt-3 pb-5 mt-3 border-t border-[#141414]/15 gap-0">
                 <div className="text-[10px] leading-relaxed text-[#141414]/70 pr-3 border-r border-[#141414]/15">
@@ -260,19 +255,22 @@ function NewspaperPaper({
   );
 }
 
-// ─── Letter / Memo ────────────────────────────────────────────────────────────
-
 function LetterPaper({
-  nightConfig,
-  fired,
+  nightSegment,
   isLoss,
+  firedReason,
   visible,
 }: {
-  nightConfig?: NightConfig;
-  fired?: FiredConfig;
+  nightSegment: string;
   isLoss: boolean;
+  firedReason: "MORALE" | "VIP" | "BANNED";
   visible: boolean;
 }) {
+  const { t } = useTranslation("campaign");
+  const nk = `nights.${nightSegment}`;
+  const quote = t(`${nk}.quote`);
+  const showQuote = quote.trim() !== "..." && quote.trim() !== "…";
+
   return (
     <AnimatePresence>
       {visible && (
@@ -286,47 +284,54 @@ function LetterPaper({
           <div className="w-80 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
-                Le Solstice
+                {t("corkboard.letter.venueName")}
               </p>
               <p className="text-xs font-black uppercase tracking-[0.15em] mt-0.5">
-                Correspondance Interne
+                {t("corkboard.letter.internalMemo")}
               </p>
             </div>
 
             <div className="p-5 font-sans">
-              {isLoss && fired ? (
+              {isLoss ? (
                 <>
                   <p className="text-xs text-[#141414]/50 mb-3">
-                    {fired.letterSalutation}
+                    {t(`fired.${firedReason}.letterSalutation`)}
                   </p>
                   <p className="text-sm text-[#141414]/80 leading-relaxed whitespace-pre-line mb-4">
-                    {fired.letterBody}
+                    {t(`fired.${firedReason}.letterBody`)}
                   </p>
                   <blockquote className="border-l-2 border-[#141414] pl-3 mb-4 text-sm italic text-[#141414]/60 leading-relaxed">
-                    "{fired.letterQuote}"
+                    &ldquo;{t(`fired.${firedReason}.letterQuote`)}&rdquo;
                   </blockquote>
                   <p className="text-xs text-[#141414]/50">
-                    {fired.letterSignOff}
+                    {t(`fired.${firedReason}.letterSignOff`)}
                   </p>
                   <p className="text-sm font-black uppercase tracking-[0.1em] mt-1">
-                    Monsieur V.
+                    {t("corkboard.letter.signOffName")}
                   </p>
                   <p className="text-[10px] text-[#141414]/40 italic mt-3 pt-3 border-t border-[#141414]/10">
-                    P.S. {fired.letterPS}
+                    {t("corkboard.letter.psLine", {
+                      text: t(`fired.${firedReason}.letterPS`),
+                    })}
                   </p>
                 </>
               ) : (
                 <>
-                  {nightConfig?.quote && (
+                  {showQuote && (
                     <blockquote className="border-l-2 border-[#141414] pl-3 mb-4 text-sm italic text-[#141414]/60 leading-relaxed">
-                      "{nightConfig.quote}"
+                      &ldquo;{quote}&rdquo;
                     </blockquote>
                   )}
                   <p className="text-sm text-[#141414]/80 leading-relaxed">
-                    {nightConfig?.memo ?? "..."}
+                    {(() => {
+                      const m = t(`${nk}.memo`);
+                      return m === "..." || m === "…"
+                        ? t("corkboard.letter.memoFallback")
+                        : m;
+                    })()}
                   </p>
                   <p className="text-xs text-[#141414]/40 mt-4 pt-3 border-t border-[#141414]/10 font-black uppercase tracking-[0.1em]">
-                    — V.
+                    {t("corkboard.letter.signatureV")}
                   </p>
                 </>
               )}
@@ -338,8 +343,6 @@ function LetterPaper({
   );
 }
 
-// ─── Activity Log ─────────────────────────────────────────────────────────────
-
 function ActivityLogPaper({
   logs,
   visible,
@@ -347,6 +350,7 @@ function ActivityLogPaper({
   logs: string[];
   visible: boolean;
 }) {
+  const { t } = useTranslation("campaign");
   return (
     <AnimatePresence>
       {visible && (
@@ -360,16 +364,16 @@ function ActivityLogPaper({
           <div className="w-64 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
-                Le Solstice
+                {t("corkboard.log.venueName")}
               </p>
               <p className="text-xs font-black uppercase tracking-[0.15em] mt-0.5">
-                Activity Log
+                {t("corkboard.log.title")}
               </p>
             </div>
             <div className="p-3 max-h-80 overflow-y-auto font-sans">
               {logs.length === 0 ? (
                 <p className="text-xs text-[#141414]/40 italic p-1">
-                  No activity recorded.
+                  {t("corkboard.log.empty")}
                 </p>
               ) : (
                 logs.map((entry, i) => (
@@ -393,8 +397,6 @@ function ActivityLogPaper({
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-
 const LEDGER_ROWS = 10;
 const MS_PER_ROW = 120;
 const NEWSPAPER_DELAY_MS = LEDGER_ROWS * MS_PER_ROW + 300;
@@ -405,14 +407,17 @@ const CTA_DELAY_MS = LOG_DELAY_MS + 400;
 export function CorkboardScreen({
   variant,
   nightNumber,
-  nightConfig,
+  activePath,
   ledger,
-  firedConfig,
+  firedReason,
   onOpenRestaurant,
   onLeave,
 }: CorkboardScreenProps) {
+  const { t } = useTranslation("campaign");
   const isLoss = variant === "fired";
-  const fired = isLoss ? (firedConfig ?? FIRED_CONFIG["MORALE"]) : undefined;
+  const lossReason = firedReason ?? "MORALE";
+  const nightSegment = campaignNightsKeySegment(nightNumber, activePath);
+  const nk = `nights.${nightSegment}`;
 
   const [ledgerStep, setLedgerStep] = React.useState(0);
   const [showNewspaper, setShowNewspaper] = React.useState(false);
@@ -452,9 +457,23 @@ export function CorkboardScreen({
     drag.current.active = false;
   };
 
+  const headline = isLoss
+    ? t(`fired.${lossReason}.newspaperHeadline`)
+    : t(`${nk}.newspaper`);
+  const deck = isLoss
+    ? t(`fired.${lossReason}.newspaperDeck`)
+    : t(`${nk}.newspaperDeck`);
+  const bodyLeft = isLoss
+    ? t(`fired.${lossReason}.newspaperBodyLeft`)
+    : t(`${nk}.newspaperBodyLeft`);
+  const bodyRight = isLoss
+    ? t(`fired.${lossReason}.newspaperBodyRight`)
+    : t(`${nk}.newspaperBodyRight`);
+
+  const ledgerStamp = isLoss ? t(`fired.${lossReason}.ledgerStamp`) : undefined;
+
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
-      {/* Board */}
       <div
         ref={boardRef}
         onMouseDown={onMouseDown}
@@ -466,33 +485,30 @@ export function CorkboardScreen({
       >
         <LedgerPaper
           ledger={ledger}
-          stamp={isLoss && fired ? fired.ledgerStamp : undefined}
+          stamp={ledgerStamp}
           animationStep={ledgerStep}
         />
         <NewspaperPaper
-          headline={
-            isLoss && fired
-              ? fired.newspaperHeadline
-              : (nightConfig?.newspaper ?? "")
-          }
-          deck={isLoss && fired ? fired.newspaperDeck : (nightConfig?.newspaperDeck ?? "")}
-          bodyLeft={isLoss && fired ? fired.newspaperBodyLeft : (nightConfig?.newspaperBodyLeft ?? "")}
-          bodyRight={isLoss && fired ? fired.newspaperBodyRight : (nightConfig?.newspaperBodyRight ?? "")}
+          headline={headline}
+          deck={deck}
+          bodyLeft={bodyLeft}
+          bodyRight={bodyRight}
           visible={showNewspaper}
         />
         <LetterPaper
-          nightConfig={nightConfig}
-          fired={fired}
+          nightSegment={nightSegment}
           isLoss={isLoss}
+          firedReason={lossReason}
           visible={showLetter}
         />
         <ActivityLogPaper logs={ledger.logs} visible={showLog} />
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-[#141414] flex items-center justify-between px-8 py-4 shrink-0">
         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#141414]/40">
-          Night {nightNumber} — {isLoss ? "Game Over" : "Ready"}
+          {isLoss
+            ? t("corkboard.footer.nightGameOver", { n: nightNumber })
+            : t("corkboard.footer.nightReady", { n: nightNumber })}
         </span>
 
         <AnimatePresence>
@@ -508,7 +524,7 @@ export function CorkboardScreen({
                   onClick={onLeave}
                   className="rounded-xl border-2 border-[#141414] px-8 py-2.5 text-sm font-extrabold uppercase tracking-[0.2em] text-[#141414] shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
                 >
-                  Give Resignation.
+                  {t("corkboard.cta.giveResignation")}
                 </button>
               ) : (
                 <button
@@ -516,7 +532,7 @@ export function CorkboardScreen({
                   onClick={onOpenRestaurant}
                   className="rounded-xl border-2 border-[#141414] bg-[#141414] px-10 py-2.5 text-sm font-extrabold uppercase tracking-[0.2em] text-[#E4E3E0] shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
                 >
-                  Open Restaurant
+                  {t("corkboard.cta.openRestaurant")}
                 </button>
               )}
             </motion.div>
@@ -524,7 +540,7 @@ export function CorkboardScreen({
         </AnimatePresence>
 
         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#141414]/20">
-          {ctaReady ? "← scroll →" : ""}
+          {ctaReady ? t("corkboard.footer.scrollHint") : ""}
         </span>
       </div>
     </div>

@@ -224,7 +224,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         </span>
       </button>
 
-      {/* Maître D' */}
+      {/* Maitre d' */}
       <div className="relative flex flex-col items-center gap-1 min-w-[160px]">
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
           <SpeechBubble text={maitreDMessage} />
@@ -234,7 +234,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
           onAnimationComplete={() => setMaitreDAnimState(null)}
         />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
-          Maître D'
+          Maitre D'
         </span>
       </div>
 

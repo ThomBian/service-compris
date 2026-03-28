@@ -18,14 +18,12 @@ import { generateReservations } from "./reservationGenerator";
 import {
   FIRST_NAMES,
   LAST_NAMES,
-  GREETINGS,
-  SCAMMER_GREETINGS,
-  WALK_IN_GREETINGS,
   GRID_SIZE,
   BASE_REVENUE_PER_SEAT,
   PARTY_SIZE_TIP_PER_SEAT_PARTY,
 } from "../constants";
 import { getRandom, formatTime } from "../utils";
+import { tGame, randomGreeting } from "../i18n/tGame";
 
 function traitsMatch(a: VisualTraits, b: VisualTraits): boolean {
   return (
@@ -83,6 +81,17 @@ export const createInitialGrid = (): Cell[][] => {
   }
   return grid;
 };
+
+/** Drop any in-progress table picks so they cannot carry over after the guest leaves or a new seating starts. */
+export function clearFloorplanSelection(grid: Cell[][]): Cell[][] {
+  return grid.map((row) =>
+    row.map((cell) =>
+      cell.state === CellState.SELECTED
+        ? { ...cell, state: CellState.EMPTY }
+        : cell,
+    ),
+  );
+}
 
 // --- Client Spawning Logic ---
 
@@ -233,7 +242,7 @@ export const createNewClient = ({
     hasLied: finalLieType !== LieType.NONE,
     visualTraits,
     isCaught: false,
-    lastMessage: "Waiting in line...",
+    lastMessage: tGame('waitingInLine'),
     chatHistory: [],
   };
 
@@ -245,10 +254,10 @@ export const createNewClient = ({
 export function prepareClientForDesk(client: Client): Client {
   const greeting =
     client.type === ClientType.WALK_IN
-      ? getRandom(WALK_IN_GREETINGS)
+      ? randomGreeting('walkin')
       : client.type === ClientType.SCAMMER
-        ? getRandom(SCAMMER_GREETINGS)
-        : getRandom(GREETINGS);
+        ? randomGreeting('scammer')
+        : randomGreeting('reservation');
 
   const preparedClient: Client = {
     ...client,
@@ -256,7 +265,7 @@ export function prepareClientForDesk(client: Client): Client {
     dialogueState: DialogueState.OPENING_GAMBIT,
     lastMessage: greeting,
     chatHistory: [
-      { sender: "maitre-d", text: "Good evening! How may I help you?" },
+      { sender: 'maitre-d', text: tGame('maitreGreeting') },
       { sender: "guest", text: greeting },
     ],
   };
@@ -296,7 +305,7 @@ function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
   const nextQueue = queue.filter((c) => c.patience > 0);
   const nextRating = Math.max(0, rating - 0.5 * stormedOutCount);
   const nextLogs = [
-    `${stormedOutCount} guest(s) stormed out of the queue!`,
+    tGame('stormQueue', { count: stormedOutCount }),
     ...logs,
   ].slice(0, 50);
 
@@ -324,7 +333,7 @@ function tryMoveToDesk(
 
   const [first, ...rest] = queue;
   const nextCurrentClient = prepareClientForDesk(first);
-  const nextLogs = [`Next guest stepped up to the podium.`, ...logs].slice(
+  const nextLogs = [tGame('nextGuest'), ...logs].slice(
     0,
     50,
   );
@@ -400,11 +409,11 @@ export type QuestionField = "firstName" | "lastName" | "time";
 function getFieldQuestionText(field: QuestionField): string {
   switch (field) {
     case "firstName":
-      return "What is your first name?";
+      return tGame('questionFirstName');
     case "lastName":
-      return "What is your last name?";
+      return tGame('questionLastName');
     case "time":
-      return "What time was your reservation?";
+      return tGame('questionTime');
     default:
       return "";
   }
@@ -430,8 +439,8 @@ function handleFieldQuestion(
       if (alreadyKnownForImpersonator) {
         return {
           patiencePenalty: 20,
-          logMsg: `Client is frustrated. You already asked that.`,
-          guestResponse: "I already told you that!",
+          logMsg: tGame('frustratedRepeat'),
+          guestResponse: tGame('guestAlreadyTold'),
           revealedInfo: {},
         };
       }
@@ -440,7 +449,7 @@ function handleFieldQuestion(
         return {
           patiencePenalty: 10,
           logMsg: "",
-          guestResponse: `My name is ${stolenRes.firstName}.`,
+          guestResponse: tGame('guestMyName', { name: stolenRes.firstName }),
           revealedInfo: { knownFirstName: stolenRes.firstName },
         };
       }
@@ -448,7 +457,7 @@ function handleFieldQuestion(
         return {
           patiencePenalty: 10,
           logMsg: "",
-          guestResponse: `My last name is ${stolenRes.lastName}.`,
+          guestResponse: tGame('guestMyLastName', { name: stolenRes.lastName }),
           revealedInfo: { knownLastName: stolenRes.lastName },
         };
       }
@@ -461,7 +470,7 @@ function handleFieldQuestion(
         return {
           patiencePenalty: 10,
           logMsg: "",
-          guestResponse: `Our reservation was for ${formatTime(claimedTime)}.`,
+          guestResponse: tGame('guestReservationTime', { time: formatTime(claimedTime) }),
           revealedInfo: { knownTime: claimedTime },
         };
       }
@@ -477,8 +486,8 @@ function handleFieldQuestion(
   if (alreadyKnown) {
     return {
       patiencePenalty: 20,
-      logMsg: `Client is frustrated. You already asked that.`,
-      guestResponse: "I already told you that!",
+      logMsg: tGame('frustratedRepeat'),
+      guestResponse: tGame('guestAlreadyTold'),
       revealedInfo: {},
     };
   }
@@ -488,15 +497,15 @@ function handleFieldQuestion(
 
   if (field === "firstName") {
     revealedInfo = { knownFirstName: client.trueFirstName };
-    guestResponse = `My name is ${client.trueFirstName}.`;
+    guestResponse = tGame('guestMyName', { name: client.trueFirstName });
   } else if (field === "lastName") {
     revealedInfo = { knownLastName: client.trueLastName };
-    guestResponse = `My last name is ${client.trueLastName}.`;
+    guestResponse = tGame('guestMyLastName', { name: client.trueLastName });
   } else if (field === "time") {
     const res = reservations.find((r) => r.id === client.trueReservationId);
     const trueTime = res ? res.time : inGameMinutes - 10;
     revealedInfo = { knownTime: trueTime };
-    guestResponse = `Our reservation was for ${formatTime(trueTime)}.`;
+    guestResponse = tGame('guestReservationTime', { time: formatTime(trueTime) });
   }
 
   return {
@@ -532,6 +541,12 @@ export function generateQuestionResponse({
 
 export type AccusationField = "size" | "time" | "reservation";
 
+function accusationFieldLabel(field: AccusationField): string {
+  if (field === "size") return tGame("fieldSize");
+  if (field === "time") return tGame("fieldTime");
+  return tGame("fieldReservation");
+}
+
 function isAccusationCorrect(
   field: AccusationField,
   client: Client,
@@ -556,11 +571,11 @@ function isAccusationCorrect(
 function getAccusationText(field: AccusationField): string {
   switch (field) {
     case "reservation":
-      return "I don't think you have a reservation at all.";
+      return tGame('accuseReservation');
     case "size":
-      return "You're bringing more people than you booked for!";
+      return tGame('accuseSize');
     case "time":
-      return "You're far too late for your reservation.";
+      return tGame('accuseTime');
     default:
       return "";
   }
@@ -583,16 +598,16 @@ export function checkAccusation({
     return {
       caught: true,
       accusationText,
-      guestResponse: "You caught me... I didn't think you'd notice. *sweats*",
-      logMsg: `CAUGHT IN A LIE: You correctly called out their ${field} lie!`,
+      guestResponse: tGame('accuseCaughtResponse'),
+      logMsg: tGame('logCaughtLie', { field: accusationFieldLabel(field) }),
       patiencePenalty: 0,
     };
   } else {
     return {
       caught: false,
       accusationText,
-      guestResponse: "I'm telling the truth! This is insulting!",
-      logMsg: `False Accusation: They weren't lying about ${field}!`,
+      guestResponse: tGame('accuseFalseResponse'),
+      logMsg: tGame('logFalseAccusation', { field: accusationFieldLabel(field) }),
       patiencePenalty: 50,
     };
   }
@@ -624,7 +639,7 @@ export function handleAcceptedClient(
     const penalty = -0.5 * Math.pow(2, croppedCount - 1);
     nextRating = Math.max(0, nextRating + penalty);
     nextLogs = [
-      `CROPPED: Left ${croppedCount} guest(s) behind. Rating penalty: ${penalty.toFixed(2)}`,
+      tGame('logCropped', { count: croppedCount, penalty: penalty.toFixed(2) }),
       ...nextLogs,
     ];
   }
@@ -636,7 +651,7 @@ export function handleAcceptedClient(
       nextRating = Math.min(5, nextRating + 0.8);
       nextMorale = Math.min(100, nextMorale + 10);
       nextLogs = [
-        `Grateful Liar: You caught them, but sat them anyway! Massive bonus.`,
+        tGame('logGratefulLiar'),
         ...nextLogs,
       ];
     } else {
@@ -646,14 +661,14 @@ export function handleAcceptedClient(
         nextRating = Math.max(0, nextRating - 1.0);
         nextMorale = Math.max(0, nextMorale - 20);
         nextLogs = [
-          `FOOLED: You sat a scammer! They skipped the bill and left a mess.`,
+          tGame('logFooledScammer'),
           ...nextLogs,
         ];
       } else {
         nextRating = Math.max(0, nextRating - 0.5);
         nextMorale = Math.max(0, nextMorale - 10);
         nextLogs = [
-          `FOOLED: You sat a rule-breaker without calling them out. Staff is annoyed.`,
+          tGame('logFooledOther'),
           ...nextLogs,
         ];
       }
@@ -663,7 +678,7 @@ export function handleAcceptedClient(
     nextCash += basePay;
     nextRating = Math.min(5, nextRating + 0.1);
     nextLogs = [
-      `Accepted ${client.trueFirstName}. Standard service.`,
+      tGame('logAccepted', { name: client.trueFirstName }),
       ...nextLogs,
     ];
   }
@@ -684,7 +699,7 @@ export function handleRefusedClient(
   // Walk-ins: no rating/morale penalty (temporary design — house policy TBD).
   if (client.type === ClientType.WALK_IN) {
     nextLogs = [
-      `Walk-in turned away: ${client.trueFirstName} heads out.`,
+      tGame('logWalkInAway', { name: client.trueFirstName }),
       ...nextLogs,
     ];
     return { nextRating, nextMorale, nextLogs };
@@ -701,7 +716,7 @@ export function handleRefusedClient(
     nextRating = Math.min(5, nextRating + 0.2);
     nextMorale = Math.min(100, nextMorale + 5);
     nextLogs = [
-      `Justified Refusal: You protected the house from a problematic guest.`,
+      tGame('logJustifiedRefusal'),
       ...nextLogs,
     ];
   } else {
@@ -709,7 +724,7 @@ export function handleRefusedClient(
     nextRating = Math.max(0, nextRating - 0.5);
     nextMorale = Math.max(0, nextMorale - 15);
     nextLogs = [
-      `Unjustified Refusal: You turned away an honest guest!`,
+      tGame('logUnjustifiedRefusal'),
       ...nextLogs,
     ];
   }
@@ -726,7 +741,7 @@ export function handleSeatingRefusal(
   const nextRating = Math.max(0, currentRating - 1.5);
   const nextMorale = Math.max(0, currentMorale - 30);
   const nextLogs = [
-    `Refused after seating: You accepted ${client.trueFirstName} then turned them away. Guests are furious.`,
+    tGame('logRefusedAfterSeating', { name: client.trueFirstName }),
     ...currentLogs,
   ];
   return { nextRating, nextMorale, nextLogs };
@@ -774,7 +789,7 @@ export function applyMoraleGameOver(state: GameState): GameState {
     gameOverReason: 'MORALE',
     gameOverCharacterId: null,
     timeMultiplier: 0,
-    logs: ["Staff morale collapsed. Shift ended.", ...state.logs].slice(0, 50),
+    logs: [tGame('moraleCollapsed'), ...state.logs].slice(0, 50),
   };
 }
 
@@ -812,7 +827,7 @@ export function buildInitialState(
     cash: persist?.cash ?? 0,
     rating,
     morale: persist ? Math.max(0, persist.morale) : 100,
-    logs: ["Welcome to The Maitre D'. The doors are open."],
+    logs: [tGame('welcome')],
     dailyCharacterIds: dailyChars.map(c => c.id),
     seatedCharacterIds: [],
     gameOverCharacterId: null,

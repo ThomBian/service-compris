@@ -1,0 +1,66 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+
+import enCommon from './locales/en/common.json';
+import enUi from './locales/en/ui.json';
+import enGame from './locales/en/game.json';
+import enTour from './locales/en/tour.json';
+import enCampaign from './locales/en/campaign.json';
+
+import frCommon from './locales/fr/common.json';
+import frUi from './locales/fr/ui.json';
+import frGame from './locales/fr/game.json';
+import frTour from './locales/fr/tour.json';
+import frCampaign from './locales/fr/campaign.json';
+
+export const I18N_STORAGE_KEY = 'service-compris-lang';
+
+void i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        common: enCommon,
+        ui: enUi,
+        game: enGame,
+        tour: enTour,
+        campaign: enCampaign,
+      },
+      fr: {
+        common: frCommon,
+        ui: frUi,
+        game: frGame,
+        tour: frTour,
+        campaign: frCampaign,
+      },
+    },
+    fallbackLng: 'en',
+    supportedLngs: ['en', 'fr'],
+    defaultNS: 'common',
+    ns: ['common', 'ui', 'game', 'tour', 'campaign'],
+    interpolation: { escapeValue: false },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+      lookupLocalStorage: I18N_STORAGE_KEY,
+    },
+  });
+
+i18n.on('languageChanged', (lng) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lng;
+  }
+  try {
+    localStorage.setItem(I18N_STORAGE_KEY, lng);
+  } catch {
+    /* ignore */
+  }
+});
+
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = i18n.language;
+}
+
+export default i18n;

@@ -1,6 +1,7 @@
 // src/components/TourOverlay.tsx
 import React, { useEffect, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { TOUR_STEPS } from '@/src/tour/tourSteps';
 
 interface TargetRect {
@@ -24,11 +25,15 @@ const EDGE_GUARD = 12;
 const COUNTDOWN_START = 3;
 
 export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }) => {
+  const { t } = useTranslation('tour');
   const [rect, setRect] = useState<TargetRect | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const tourStep = TOUR_STEPS[step];
   const isLastStep = step === TOUR_STEPS.length - 1;
   const maskId = useId().replace(/:/g, '_');
+  const ck = tourStep.copyKey;
+  const title = t(`${ck}.title`);
+  const tooltip = t(`${ck}.tooltip`);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -64,7 +69,6 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
     const resizeObserver = new ResizeObserver(update);
     resizeObserver.observe(document.documentElement);
 
-    // Watch for the target element mounting (e.g. floorplan view switch)
     const mutationObserver = new MutationObserver(() => {
       if (document.querySelector(`[data-tour="${tourStep.target}"]`)) {
         update();
@@ -101,7 +105,6 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
 
   return createPortal(
     <div className="fixed inset-0 z-50">
-      {/* SVG spotlight overlay — full black during countdown, masked spotlight otherwise */}
       <svg
         className="absolute inset-0 w-full h-full"
         style={{ pointerEvents: 'none' }}
@@ -130,23 +133,21 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
         />
       </svg>
 
-      {/* Countdown screen */}
       {countdown !== null && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
           <p className="text-2xl font-black uppercase tracking-[0.2em] text-white">
-            Ready to Play!
+            {t('countdown.ready')}
           </p>
           <span className="text-8xl font-black text-white tabular-nums">
-            {countdown === 0 ? 'Go!' : countdown}
+            {countdown === 0 ? t('countdown.go') : countdown}
           </span>
         </div>
       )}
 
-      {/* Tooltip */}
       {rect && countdown === null && (
         <div
           role="dialog"
-          aria-label={`Tour step ${step + 1} of ${TOUR_STEPS.length}: ${tourStep.title}`}
+          aria-label={`${t('aria.stepOf', { n: step + 1, total: TOUR_STEPS.length })}: ${title}`}
           className="absolute w-[420px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_#141414]"
           style={{
             top: tooltipTop,
@@ -154,13 +155,13 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
           }}
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#141414]/50">
-            {step + 1} of {TOUR_STEPS.length}
+            {t('aria.stepProgress', { n: step + 1, total: TOUR_STEPS.length })}
           </p>
           <h3 className="mt-1 text-base font-black uppercase tracking-[0.12em] text-[#141414]">
-            {tourStep.title}
+            {title}
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-[#141414]/80">
-            {tourStep.tooltip}
+            {tooltip}
           </p>
           <div className="mt-4 flex gap-2">
             <button
@@ -168,7 +169,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
               onClick={isLastStep ? handleDone : onNext}
               className="flex-1 rounded-xl bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
             >
-              {isLastStep ? "Let's go!" : 'Next →'}
+              {isLastStep ? t('buttons.letsGo') : t('buttons.next')}
             </button>
             {!isLastStep && (
               <button
@@ -176,7 +177,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
                 onClick={onSkip}
                 className="rounded-xl border-2 border-[#141414]/20 px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#141414]/40 transition-colors hover:border-[#141414]/40 hover:text-[#141414]/60"
               >
-                Skip
+                {t('buttons.skip')}
               </button>
             )}
           </div>

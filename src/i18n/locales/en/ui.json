@@ -1,0 +1,118 @@
+{
+  "landing": {
+    "tagline": "The Maitre D' Simulator",
+    "blurb": "You are the Maitre D' at a ruthless restaurant. Manage the door, spot the liars, survive the shift.",
+    "newGame": "New Game"
+  },
+  "topbar": {
+    "night": "Night",
+    "overtime": "Overtime",
+    "hellLockedTitle": "Hell mode: 3× speed only",
+    "locked": "Locked",
+    "speedPause": "Pause",
+    "speed1": "1× speed",
+    "speed2": "2× speed",
+    "speed3": "3× speed",
+    "tourTitle": "Quick Tour"
+  },
+  "app": {
+    "resume3xAria": "Resume game at 3× speed",
+    "resumeNormalAria": "Resume game at normal speed",
+    "paused": "Paused",
+    "resumeHint": "Click anywhere to resume"
+  },
+  "corkboard": {
+    "venue": "The Solstice",
+    "shiftReport": "Shift Report",
+    "observer": "The Observer",
+    "eveningEdition": "Evening Edition",
+    "free": "Free",
+    "internalMemo": "Internal Memo",
+    "activityLog": "Activity Log",
+    "noActivity": "No activity recorded.",
+    "nightStatus": "Night {{n}} — {{status}}",
+    "statusReady": "Ready",
+    "statusGameOver": "Game Over",
+    "resign": "Give Resignation.",
+    "openRestaurant": "Open Restaurant",
+    "scrollHint": "← scroll →",
+    "ledgerRevenue": "Revenue",
+    "ledgerCovers": "Covers Seated",
+    "ledgerSalaries": "Salaries",
+    "ledgerElectricity": "Electricity",
+    "ledgerFood": "Food ({{covers}} cvrs)",
+    "ledgerNetProfit": "Net Profit",
+    "ledgerCash": "Cash on Hand",
+    "ledgerRating": "Rating",
+    "letterPS": "P.S. {{text}}",
+    "signOff": "— V.",
+    "mrV": "Mr. V."
+  },
+  "desk": {
+    "partyTicket": "Party Ticket",
+    "awaitingGuest": "Awaiting next guest...",
+    "caught": "CAUGHT",
+    "joinedQueue": "Joined queue",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "time": "Time",
+    "partySize": "Party Size",
+    "accuseNoReservation": "No Reservation",
+    "accuseSize": "Size Lie",
+    "accuseTime": "Late",
+    "refuse": "REFUSE",
+    "waitInLine": "Wait in line",
+    "seatParty": "Seat Party",
+    "maitreD": "Maitre D'"
+  },
+  "booking": {
+    "title": "Booking Ledger",
+    "colTime": "Time",
+    "colName": "Name",
+    "colSize": "Size",
+    "colIn": "In",
+    "alreadyIn": "⚠ ALREADY IN"
+  },
+  "clipboard": {
+    "title": "Clipboard",
+    "tabVips": "VIPs",
+    "tabBanned": "Banned",
+    "tabLog": "Log",
+    "noVips": "No VIPs expected tonight.",
+    "noBanned": "No trouble expected tonight.",
+    "comingSoon": "{{tab}} — coming soon",
+    "booksAs": "Books as \"{{first}} {{last}}\" · Party of {{n}}",
+    "walkInNoRes": "Walk-in, no reservation · Party of {{n}}",
+    "lateArrival": "Late arrival · Party of {{n}}",
+    "seated": "Seated",
+    "gameOver": "Game over",
+    "cashFine": "Cash fine",
+    "moraleHit": "Morale hit",
+    "ratingLoss": "Rating loss",
+    "slippedThrough": "Slipped through"
+  },
+  "floorplan": {
+    "title": "Floorplan",
+    "seating": "Seating: {{name}} ({{sel}}/{{total}})",
+    "viewingMode": "Viewing mode — numbers are in-game minutes left at the table",
+    "confirm": "Confirm",
+    "cropSeat": "Crop & Seat",
+    "refuseParty": "Refuse Party",
+    "toastOccupied": "Table is occupied",
+    "toastOccupiedDetail": "{{m}}m remaining",
+    "toastAdjacent": "Must be adjacent",
+    "toastAdjacentDetail": "Select a cell next to an existing selection",
+    "lastCall": "Last call",
+    "turningSoon": "Turning soon",
+    "minutesLeft": "{{m}} min"
+  },
+  "scene": {
+    "doorOpen": "Door",
+    "doorClosed": "Door",
+    "seatPartyBtn": "Seat Party",
+    "queue": "Queue"
+  },
+  "miniGrid": {
+    "title": "Floor"
+  }
+}

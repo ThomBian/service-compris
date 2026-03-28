@@ -1,10 +1,11 @@
 import React, { useCallback, Dispatch, SetStateAction } from 'react';
 import { flushSync } from 'react-dom';
 import { GameState } from '../types';
-import { AccusationField, checkAccusation } from '../logic/gameLogic';
+import { AccusationField, checkAccusation, clearFloorplanSelection } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { getRule } from '../logic/nightRules';
+import { tGame } from '../i18n/tGame';
 
 type ShowToast = (
   title: string,
@@ -49,20 +50,21 @@ export function useAccusationActions(
         const nextLogs = [logMsg, ...prev.logs].slice(0, 50);
 
         if (nextPatience <= 0) {
-          toastArgs = ['Client stormed out!', '★ −0.5', 'error'];
+          toastArgs = [tGame('toast.stormOutTitle'), tGame('toast.stormPatienceDetail'), 'error'];
           return {
             ...prev,
             ...characterOutcome,
+            grid: clearFloorplanSelection(prev.grid),
             currentClient: null,
             rating: Math.max(0, prev.rating - 0.5),
-            logs: [`Client stormed out after false accusation!`, ...nextLogs].slice(0, 50)
+            logs: [tGame('logStormFalseAccusation'), ...nextLogs].slice(0, 50)
           };
         }
 
         if (caught) {
-          toastArgs = ['Caught in a lie!', patiencePenalty > 0 ? `Patience −${patiencePenalty}` : undefined, 'success'];
+          toastArgs = [tGame('toast.caughtLie'), patiencePenalty > 0 ? tGame('toast.patiencePenalty', { n: patiencePenalty }) : undefined, 'success'];
         } else {
-          toastArgs = ['False accusation!', patiencePenalty > 0 ? `Patience −${patiencePenalty}` : undefined, 'warning'];
+          toastArgs = [tGame('toast.falseAccusation'), patiencePenalty > 0 ? tGame('toast.patiencePenalty', { n: patiencePenalty }) : undefined, 'warning'];
         }
 
         const strict = getRule<boolean>(prev.activeRules, 'STRICT_FALSE_ACCUSATION', false);

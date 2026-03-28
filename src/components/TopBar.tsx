@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Clock,
   Star,
@@ -41,12 +42,13 @@ export const TopBar: React.FC<TopBarProps> = ({
   isOvertime,
   activeRules = [],
 }) => {
+  const { t } = useTranslation('ui');
   const pauseDisabled = getRule<boolean>(activeRules, 'PAUSE_DISABLED', false);
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
       <div className="flex items-center gap-8" data-tour="topbar">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Night</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">{t('topbar.night')}</span>
           <span className="font-mono text-xl font-bold">{nightNumber}</span>
         </div>
         <div className={`flex items-center gap-2 ${isOvertime ? 'text-amber-600' : ''}`}>
@@ -56,7 +58,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
           {isOvertime && (
             <span className="text-[10px] font-black uppercase tracking-[0.15em] bg-amber-500 text-white rounded px-1.5 py-0.5 animate-pulse">
-              Overtime
+              {t('topbar.overtime')}
             </span>
           )}
         </div>
@@ -83,13 +85,13 @@ export const TopBar: React.FC<TopBarProps> = ({
         {difficulty === 3 ? (
           <div
             className="flex items-center gap-2 px-2 py-1"
-            title="Hell mode: 3× speed only"
+            title={t('topbar.hellLockedTitle')}
           >
             <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#141414] text-[#E4E3E0]">
               3×
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider opacity-40">
-              Locked
+              {t('topbar.locked')}
             </span>
           </div>
         ) : (
@@ -100,12 +102,12 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClick={() => setTimeMultiplier(m)}
               title={
                 m === 0
-                  ? "Pause"
+                  ? t('topbar.speedPause')
                   : m === 1
-                    ? "1× speed"
+                    ? t('topbar.speed1')
                     : m === 2
-                      ? "2× speed"
-                      : "3× speed"
+                      ? t('topbar.speed2')
+                      : t('topbar.speed3')
               }
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
                 timeMultiplier === m
@@ -131,7 +133,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       <button
         type="button"
         onClick={onTourClick}
-        title="Quick Tour"
+        title={t('topbar.tourTitle')}
         className="rounded-xl p-1.5 transition-colors hover:bg-[#141414]/10"
       >
         <HelpCircle size={20} />

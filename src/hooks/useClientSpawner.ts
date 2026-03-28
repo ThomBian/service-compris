@@ -16,6 +16,7 @@ import { generateClientData, createNewClient } from '../logic/gameLogic';
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
 import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
 import { getRule } from '../logic/nightRules';
+import { tGame } from '../i18n/tGame';
 
 export function useClientSpawner(
   gameState: GameState,
@@ -88,7 +89,7 @@ export function useClientSpawner(
         visualTraits: def.visualTraits,
         isCaught: false,
         characterId: def.id,
-        lastMessage: 'Waiting in line...',
+        lastMessage: tGame('waitingInLine'),
         chatHistory: [],
       };
       return {
@@ -120,10 +121,10 @@ export function useClientSpawner(
         visualTraits: def.visualTraits,
         isCaught: false,
         characterId: def.id,
-        lastMessage: "We require a table. Immediately.",
+        lastMessage: tGame('syndicateDemand'),
         chatHistory: [
-          { sender: 'maitre-d', text: "Good evening! How may I help you?" },
-          { sender: 'guest', text: "We require a table. Immediately." },
+          { sender: 'maitre-d', text: tGame('maitreGreeting') },
+          { sender: 'guest', text: tGame('syndicateDemand') },
         ],
       };
 

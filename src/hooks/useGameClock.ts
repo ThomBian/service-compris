@@ -3,6 +3,7 @@ import { GameState, CellState } from '../types';
 import { TICK_RATE, OVERTIME_MORALE_DRAIN_PER_MINUTE, DOORS_CLOSE_TIME } from '../constants';
 import { applyMoraleGameOver } from '../logic/gameLogic';
 import { getRule } from '../logic/nightRules';
+import { tGame } from '../i18n/tGame';
 
 export function useGameClock(
   gameState: GameState,
@@ -41,7 +42,7 @@ export function useGameClock(
       if (isOvertime) {
         nextMorale = Math.max(0, prev.morale - OVERTIME_MORALE_DRAIN_PER_MINUTE);
         if (!wasOvertime) {
-          nextLogs = ['22:30 — Doors closed. Waiting for the last tables to clear.', ...nextLogs].slice(0, 50);
+          nextLogs = [tGame('doorsClosedOvertime'), ...nextLogs].slice(0, 50);
         }
       }
 

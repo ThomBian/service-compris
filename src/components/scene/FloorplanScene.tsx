@@ -12,12 +12,12 @@ export const FloorplanScene: React.FC = () => {
 
   return (
     <div className="h-full flex items-end gap-8 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-hidden">
-      {/* Maître D' */}
+      {/* Maitre d' */}
       <div className="flex flex-col items-center gap-1 shrink-0">
         <div className="w-10 h-14 bg-[#141414] rounded-t-full flex items-end justify-center text-white text-xs pb-1">
           MD
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">Maître D'</span>
+        <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">Maitre D'</span>
       </div>
 
       {/* Current party being seated — members highlight as placed */}

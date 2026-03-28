@@ -16,12 +16,6 @@ export interface ActiveRule {
 }
 
 export interface NightConfig {
-  newspaper: string;
-  newspaperDeck?: string;
-  newspaperBodyLeft?: string;
-  newspaperBodyRight?: string;
-  quote: string;
-  memo: string;
   characterIds: string[];
   rules: ActiveRule[];
 }
@@ -54,15 +48,4 @@ export interface CampaignState {
   lossReason: 'MORALE' | 'VIP' | 'BANNED' | null;
 }
 
-export interface FiredConfig {
-  ledgerStamp: string;
-  newspaperHeadline: string;
-  newspaperDeck: string;
-  newspaperBodyLeft: string;
-  newspaperBodyRight: string;
-  letterSalutation: string;
-  letterBody: string;
-  letterQuote: string;
-  letterSignOff: string;
-  letterPS: string;
-}
+

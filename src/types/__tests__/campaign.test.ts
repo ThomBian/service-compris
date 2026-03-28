@@ -1,5 +1,5 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { ActiveRule, RuleKey, NightConfig, CampaignState, LedgerData, FiredConfig } from '../campaign';
+import type { ActiveRule, RuleKey, NightConfig, CampaignState, LedgerData } from '../campaign';
 
 describe('campaign types', () => {
   it('ActiveRule value covers all rule key shapes', () => {

@@ -17,9 +17,11 @@ import {
   handleSeatingRefusal,
   canSelectCell,
   applyMoraleGameOver,
+  clearFloorplanSelection,
 } from "../logic/gameLogic";
 import { type Toast } from "../context/ToastContext";
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
+import { tGame, tCharacter } from '../i18n/tGame';
 
 type ShowToast = (
   title: string,
@@ -36,24 +38,26 @@ function buildDeltaDetail(
   const parts: string[] = [];
   if (cashDelta !== 0) {
     parts.push(
-      cashDelta > 0
-        ? `+$${Math.round(cashDelta)}`
-        : `-$${Math.round(Math.abs(cashDelta))}`,
+      tGame(cashDelta > 0 ? 'delta.cashPos' : 'delta.cashNeg', {
+        amount: Math.round(Math.abs(cashDelta)),
+      }),
     );
   }
   if (ratingDelta !== 0) {
     parts.push(
-      ratingDelta > 0
-        ? `★ +${ratingDelta.toFixed(1)}`
-        : `★ ${ratingDelta.toFixed(1)}`,
+      tGame(ratingDelta > 0 ? 'delta.ratingPos' : 'delta.ratingNeg', {
+        v: ratingDelta.toFixed(1),
+      }),
     );
   }
   if (moraleDelta !== 0) {
     parts.push(
-      moraleDelta > 0 ? `♥ +${moraleDelta}` : `♥ ${moraleDelta}`,
+      tGame(moraleDelta > 0 ? 'delta.moralePos' : 'delta.moraleNeg', {
+        v: String(moraleDelta),
+      }),
     );
   }
-  return parts.length > 0 ? parts.join(" · ") : undefined;
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 export function useDecisionActions(
@@ -80,16 +84,17 @@ export function useDecisionActions(
             const outcome = ch.onRefused(prev);
             const def = ch.def;
             if (def.role === 'BANNED') {
-              toastArgs = [def.refusalDescription ?? 'Banned guest turned away.', undefined, 'success'];
+              toastArgs = [tCharacter(def.id, 'refusalDescription', def.refusalDescription ?? tGame('toast.bannedTurnedAway')), undefined, 'success'];
             } else {
-              toastArgs = [def.consequenceDescription, undefined, 'error'];
+              toastArgs = [tCharacter(def.id, 'consequenceDescription', def.consequenceDescription), undefined, 'error'];
             }
             pathScoreEvent = { key: `${deskClient.characterId}:refused` };
             const next = {
               ...prev,
               ...outcome,
+              grid: clearFloorplanSelection(prev.grid),
               currentClient: null,
-              logs: [`${def.role === 'VIP' ? 'VIP' : 'Banned'} refused: ${def.name}.`, ...prev.logs].slice(0, 50),
+              logs: [tGame('logVipRefused', { role: tGame(def.role === 'VIP' ? 'roleVip' : 'roleBanned'), name: def.name }), ...prev.logs].slice(0, 50),
             };
             return applyMoraleGameOver(next);
           }
@@ -116,12 +121,13 @@ export function useDecisionActions(
             nextMorale - prev.morale,
           );
           toastArgs = isJustified
-            ? ["Justified Refusal", detail, "success"]
-            : ["Unjustified Refusal", detail, "error"];
+            ? [tGame('toast.justifiedTitle'), detail, 'success']
+            : [tGame('toast.unjustifiedTitle'), detail, 'error'];
         }
 
         return applyMoraleGameOver({
           ...prev,
+          grid: clearFloorplanSelection(prev.grid),
           currentClient: null,
           rating: nextRating,
           morale: nextMorale,
@@ -146,9 +152,10 @@ export function useDecisionActions(
       };
       return {
         ...prev,
+        grid: clearFloorplanSelection(prev.grid),
         queue: [client, ...prev.queue],
         currentClient: null,
-        logs: [`Sent ${client.trueFirstName} back to the line.`, ...prev.logs],
+        logs: [tGame('logSentBack', { name: client.trueFirstName }), ...prev.logs],
       };
     });
   }, [setGameState]);
@@ -158,6 +165,7 @@ export function useDecisionActions(
       if (!prev.currentClient) return prev;
       return {
         ...prev,
+        grid: clearFloorplanSelection(prev.grid),
         currentClient: {
           ...prev.currentClient,
           physicalState: PhysicalState.SEATING,
@@ -225,14 +233,14 @@ export function useDecisionActions(
                 c.state === CellState.SELECTED ? { ...c, state: CellState.EMPTY } : c,
               ),
             );
-            toastArgs = [def.consequenceDescription, undefined, 'error'];
+            toastArgs = [tCharacter(def.id, 'consequenceDescription', def.consequenceDescription), undefined, 'error'];
             const next = {
               ...prev,
               ...outcome,
               currentClient: null,
               grid: gridClearedSelection,
               seatedCharacterIds: [...prev.seatedCharacterIds, def.id],
-              logs: [`Banned customer seated: ${def.name}.`, ...prev.logs].slice(0, 50),
+              logs: [tGame('logBannedSeated', { name: def.name }), ...prev.logs].slice(0, 50),
             };
             return applyMoraleGameOver(next);
           }
@@ -256,13 +264,13 @@ export function useDecisionActions(
         );
 
         if (client.hasLied && client.isCaught) {
-          toastArgs = ["Grateful Liar — well played!", detail, "success"];
+          toastArgs = [tGame('toast.gratefulLiar'), detail, 'success'];
         } else if (client.hasLied && client.type === ClientType.SCAMMER) {
-          toastArgs = ["Fooled! Seated a scammer", detail, "error"];
+          toastArgs = [tGame('toast.fooledScammer'), detail, 'error'];
         } else if (client.hasLied) {
-          toastArgs = ["Rule-breaker slipped through", detail, "error"];
+          toastArgs = [tGame('toast.fooledRulebreaker'), detail, 'error'];
         } else {
-          toastArgs = [`✓ Accepted ${client.trueFirstName}`, detail, "success"];
+          toastArgs = [tGame('toast.accepted', { name: client.trueFirstName }), detail, 'success'];
         }
 
         const partyId = client.id;
@@ -305,7 +313,7 @@ export function useDecisionActions(
             // onSeated receives prev, so character cash outcomes replace (not augment) base revenue
             const outcome = ch.onSeated(prev);
             Object.assign(finalState, outcome);
-            toastArgs = [`Well handled — ${ch.def.name} has been seated.`, undefined, 'success'];
+            toastArgs = [tGame('toast.vipSeatedWell', { name: ch.def.name }), undefined, 'success'];
           }
         }
 
@@ -359,7 +367,7 @@ export function useDecisionActions(
           nextRating - prev.rating,
           nextMorale - prev.morale,
         );
-        toastArgs = ["Refused after seating", detail, "error"];
+        toastArgs = [tGame('toast.refusedAfterSeating'), detail, 'error'];
 
         const nextGrid = prev.grid.map((row) =>
           row.map((cell) =>
@@ -403,7 +411,7 @@ export function useDecisionActions(
         ...prev,
         grid: nextGrid,
         rating: nextRating,
-        logs: ['Rushed table — party asked to leave early.', ...prev.logs].slice(0, 50),
+        logs: [tGame('logRushedTable'), ...prev.logs].slice(0, 50),
       };
     });
   }, [setGameState]);

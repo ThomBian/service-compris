@@ -1,0 +1,270 @@
+{
+  "corkboard": {
+    "ledger": {
+      "venueName": "The Solstice",
+      "shiftReport": "Shift Report",
+      "revenue": "Revenue",
+      "coversSeated": "Covers Seated",
+      "salaries": "Salaries",
+      "electricity": "Electricity",
+      "foodWithCovers": "Food ({{count}} cvrs)",
+      "netProfit": "Net Profit",
+      "cashOnHand": "Cash on Hand",
+      "ratingLabel": "Rating",
+      "ratingStars": "{{value}} ⭐"
+    },
+    "newspaper": {
+      "masthead": "The Observer",
+      "eveningEdition": "Evening Edition",
+      "free": "Free"
+    },
+    "letter": {
+      "venueName": "The Solstice",
+      "internalMemo": "Internal Memo",
+      "memoFallback": "…",
+      "signatureV": "— V.",
+      "signOffName": "Mr. V.",
+      "psLine": "P.S. {{text}}"
+    },
+    "log": {
+      "venueName": "The Solstice",
+      "title": "Activity Log",
+      "empty": "No activity recorded."
+    },
+    "footer": {
+      "nightReady": "Night {{n}} — Ready",
+      "nightGameOver": "Night {{n}} — Game Over",
+      "scrollHint": "← scroll →"
+    },
+    "cta": {
+      "giveResignation": "Give Resignation.",
+      "openRestaurant": "Open Restaurant"
+    }
+  },
+  "fired": {
+    "MORALE": {
+      "ledgerStamp": "Abandoned",
+      "newspaperHeadline": "ENTIRE STAFF WALKS OUT MID-SERVICE AT LE SOLSTICE",
+      "newspaperDeck": "Witnesses describe scenes of quiet chaos as kitchen and floor staff left simultaneously.",
+      "newspaperBodyLeft": "Diners reported that staff simply stopped mid-task and filed out through the kitchen entrance. One server was overheard saying \"not for any amount of money.\" Tables were left uncleared. Several guests helped themselves to the wine — a minor silver lining, witnesses confirmed.",
+      "newspaperBodyRight": "The host reportedly remained at the podium alone for several minutes before the lights were cut. The industry union has been contacted. Our correspondent notes the tips jar was found untouched on the bar — a rare, quietly damning detail on Solstice Street.",
+      "letterSalutation": "To the former host,",
+      "letterBody": "The staff have left. Every last one — including the coat-check girl, who never leaves early.\n\nA restaurant without a team is simply a room full of dirty plates. I cannot operate a room full of dirty plates.",
+      "letterQuote": "You managed the queue. You forgot to manage the people behind you. There is a difference — and now you understand what it costs.",
+      "letterSignOff": "Regretfully,",
+      "letterPS": "She was the first to go. She always knows."
+    },
+    "VIP": {
+      "ledgerStamp": "Dismissed",
+      "newspaperHeadline": "DISTINGUISHED GUEST TURNED AWAY AT DOOR OF LOCAL RESTAURANT",
+      "newspaperDeck": "A diplomatic incident erupted on Solstice Street when the host refused entry to a notable guest.",
+      "newspaperBodyLeft": "What should have been a quiet dinner became an incident when a VIP was refused entry to Le Solstice, reportedly for an \"undisclosed policy.\" Their security detail was observed escorting them away without comment. The guest was seen later that evening at a bistro on the Left Bank, eating alone.",
+      "newspaperBodyRight": "A formal protest has been issued. The restaurant's owner, reached through an intermediary, issued a single statement: \"This person no longer works here.\" The host could not be reached for comment. Their coat was found folded on the pavement outside. It had started to rain.",
+      "letterSalutation": "To the former host,",
+      "letterBody": "You turned away someone who should not have been turned away.\n\nI have received several calls I did not want to receive, from people I did not want to hear from, about a decision that should not have been made.",
+      "letterQuote": "The rules exist to serve the restaurant. The restaurant exists to serve people. Some people you simply do not refuse. This is not philosophy — it is plumbing.",
+      "letterSignOff": "With all the warmth I have left,",
+      "letterPS": "Your personal items will be posted. Eventually. It may rain."
+    },
+    "BANNED": {
+      "ledgerStamp": "Compromised",
+      "newspaperHeadline": "KNOWN TROUBLEMAKER SEATED AT LE SOLSTICE — CHAOS ENSUES",
+      "newspaperDeck": "Sources confirm a banned individual was admitted and seated, resulting in a disrupted service.",
+      "newspaperBodyLeft": "Industry insiders report that a figure well known to the hospitality community was permitted entry to Le Solstice despite appearing on the establishment's own banned register. The resulting disruption cleared three tables and sent two parties into the street without their desserts.",
+      "newspaperBodyRight": "The host responsible for the oversight has since left the establishment. Chef Balzac, who declined to be named, remarked only that \"the list exists for a reason.\" The restaurant remains open but declined to comment on its door policy going forward.",
+      "letterSalutation": "To the former host,",
+      "letterBody": "You seated someone from the Banned list.\n\nThe list is not a suggestion. It is not a guideline. It is the only document in this restaurant that is never wrong.",
+      "letterQuote": "I gave you a list. One list. The list told you exactly what not to do. I am at a loss to explain how this happened — and I am a man who is rarely at a loss.",
+      "letterSignOff": "Without further ceremony,",
+      "letterPS": "Do not use me as a reference."
+    }
+  },
+  "nights": {
+    "1": {
+      "newspaper": "LE SOLSTICE REOPENS: CAN IT SURVIVE THE HYPE?",
+      "newspaperDeck": "After two years of silence, the city's most discussed dining room returns — this time with a new face at the podium.",
+      "newspaperBodyLeft": "The doors of Le Solstice swung open last night for the first time since the incident that shuttered it — an incident which, depending on who you ask, involved either a structural survey or a dispute of considerably more personal nature between the previous management and its principal investor, one Mr. V.\n\nThe queue that formed an hour before opening was, by all accounts, a social spectacle in itself: a former deputy mayor, three food bloggers of competing persuasions, and a gentleman in a white linen suit who declined to give his name but accepted a complimentary drink from a passing server nonetheless.",
+      "newspaperBodyRight": "Whether Le Solstice has changed, or merely refreshed its surface, remains to be seen. What is certain is that the new host — whose name the management declined to share — will be the test. A dining room lives or dies at the podium.\n\nOur correspondent notes that the first appetizers arrived eleven minutes late and the bread basket arrived without tongs, a detail which Mr. V., observed briefly in the corridor, did not appear to notice. Whether this is reassuring or alarming is a matter of perspective. We shall return.",
+      "quote": "A restaurant is a theater, and you are the bouncer. Don't let the ugly people on the stage.",
+      "memo": "Tonight is your first night. Learn the basics: manage the queue, seat the guests, watch the floor."
+    },
+    "2": {
+      "newspaper": "NEW HOST SHOWS PROMISE, BUT THE REAL TEST BEGINS.",
+      "newspaperDeck": "First impressions suggest a steady hand at the door — but the crowd grows stranger, and the city is watching with appetite.",
+      "newspaperBodyLeft": "A second night, and the queue outside Le Solstice was longer by a third. This is either a sign of genuine curiosity or the particular hunger that attends anything the city has been told it cannot have. Both are equally likely, and equally dangerous.\n\nThe host was observed turning away at least three parties before nine o'clock. Two were smiling when they left. The third was not, and paused long enough on the pavement to suggest a review may be forthcoming.",
+      "newspaperBodyRight": "The real question — whether the house can hold its standards as the guests grow more unusual — is one this correspondent cannot answer from the street. A table has been requested through the proper channels. We are, as yet, unanswered.\n\nMr. V. was not sighted. This may be the most telling detail of the evening.",
+      "quote": "Rules are the foundation of society. But cash is the foundation of this building. Don't confuse the two.",
+      "memo": "Two unusual guests tonight. Your choices will define what kind of house this becomes."
+    },
+    "3": {
+      "default": {
+        "newspaper": "THE RESTAURANT FINDS ITS RHYTHM.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "underworld": {
+        "newspaper": "LOUD NOISES AND FAT TIPS AT LOCAL BISTRO.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "michelin": {
+        "newspaper": "IS LE SOLSTICE THE STRICTEST RESTAURANT IN THE WORLD?",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "viral": {
+        "newspaper": "THE PLACE TO BE SEEN: LE SOLSTICE TRENDING GLOBALLY.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      }
+    },
+    "4": {
+      "default": {
+        "newspaper": "NIGHT FOUR AT LE SOLSTICE.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "underworld": {
+        "newspaper": "SYNDICATE LINKS RUMOURED AS TIPS FLOW FREELY.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "michelin": {
+        "newspaper": "WHISPERS OF AN INSPECTOR IN THE CITY.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "viral": {
+        "newspaper": "QUEUES FORM BEFORE OPENING TIME.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      }
+    },
+    "5": {
+      "default": {
+        "newspaper": "THE CITY IS WATCHING.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "underworld": {
+        "newspaper": "RUMORS OF MONEY LAUNDERING AT LE SOLSTICE.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "michelin": {
+        "newspaper": "CULINARY ELITE FLOCK TO IMPOSSIBLE-TO-BOOK RESTAURANT.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "viral": {
+        "newspaper": "INFLUENCER BRAWL OVER THE LAST WAGYU STEAK.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      }
+    },
+    "6": {
+      "default": {
+        "newspaper": "PENULTIMATE SERVICE.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "underworld": {
+        "newspaper": "THE SYNDICATE TIGHTENS ITS GRIP.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "michelin": {
+        "newspaper": "THE INSPECTOR'S VERDICT APPROACHES.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "viral": {
+        "newspaper": "VIRAL MOMENTUM REACHES A FEVER PITCH.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      }
+    },
+    "7": {
+      "default": {
+        "newspaper": "THE FINAL NIGHT.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "underworld": {
+        "newspaper": "THE RAID — COPS AND BOSSES. DO NOT LET THEM TOUCH.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "michelin": {
+        "newspaper": "THE THREE STARS — PERFECTION IS NOT AN EXPECTATION; IT IS A THREAT.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      },
+      "viral": {
+        "newspaper": "THE LIVE STREAM — 100 COVERS OR NOTHING.",
+        "newspaperDeck": "",
+        "newspaperBodyLeft": "",
+        "newspaperBodyRight": "",
+        "quote": "...",
+        "memo": "..."
+      }
+    }
+  }
+}

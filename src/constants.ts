@@ -482,22 +482,3 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     partySeated: false,
   },
 ];
-
-export const GREETINGS = [
-  "Good evening, I'm here for my table.",
-  "Hi, I have a reservation.",
-  "Hello, table for tonight?",
-  "Hey, checking in for my booking.",
-];
-
-export const SCAMMER_GREETINGS = [
-  "I definitely have a reservation, I just forgot the time.",
-  "My name should be in there, I booked it weeks ago.",
-  "I'm a regular here, you must have my name.",
-];
-
-export const WALK_IN_GREETINGS = [
-  "Do you have any space for a walk-in?",
-  "We don't have a booking, but we're hoping for a table.",
-  "Any chance you can squeeze us in?",
-];

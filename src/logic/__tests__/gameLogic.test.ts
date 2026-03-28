@@ -15,6 +15,7 @@ import {
   generateQuestionResponse,
   seedTraits,
   applyMoraleGameOver,
+  clearFloorplanSelection,
 } from '../gameLogic';
 import {
   ClientType,
@@ -133,6 +134,18 @@ describe('createInitialGrid', () => {
     const grid = createInitialGrid();
     const ids = grid.flat().map(c => c.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('clearFloorplanSelection', () => {
+  it('turns SELECTED cells EMPTY and leaves others unchanged', () => {
+    const grid = createInitialGrid();
+    grid[0][0] = { ...grid[0][0], state: CellState.SELECTED };
+    grid[1][1] = { ...grid[1][1], state: CellState.OCCUPIED, mealDuration: 5, partyId: 'p1' };
+    const next = clearFloorplanSelection(grid);
+    expect(next[0][0].state).toBe(CellState.EMPTY);
+    expect(next[1][1].state).toBe(CellState.OCCUPIED);
+    expect(next[1][1].mealDuration).toBe(5);
   });
 });
 

@@ -1,0 +1,13 @@
+{
+  "appTitle": "Service Compris",
+  "language": {
+    "en": "EN",
+    "fr": "FR"
+  },
+  "difficulty": {
+    "0": "Chill",
+    "1": "Normal",
+    "2": "Busy",
+    "3": "Hell"
+  }
+}

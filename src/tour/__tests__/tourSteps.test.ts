@@ -6,17 +6,16 @@ describe('TOUR_STEPS', () => {
     expect(TOUR_STEPS).toHaveLength(7);
   });
 
-  it('each step has target, title, tooltip, and view', () => {
+  it('each step has target, copyKey, and view', () => {
     for (const step of TOUR_STEPS) {
       expect(typeof step.target).toBe('string');
-      expect(typeof step.title).toBe('string');
-      expect(typeof step.tooltip).toBe('string');
+      expect(typeof step.copyKey).toBe('string');
       expect(['desk', 'floorplan']).toContain(step.view);
     }
   });
 
   it('targets are the expected values in order', () => {
-    expect(TOUR_STEPS.map(s => s.target)).toEqual([
+    expect(TOUR_STEPS.map((s) => s.target)).toEqual([
       'topbar',
       'queue',
       'party-ticket',
@@ -32,6 +31,6 @@ describe('TOUR_STEPS', () => {
   });
 
   it('all steps except the last target desk view', () => {
-    expect(TOUR_STEPS.slice(0, -1).every(s => s.view === 'desk')).toBe(true);
+    expect(TOUR_STEPS.slice(0, -1).every((s) => s.view === 'desk')).toBe(true);
   });
 });

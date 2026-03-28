@@ -4,8 +4,9 @@ import {
   GameState,
   ChatMessage
 } from '../types';
-import { QuestionField, generateQuestionResponse } from '../logic/gameLogic';
+import { QuestionField, generateQuestionResponse, clearFloorplanSelection } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
+import { tGame } from '../i18n/tGame';
 
 type ShowToast = (
   title: string,
@@ -43,12 +44,13 @@ export function useQuestionActions(
         const nextLogs = logMsg ? [logMsg, ...prev.logs].slice(0, 50) : prev.logs;
 
         if (nextPatience <= 0) {
-          toastArgs = ['Client stormed out!', '★ −0.5', 'error'];
+          toastArgs = [tGame('toast.stormOutTitle'), tGame('toast.stormPatienceDetail'), 'error'];
           return {
             ...prev,
+            grid: clearFloorplanSelection(prev.grid),
             currentClient: null,
             rating: Math.max(0, prev.rating - 0.5),
-            logs: [`Client stormed out of the desk!`, ...nextLogs].slice(0, 50)
+            logs: [tGame('logStormDesk'), ...nextLogs].slice(0, 50)
           };
         }
 

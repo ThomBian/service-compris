@@ -61,6 +61,6 @@ describe('useCampaign', () => {
   it('activeNightConfig resolves correct path config', () => {
     const { result } = renderHook(() => useCampaign());
     expect(result.current.activeNightConfig).toBeDefined();
-    expect(typeof result.current.activeNightConfig.newspaper).toBe('string');
+    expect(Array.isArray(result.current.activeNightConfig.characterIds)).toBe(true);
   });
 });

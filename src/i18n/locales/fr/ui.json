@@ -1,0 +1,118 @@
+{
+  "landing": {
+    "tagline": "Simulateur de maître d’hôtel",
+    "blurb": "Vous êtes le maître d’hôtel d’un restaurant impitoyable. Gérez la porte, démasquez les menteurs, survivez au service.",
+    "newGame": "Nouvelle partie"
+  },
+  "topbar": {
+    "night": "Nuit",
+    "overtime": "Prolongation",
+    "hellLockedTitle": "Mode Enfer : vitesse ×3 uniquement",
+    "locked": "Verrouillé",
+    "speedPause": "Pause",
+    "speed1": "Vitesse ×1",
+    "speed2": "Vitesse ×2",
+    "speed3": "Vitesse ×3",
+    "tourTitle": "Visite rapide"
+  },
+  "app": {
+    "resume3xAria": "Reprendre à vitesse ×3",
+    "resumeNormalAria": "Reprendre à vitesse normale",
+    "paused": "En pause",
+    "resumeHint": "Cliquez n’importe où pour reprendre"
+  },
+  "corkboard": {
+    "venue": "Le Solstice",
+    "shiftReport": "Rapport de service",
+    "observer": "L’Observateur",
+    "eveningEdition": "Édition du soir",
+    "free": "Gratuit",
+    "internalMemo": "Note interne",
+    "activityLog": "Journal d’activité",
+    "noActivity": "Aucune activité enregistrée.",
+    "nightStatus": "Night {{n}} — {{status}}",
+    "statusReady": "Prêt",
+    "statusGameOver": "Partie terminée",
+    "resign": "Démissionner.",
+    "openRestaurant": "Ouvrir le restaurant",
+    "scrollHint": "← faire défiler →",
+    "ledgerRevenue": "Chiffre d’affaires",
+    "ledgerCovers": "Couverts servis",
+    "ledgerSalaries": "Salaires",
+    "ledgerElectricity": "Électricité",
+    "ledgerFood": "Nourriture ({{covers}} cvts)",
+    "ledgerNetProfit": "Profit net",
+    "ledgerCash": "Trésorerie",
+    "ledgerRating": "Note",
+    "letterPS": "P.S. {{text}}",
+    "signOff": "— V.",
+    "mrV": "Mr. V."
+  },
+  "desk": {
+    "partyTicket": "Ticket groupe",
+    "awaitingGuest": "En attente du prochain invité…",
+    "caught": "PRIS",
+    "joinedQueue": "File d’attente",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "time": "Heure",
+    "partySize": "Taille",
+    "accuseNoReservation": "Pas de résa",
+    "accuseSize": "Mensonge taille",
+    "accuseTime": "En retard",
+    "refuse": "REFUSER",
+    "waitInLine": "Remettre en file",
+    "seatParty": "Installer le groupe",
+    "maitreD": "Maître d’hôtel"
+  },
+  "booking": {
+    "title": "Livre des réservations",
+    "colTime": "Heure",
+    "colName": "Nom",
+    "colSize": "Taille",
+    "colIn": "Là",
+    "alreadyIn": "⚠ DÉJÀ LÀ"
+  },
+  "clipboard": {
+    "title": "Planchette",
+    "tabVips": "VIP",
+    "tabBanned": "Interdits",
+    "tabLog": "Journal",
+    "noVips": "Aucun VIP prévu ce soir.",
+    "noBanned": "Pas d’embrouilles prévues ce soir.",
+    "comingSoon": "{{tab}} — coming soon",
+    "booksAs": "Books as \"{{first}} {{last}}\" · Party of {{n}}",
+    "walkInNoRes": "Walk-in, no reservation · Party of {{n}}",
+    "lateArrival": "Late arrival · Party of {{n}}",
+    "seated": "Installé",
+    "gameOver": "Game over",
+    "cashFine": "Amende",
+    "moraleHit": "Moral",
+    "ratingLoss": "Perte de note",
+    "slippedThrough": "Passé entre les mailles"
+  },
+  "floorplan": {
+    "title": "Plan de salle",
+    "seating": "Placement : {{name}} ({{sel}}/{{total}})",
+    "viewingMode": "Lecture seule — les chiffres sont les minutes restantes à table",
+    "confirm": "Confirmer",
+    "cropSeat": "Rogner et placer",
+    "refuseParty": "Refuser le groupe",
+    "toastOccupied": "Table occupée",
+    "toastOccupiedDetail": "{{m}} min restantes",
+    "toastAdjacent": "Doit être adjacent",
+    "toastAdjacentDetail": "Choisissez une case à côté de la sélection",
+    "lastCall": "Dernier service",
+    "turningSoon": "Bientôt libre",
+    "minutesLeft": "{{m}} min"
+  },
+  "scene": {
+    "doorOpen": "Porte",
+    "doorClosed": "Porte",
+    "seatPartyBtn": "Installer le groupe",
+    "queue": "File"
+  },
+  "miniGrid": {
+    "title": "Salle"
+  }
+}

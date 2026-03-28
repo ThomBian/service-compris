@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pause, Play } from 'lucide-react';
 import { formatTime } from './utils';
 import { GameProvider, useGame } from './context/GameContext';
@@ -14,7 +15,6 @@ import { TourOverlay } from './components/TourOverlay';
 import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
 import { TOUR_STEPS } from './tour/tourSteps';
 import { useCampaign } from './hooks/useCampaign';
-import { FIRED_CONFIG } from './data/firedConfig';
 import type { LedgerData } from './types/campaign';
 
 type GamePhase = 'LANDING' | 'CORKBOARD' | 'PLAYING';
@@ -40,6 +40,7 @@ function GameContent({
   onTourSkip,
   startTour,
 }: GameContentProps) {
+  const { t } = useTranslation('ui');
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
@@ -157,18 +158,18 @@ function GameContent({
             onClick={() => setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1)}
             aria-label={
               gameState.difficulty === 3
-                ? 'Resume game at 3× speed'
-                : 'Resume game at normal speed'
+                ? t('app.resume3xAria')
+                : t('app.resumeNormalAria')
             }
           >
             <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-2 rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-6 py-4 text-center shadow-[4px_4px_0_0_#141414]">
               <span className="flex items-center gap-2 text-[#141414]">
                 <Pause size={24} strokeWidth={2.5} className="shrink-0" aria-hidden />
-                <span className="text-2xl font-bold uppercase tracking-[0.2em] sm:text-3xl">Paused</span>
+                <span className="text-2xl font-bold uppercase tracking-[0.2em] sm:text-3xl">{t('app.paused')}</span>
               </span>
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#141414]/80 sm:text-sm">
                 <Play size={16} className="shrink-0" aria-hidden />
-                Click anywhere to resume
+                {t('app.resumeHint')}
               </span>
             </span>
           </button>
@@ -187,6 +188,8 @@ function GameContent({
 }
 
 export default function App() {
+  const { t } = useTranslation('common');
+  React.useEffect(() => { document.title = t('appTitle'); }, [t]);
   const [phase, setPhase] = React.useState<GamePhase>('LANDING');
   const [difficulty, setDifficulty] = React.useState(1);
   const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
@@ -230,7 +233,7 @@ export default function App() {
         'Party of 2 seated (reservation).',
         'Walk-in refused — no tables available.',
         'Scammer caught and removed.',
-        'VIP Monsieur Dupont seated.',
+        'VIP Marcel Dupont seated.',
         'Last call — table cleared early.',
         'Party of 4 seated.',
         'Reservation no-show marked.',
@@ -272,9 +275,8 @@ export default function App() {
               variant={campaign.campaignState.lossReason ? 'fired' : 'next_night'}
               nightNumber={campaign.campaignState.nightNumber}
               activePath={campaign.activePath}
-              nightConfig={campaign.activeNightConfig}
               ledger={campaign.campaignState.lastNightLedger}
-              firedConfig={campaign.campaignState.lossReason ? FIRED_CONFIG[campaign.campaignState.lossReason] : undefined}
+              firedReason={campaign.campaignState.lossReason ?? undefined}
               onOpenRestaurant={handleOpenRestaurant}
               onLeave={handleLeave}
             />
