@@ -59,38 +59,6 @@ export interface VisualTraits {
   eyebrows?: 0 | 1;  // 0=heavy furrowed brow, 1=droopy half-closed lids (drunk)
 }
 
-export type VipConsequenceTier = 'RATING' | 'CASH_FINE' | 'GAME_OVER';
-
-export type BannedConsequenceTier = 'CASH_FINE' | 'MORALE' | 'RATING' | 'GAME_OVER';
-
-export interface Banned {
-  id: string;
-  name: string;
-  visualTraits: VisualTraits;
-  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
-  aliasFirstName?: string;
-  aliasLastName?: string;
-  expectedPartySize: number;
-  consequenceTier: BannedConsequenceTier;
-  cashFinePenalty?: number;
-  moralePenalty?: number;
-  ratingPenalty?: number;
-  consequenceDescription: string;
-}
-
-export interface Vip {
-  id: string;
-  name: string;
-  visualTraits: VisualTraits;
-  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
-  aliasFirstName?: string;
-  aliasLastName?: string;
-  expectedPartySize: number;
-  consequenceTier: VipConsequenceTier;
-  cashFinePenalty?: number;
-  consequenceDescription: string;
-}
-
 export interface CharacterDefinition {
   id:                string;
   name:              string;

@@ -284,6 +284,7 @@ export function useDecisionActions(
         if (client.characterId) {
           const ch = characters.current.get(client.characterId);
           if (ch) {
+            // onSeated receives prev, so character cash outcomes replace (not augment) base revenue
             const outcome = ch.onSeated(prev);
             Object.assign(finalState, outcome);
             toastArgs = [`Well handled — ${ch.def.name} has been seated.`, undefined, 'success'];
