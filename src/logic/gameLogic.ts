@@ -11,6 +11,10 @@ import {
   CellState,
   VisualTraits,
 } from "../types";
+import type { ActiveRule } from "../types/campaign";
+import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
+import { generateDailyCharacters, injectCharacterReservations, CHARACTER_ROSTER } from "./characterRoster";
+import { generateReservations } from "./reservationGenerator";
 import {
   FIRST_NAMES,
   LAST_NAMES,
@@ -771,5 +775,53 @@ export function applyMoraleGameOver(state: GameState): GameState {
     gameOverCharacterId: null,
     timeMultiplier: 0,
     logs: ["Staff morale collapsed. Shift ended.", ...state.logs].slice(0, 50),
+  };
+}
+
+// --- Initial State Builder ---
+
+export type PersistState = { cash: number; rating: number; morale: number; nightNumber: number };
+
+export function buildInitialState(
+  difficulty: number,
+  persist?: PersistState,
+  rules: ActiveRule[] = [],
+  characterIds?: string[],
+): GameState {
+  const nightNumber = persist?.nightNumber ?? 1;
+  const rating = persist ? Math.max(1.0, persist.rating) : 5.0;
+
+  const dailyChars = characterIds && characterIds.length > 0
+    ? CHARACTER_ROSTER.filter(c => characterIds.includes(c.id))
+    : generateDailyCharacters(difficulty, CHARACTER_ROSTER);
+
+  const baseReservations = nightNumber === 1
+    ? INITIAL_RESERVATIONS
+    : generateReservations({ nightNumber, rating });
+  const reservations = injectCharacterReservations(dailyChars, baseReservations);
+
+  return {
+    inGameMinutes: START_TIME,
+    timeMultiplier: difficulty === 3 ? 3 : 1,
+    difficulty,
+    reservations,
+    spawnedReservationIds: [],
+    queue: [],
+    currentClient: null,
+    grid: createInitialGrid(),
+    cash: persist?.cash ?? 0,
+    rating,
+    morale: persist ? Math.max(0, persist.morale) : 100,
+    logs: ["Welcome to The Maitre D'. The doors are open."],
+    dailyCharacterIds: dailyChars.map(c => c.id),
+    seatedCharacterIds: [],
+    gameOverCharacterId: null,
+    strikeActive: false,
+    gameOver: false,
+    gameOverReason: null,
+    nightNumber,
+    coversSeated: 0,
+    shiftRevenue: 0,
+    activeRules: rules,
   };
 }

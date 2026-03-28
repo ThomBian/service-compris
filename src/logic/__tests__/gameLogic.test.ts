@@ -3,6 +3,7 @@ import {
   createInitialGrid,
   generateClientData,
   createNewClient,
+  buildInitialState,
   prepareClientForDesk,
   isAdjacent,
   canSelectCell,
@@ -887,5 +888,23 @@ describe('visualTraits', () => {
     const a = seedTraits('abc123', 0);
     const b = seedTraits('abc123', 1);
     expect(a).not.toEqual(b);
+  });
+});
+
+describe('buildInitialState — campaign params', () => {
+  it('defaults to empty activeRules when not provided', () => {
+    const state = buildInitialState(1);
+    expect(state.activeRules).toEqual([]);
+  });
+
+  it('stores provided rules in activeRules', () => {
+    const rules = [{ key: 'CLOCK_SPEED' as const, value: 2 }];
+    const state = buildInitialState(1, undefined, rules);
+    expect(state.activeRules).toEqual(rules);
+  });
+
+  it('uses provided characterIds instead of generateDailyCharacters', () => {
+    const state = buildInitialState(1, undefined, [], ['the-syndicate']);
+    expect(state.dailyCharacterIds).toEqual(['the-syndicate']);
   });
 });
