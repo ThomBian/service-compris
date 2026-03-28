@@ -17,6 +17,9 @@ export interface ActiveRule {
 
 export interface NightConfig {
   newspaper: string;
+  newspaperDeck?: string;
+  newspaperBodyLeft?: string;
+  newspaperBodyRight?: string;
   quote: string;
   memo: string;
   characterIds: string[];

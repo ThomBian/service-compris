@@ -475,9 +475,9 @@ export function CorkboardScreen({
               ? fired.newspaperHeadline
               : (nightConfig?.newspaper ?? "")
           }
-          deck={isLoss && fired ? fired.newspaperDeck : ""}
-          bodyLeft={isLoss && fired ? fired.newspaperBodyLeft : ""}
-          bodyRight={isLoss && fired ? fired.newspaperBodyRight : ""}
+          deck={isLoss && fired ? fired.newspaperDeck : (nightConfig?.newspaperDeck ?? "")}
+          bodyLeft={isLoss && fired ? fired.newspaperBodyLeft : (nightConfig?.newspaperBodyLeft ?? "")}
+          bodyRight={isLoss && fired ? fired.newspaperBodyRight : (nightConfig?.newspaperBodyRight ?? "")}
           visible={showNewspaper}
         />
         <LetterPaper
