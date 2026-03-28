@@ -265,13 +265,64 @@ function LetterPaper({ nightConfig, fired, isLoss, visible }: {
   );
 }
 
+// ─── Activity Log ─────────────────────────────────────────────────────────────
+
+function ActivityLogPaper({ logs, visible }: { logs: string[]; visible: boolean }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: -30, rotate: 1.5 }}
+          animate={{ opacity: 1, y: 0, rotate: -1 }}
+          transition={{ type: 'spring', stiffness: 160, damping: 22 }}
+          style={{ position: 'relative', flexShrink: 0, filter: 'drop-shadow(3px 6px 14px rgba(0,0,0,0.8))' }}
+        >
+          <div style={{
+            position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+            width: 14, height: 14, borderRadius: '50%', background: '#444',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.6)', zIndex: 2, border: '2px solid rgba(0,0,0,0.3)',
+          }} />
+
+          <div style={{
+            width: 280, background: '#f8f8f6', border: '1px solid #c0c0b0',
+            fontFamily: '"Courier New", Courier, monospace', overflow: 'hidden',
+          }}>
+            <div style={{
+              background: '#1a1a1a', color: '#e8e8e8', padding: '10px 16px',
+              fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 'bold',
+            }}>
+              Activity Log
+            </div>
+            <div style={{ padding: '12px 14px', maxHeight: 320, overflowY: 'auto' }}>
+              {logs.length === 0 ? (
+                <div style={{ fontSize: '0.65rem', color: '#999', fontStyle: 'italic' }}>No activity recorded.</div>
+              ) : (
+                logs.map((entry, i) => (
+                  <div key={i} style={{
+                    fontSize: '0.62rem', color: i === 0 ? '#222' : '#555',
+                    borderBottom: '1px solid #e0e0d0', padding: '4px 0',
+                    lineHeight: 1.4,
+                  }}>
+                    {entry}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 const LEDGER_ROWS = 10; // total rows in ledger (including dividers)
 const MS_PER_ROW = 120;
 const NEWSPAPER_DELAY_MS = LEDGER_ROWS * MS_PER_ROW + 300;
 const LETTER_DELAY_MS = NEWSPAPER_DELAY_MS + 700;
-const CTA_DELAY_MS = LETTER_DELAY_MS + 600;
+const LOG_DELAY_MS = LETTER_DELAY_MS + 500;
+const CTA_DELAY_MS = LOG_DELAY_MS + 400;
 
 export function CorkboardScreen({
   variant,
@@ -289,6 +340,7 @@ export function CorkboardScreen({
   const [ledgerStep, setLedgerStep] = React.useState(0);
   const [showNewspaper, setShowNewspaper] = React.useState(false);
   const [showLetter, setShowLetter] = React.useState(false);
+  const [showLog, setShowLog] = React.useState(false);
   const [ctaReady, setCtaReady] = React.useState(false);
 
   React.useEffect(() => {
@@ -299,6 +351,7 @@ export function CorkboardScreen({
     }
     timers.push(setTimeout(() => setShowNewspaper(true), NEWSPAPER_DELAY_MS));
     timers.push(setTimeout(() => setShowLetter(true), LETTER_DELAY_MS));
+    timers.push(setTimeout(() => setShowLog(true), LOG_DELAY_MS));
     timers.push(setTimeout(() => setCtaReady(true), CTA_DELAY_MS));
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -342,6 +395,7 @@ export function CorkboardScreen({
           visible={showNewspaper}
         />
         <LetterPaper nightConfig={nightConfig} fired={fired} isLoss={isLoss} visible={showLetter} />
+        <ActivityLogPaper logs={ledger.logs} visible={showLog} />
       </div>
 
       {/* Bottom bar — matches game chrome */}
