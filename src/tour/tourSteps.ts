@@ -1,5 +1,7 @@
+export type TourTarget = 'topbar' | 'queue' | 'desk-tools' | 'floorplan';
+
 export interface TourStep {
-  target: string;
+  target: TourTarget;
   title: string;
   tooltip: string;
   view: 'desk' | 'floorplan';
