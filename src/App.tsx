@@ -98,7 +98,8 @@ function GameContent({
     if (!shiftEnded || shiftEndFiredRef.current) return;
     shiftEndFiredRef.current = true;
 
-    const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
+    const foodCost = gameState.coversSeated * FOOD_COST_PER_COVER;
+    const bill = SALARY_COST + ELECTRICITY_COST + foodCost;
     const cashAfter = Math.max(0, gameState.cash - bill);
 
     const ledger: LedgerData = {
@@ -107,6 +108,10 @@ function GameContent({
       rating: Math.max(1.0, gameState.rating),
       morale: Math.max(0, gameState.morale),
       coversSeated: gameState.coversSeated,
+      shiftRevenue: gameState.shiftRevenue,
+      salaryCost: SALARY_COST,
+      electricityCost: ELECTRICITY_COST,
+      foodCost,
     };
 
     // Determine loss reason — COVERS_TARGET means win (target reached), not loss

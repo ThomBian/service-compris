@@ -34,7 +34,7 @@ describe('useCampaign', () => {
 
   it('advanceNight increments nightNumber and stores ledger', () => {
     const { result } = renderHook(() => useCampaign());
-    const ledger = { cash: 500, netProfit: 200, rating: 4.0, morale: 80, coversSeated: 20 };
+    const ledger = { cash: 500, netProfit: 200, rating: 4.0, morale: 80, coversSeated: 20, shiftRevenue: 700, salaryCost: 200, electricityCost: 40, foodCost: 460 };
     act(() => { result.current.advanceNight(ledger); });
     expect(result.current.campaignState.nightNumber).toBe(2);
     expect(result.current.campaignState.lastNightLedger).toEqual(ledger);
@@ -42,7 +42,7 @@ describe('useCampaign', () => {
 
   it('fireCorkboard sets lossReason and stores ledger', () => {
     const { result } = renderHook(() => useCampaign());
-    const ledger = { cash: 100, netProfit: -50, rating: 2.0, morale: 0, coversSeated: 5 };
+    const ledger = { cash: 100, netProfit: -50, rating: 2.0, morale: 0, coversSeated: 5, shiftRevenue: 200, salaryCost: 200, electricityCost: 40, foodCost: 115 };
     act(() => { result.current.fireCorkboard('MORALE', ledger); });
     expect(result.current.campaignState.lossReason).toBe('MORALE');
     expect(result.current.campaignState.lastNightLedger).toEqual(ledger);
@@ -51,7 +51,7 @@ describe('useCampaign', () => {
   it('resetCampaign clears all state', () => {
     const { result } = renderHook(() => useCampaign());
     act(() => { result.current.incrementPathScore('underworld', 30); });
-    act(() => { result.current.advanceNight({ cash: 400, netProfit: 100, rating: 4.0, morale: 70, coversSeated: 15 }); });
+    act(() => { result.current.advanceNight({ cash: 400, netProfit: 100, rating: 4.0, morale: 70, coversSeated: 15, shiftRevenue: 600, salaryCost: 200, electricityCost: 40, foodCost: 345 }); });
     act(() => { result.current.resetCampaign(); });
     expect(result.current.campaignState.nightNumber).toBe(1);
     expect(result.current.campaignState.pathScores).toEqual({ underworld: 0, michelin: 0, viral: 0 });

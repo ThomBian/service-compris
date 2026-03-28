@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { LedgerData, NightConfig, FiredConfig, CorkboardVariant, CampaignPath } from '../types/campaign';
 import { FIRED_CONFIG } from '../data/firedConfig';
 
@@ -13,346 +14,264 @@ interface CorkboardScreenProps {
   onLeave: () => void;
 }
 
-// ---- Sub-components ----
+// ─── Ledger ───────────────────────────────────────────────────────────────────
 
-function Pin({ color = '#c0392b' }: { color?: string }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      top: -10,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: 16,
-      height: 16,
-      borderRadius: '50%',
-      background: color,
-      boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-      zIndex: 2,
-      border: '2px solid rgba(0,0,0,0.3)',
-    }} />
-  );
-}
-
-function Paper({
-  rotation = 0,
-  children,
-  pinColor,
-}: {
-  rotation?: number;
-  children: React.ReactNode;
-  pinColor?: string;
+function LedgerPaper({ ledger, stamp, animationStep }: {
+  ledger: LedgerData;
+  stamp?: string;
+  animationStep: number; // how many items to reveal
 }) {
-  return (
-    <div style={{
-      position: 'relative',
-      transform: `rotate(${rotation}deg)`,
-      flexShrink: 0,
-      filter: 'drop-shadow(3px 6px 12px rgba(0,0,0,0.7))',
-    }}>
-      <Pin color={pinColor} />
-      {children}
-    </div>
-  );
-}
+  const rows = [
+    { label: 'Revenue', value: `€${Math.round(ledger.shiftRevenue)}`, type: 'income' as const },
+    { label: 'Covers Seated', value: String(ledger.coversSeated), type: 'info' as const },
+    { label: '──────────', value: '', type: 'divider' as const },
+    { label: 'Salaries', value: `-€${ledger.salaryCost}`, type: 'expense' as const },
+    { label: 'Electricity', value: `-€${ledger.electricityCost}`, type: 'expense' as const },
+    { label: `Food (${ledger.coversSeated} covers)`, value: `-€${Math.round(ledger.foodCost)}`, type: 'expense' as const },
+    { label: '──────────', value: '', type: 'divider' as const },
+    { label: 'Net Profit', value: `€${Math.round(ledger.netProfit)}`, type: 'total' as const },
+    { label: 'Cash on Hand', value: `€${Math.round(ledger.cash)}`, type: 'total' as const },
+    { label: 'Rating', value: `${ledger.rating.toFixed(1)} ★`, type: 'info' as const },
+  ];
 
-function LedgerPaper({ ledger, stamp }: { ledger: LedgerData; stamp?: string }) {
   return (
-    <Paper rotation={-1.5} pinColor="#2c7a2c">
+    <motion.div
+      initial={{ opacity: 0, y: -40, rotate: -2 }}
+      animate={{ opacity: 1, y: 0, rotate: -1.5 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.1 }}
+      style={{ position: 'relative', flexShrink: 0, filter: 'drop-shadow(3px 6px 14px rgba(0,0,0,0.8))' }}
+    >
+      {/* Pin */}
       <div style={{
-        width: 300,
-        background: '#fafaf8',
-        border: '1px solid #c8c8b0',
-        fontFamily: '"Courier New", Courier, monospace',
-        overflow: 'hidden',
+        position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+        width: 14, height: 14, borderRadius: '50%', background: '#2c7a2c',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.6)', zIndex: 2, border: '2px solid rgba(0,0,0,0.3)',
+      }} />
+
+      <div style={{
+        width: 300, background: '#fafaf8', border: '1px solid #c8c8b0',
+        fontFamily: '"Courier New", Courier, monospace', overflow: 'hidden',
       }}>
-        {/* Green ledger header */}
+        {/* Green header */}
         <div style={{
-          background: '#2d5a2d',
-          color: '#e8f5e8',
-          padding: '10px 16px',
-          fontSize: '0.7rem',
-          letterSpacing: '0.2em',
-          textTransform: 'uppercase',
-          fontWeight: 'bold',
+          background: '#1a1a1a', color: '#e8e8e8', padding: '10px 16px',
+          fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 'bold',
         }}>
           Le Solstice — Shift Report
         </div>
 
-        {/* Ruled lines */}
-        <div style={{ padding: '16px', position: 'relative' }}>
+        <div style={{ padding: '14px 16px', position: 'relative', minHeight: 200 }}>
           {stamp && (
             <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) rotate(-15deg)',
-              border: '3px solid rgba(150,30,30,0.6)',
-              color: 'rgba(150,30,30,0.6)',
-              padding: '4px 12px',
-              fontSize: '1.4rem',
-              fontWeight: 900,
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              zIndex: 1,
-              pointerEvents: 'none',
+              position: 'absolute', top: '45%', left: '50%',
+              transform: 'translate(-50%, -50%) rotate(-12deg)',
+              border: '3px solid rgba(150,30,30,0.65)', color: 'rgba(150,30,30,0.65)',
+              padding: '4px 14px', fontSize: '1.3rem', fontWeight: 900,
+              letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+              zIndex: 3, pointerEvents: 'none', fontFamily: '"Courier New", monospace',
             }}>
               {stamp}
             </div>
           )}
-          {[
-            { label: 'Cash', value: `€${Math.round(ledger.cash)}` },
-            { label: 'Net Profit', value: `€${Math.round(ledger.netProfit)}` },
-            { label: 'Rating', value: `${ledger.rating.toFixed(1)} ★` },
-            { label: 'Covers Seated', value: String(ledger.coversSeated) },
-          ].map(({ label, value }, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #d0cfc0',
-              padding: '6px 0',
-              fontSize: '0.78rem',
-            }}>
-              <span style={{ color: '#555', fontSize: '0.7rem', letterSpacing: '0.05em' }}>{label}</span>
-              <span style={{ fontWeight: 'bold', color: '#222' }}>{value}</span>
-            </div>
-          ))}
+
+          {rows.map((row, i) => {
+            if (i >= animationStep) return null;
+            if (row.type === 'divider') {
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ borderTop: '1px dashed #ccc', margin: '6px 0' }}
+                />
+              );
+            }
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  padding: '4px 0', fontSize: '0.74rem',
+                }}
+              >
+                <span style={{ color: '#666', fontSize: '0.68rem' }}>{row.label}</span>
+                <span style={{
+                  fontWeight: row.type === 'total' ? 'bold' : 'normal',
+                  color: row.type === 'expense' ? '#8b0000' : row.type === 'total' ? '#111' : '#333',
+                }}>
+                  {row.value}
+                </span>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
-    </Paper>
+    </motion.div>
   );
 }
 
-function NewspaperPaper({
-  masthead,
-  headline,
-  deck,
-  bodyLeft,
-  bodyRight,
-}: {
-  masthead: string;
+// ─── Newspaper ────────────────────────────────────────────────────────────────
+
+function NewspaperPaper({ headline, deck, bodyLeft, bodyRight, visible }: {
   headline: string;
   deck: string;
   bodyLeft: string;
   bodyRight: string;
+  visible: boolean;
 }) {
   return (
-    <Paper rotation={0.5} pinColor="#222">
-      <div style={{
-        width: 380,
-        background: '#f5f3ee',
-        border: '1px solid #bbb',
-        fontFamily: 'Georgia, "Times New Roman", serif',
-        overflow: 'hidden',
-      }}>
-        {/* Masthead */}
-        <div style={{
-          borderBottom: '3px double #111',
-          padding: '8px 16px',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '0.1em', color: '#111' }}>
-            {masthead}
-          </div>
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 30, rotate: 1 }}
+          animate={{ opacity: 1, y: 0, rotate: 0.5 }}
+          transition={{ type: 'spring', stiffness: 180, damping: 22 }}
+          style={{ position: 'relative', flexShrink: 0, filter: 'drop-shadow(3px 6px 14px rgba(0,0,0,0.8))' }}
+        >
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.6rem',
-            color: '#666',
-            marginTop: 4,
-            letterSpacing: '0.05em',
-          }}>
-            <span>ÉDITION DU SOIR</span>
-            <span>PRIX: GRATUIT</span>
-          </div>
-        </div>
+            position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+            width: 14, height: 14, borderRadius: '50%', background: '#111',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.6)', zIndex: 2, border: '2px solid rgba(0,0,0,0.3)',
+          }} />
 
-        {/* Headline */}
-        <div style={{ padding: '12px 16px 0' }}>
           <div style={{
-            fontSize: '1rem',
-            fontWeight: 900,
-            lineHeight: 1.2,
-            color: '#111',
-            textTransform: 'uppercase',
-            letterSpacing: '0.02em',
+            width: 380, background: '#f5f3ee', border: '1px solid #bbb',
+            fontFamily: 'Georgia, "Times New Roman", serif', overflow: 'hidden',
           }}>
-            {headline}
-          </div>
-          {deck && (
-            <div style={{
-              fontSize: '0.72rem',
-              color: '#444',
-              fontStyle: 'italic',
-              marginTop: 6,
-              borderTop: '1px solid #bbb',
-              paddingTop: 6,
-            }}>
-              {deck}
+            <div style={{ borderBottom: '3px double #111', padding: '8px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '0.08em', color: '#111' }}>
+                L'Observateur
+              </div>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                fontSize: '0.58rem', color: '#888', marginTop: 3, letterSpacing: '0.05em',
+              }}>
+                <span>ÉDITION DU SOIR</span>
+                <span>PRIX: GRATUIT</span>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Body columns */}
-        {(bodyLeft || bodyRight) && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 0,
-            padding: '10px 16px 14px',
-            borderTop: '1px solid #bbb',
-            marginTop: 8,
-          }}>
-            <div style={{
-              fontSize: '0.65rem',
-              lineHeight: 1.5,
-              color: '#333',
-              paddingRight: 8,
-              borderRight: '1px solid #ccc',
-            }}>{bodyLeft}</div>
-            <div style={{
-              fontSize: '0.65rem',
-              lineHeight: 1.5,
-              color: '#333',
-              paddingLeft: 8,
-            }}>{bodyRight}</div>
-          </div>
-        )}
-      </div>
-    </Paper>
-  );
-}
-
-function MemoLetter({ nightConfig }: { nightConfig?: NightConfig }) {
-  return (
-    <Paper rotation={1.2} pinColor="#8b6914">
-      <div style={{
-        width: 320,
-        background: '#fffef8',
-        border: '1px solid #c8b870',
-        fontFamily: '"Courier New", Courier, monospace',
-        overflow: 'hidden',
-      }}>
-        {/* Letterhead */}
-        <div style={{
-          borderBottom: '2px solid #c8b870',
-          padding: '10px 16px',
-          background: '#fffff0',
-        }}>
-          <div style={{ fontSize: '0.6rem', letterSpacing: '0.25em', color: '#6a5a1a', textTransform: 'uppercase', fontWeight: 'bold' }}>
-            Le Solstice — Correspondance Interne
-          </div>
-          <div style={{ fontSize: '0.55rem', color: '#999', marginTop: 2 }}>Transmission du Directeur</div>
-        </div>
-
-        <div style={{ padding: '14px 16px' }}>
-          {nightConfig?.quote && (
-            <div style={{
-              borderLeft: '3px solid #c8b870',
-              paddingLeft: 10,
-              marginBottom: 12,
-              fontSize: '0.72rem',
-              fontStyle: 'italic',
-              color: '#444',
-              lineHeight: 1.5,
-            }}>
-              "{nightConfig.quote}"
+            <div style={{ padding: '12px 16px 0' }}>
+              <div style={{
+                fontSize: '1rem', fontWeight: 900, lineHeight: 1.25, color: '#111',
+                textTransform: 'uppercase', letterSpacing: '0.02em',
+              }}>
+                {headline}
+              </div>
+              {deck && (
+                <div style={{
+                  fontSize: '0.7rem', color: '#555', fontStyle: 'italic',
+                  marginTop: 6, borderTop: '1px solid #bbb', paddingTop: 6,
+                }}>
+                  {deck}
+                </div>
+              )}
             </div>
-          )}
-          <div style={{ fontSize: '0.7rem', color: '#333', lineHeight: 1.6 }}>
-            {nightConfig?.memo || '...'}
+
+            {(bodyLeft || bodyRight) && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0,
+                padding: '10px 16px 14px', borderTop: '1px solid #bbb', marginTop: 8,
+              }}>
+                <div style={{ fontSize: '0.63rem', lineHeight: 1.55, color: '#444', paddingRight: 8, borderRight: '1px solid #ccc' }}>
+                  {bodyLeft}
+                </div>
+                <div style={{ fontSize: '0.63rem', lineHeight: 1.55, color: '#444', paddingLeft: 8 }}>
+                  {bodyRight}
+                </div>
+              </div>
+            )}
           </div>
-          <div style={{ marginTop: 16, fontSize: '0.65rem', color: '#888', borderTop: '1px solid #e0d8a0', paddingTop: 8 }}>
-            — V.
-          </div>
-        </div>
-      </div>
-    </Paper>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
-function DismissalLetter({ fired }: { fired: FiredConfig }) {
+// ─── Letter / Memo ────────────────────────────────────────────────────────────
+
+function LetterPaper({ nightConfig, fired, isLoss, visible }: {
+  nightConfig?: NightConfig;
+  fired?: FiredConfig;
+  isLoss: boolean;
+  visible: boolean;
+}) {
   return (
-    <Paper rotation={1.5} pinColor="#8b6914">
-      <div style={{
-        width: 320,
-        background: '#fffef8',
-        border: '1px solid #c8b870',
-        fontFamily: '"Courier New", Courier, monospace',
-        overflow: 'hidden',
-      }}>
-        {/* Letterhead */}
-        <div style={{
-          borderBottom: '2px solid #c8b870',
-          padding: '10px 16px',
-          background: '#fffff0',
-        }}>
-          <div style={{ fontSize: '0.6rem', letterSpacing: '0.25em', color: '#6a5a1a', textTransform: 'uppercase', fontWeight: 'bold' }}>
-            Le Solstice — Correspondance Interne
-          </div>
-          <div style={{ fontSize: '0.55rem', color: '#999', marginTop: 2 }}>Transmission du Directeur</div>
-        </div>
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 40, rotate: 2 }}
+          animate={{ opacity: 1, y: 0, rotate: 1.2 }}
+          transition={{ type: 'spring', stiffness: 160, damping: 22 }}
+          style={{ position: 'relative', flexShrink: 0, filter: 'drop-shadow(3px 6px 14px rgba(0,0,0,0.8))' }}
+        >
+          <div style={{
+            position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+            width: 14, height: 14, borderRadius: '50%', background: '#8b6914',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.6)', zIndex: 2, border: '2px solid rgba(0,0,0,0.3)',
+          }} />
 
-        <div style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: '0.7rem', color: '#555', marginBottom: 8 }}>{fired.letterSalutation}</div>
-          <div style={{ fontSize: '0.7rem', color: '#333', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 12 }}>
-            {fired.letterBody}
-          </div>
           <div style={{
-            borderLeft: '3px solid #c8b870',
-            paddingLeft: 10,
-            marginBottom: 12,
-            fontSize: '0.7rem',
-            fontStyle: 'italic',
-            color: '#444',
-            lineHeight: 1.5,
+            width: 320, background: '#fffef8', border: '1px solid #c8b870',
+            fontFamily: '"Courier New", Courier, monospace', overflow: 'hidden',
           }}>
-            "{fired.letterQuote}"
+            <div style={{ borderBottom: '2px solid #c8b870', padding: '10px 16px', background: '#fffff0' }}>
+              <div style={{ fontSize: '0.58rem', letterSpacing: '0.22em', color: '#6a5a1a', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                Le Solstice — Correspondance Interne
+              </div>
+              <div style={{ fontSize: '0.53rem', color: '#aaa', marginTop: 2 }}>Transmission du Directeur</div>
+            </div>
+
+            <div style={{ padding: '14px 16px' }}>
+              {isLoss && fired ? (
+                <>
+                  <div style={{ fontSize: '0.68rem', color: '#555', marginBottom: 8 }}>{fired.letterSalutation}</div>
+                  <div style={{ fontSize: '0.68rem', color: '#333', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 12 }}>
+                    {fired.letterBody}
+                  </div>
+                  <div style={{ borderLeft: '3px solid #c8b870', paddingLeft: 10, marginBottom: 12, fontSize: '0.68rem', fontStyle: 'italic', color: '#555', lineHeight: 1.5 }}>
+                    "{fired.letterQuote}"
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#555' }}>{fired.letterSignOff}</div>
+                  <div style={{ fontSize: '0.68rem', color: '#333', fontWeight: 'bold', marginTop: 4 }}>Monsieur V.</div>
+                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #e0d8a0', fontSize: '0.63rem', color: '#777', fontStyle: 'italic' }}>
+                    P.S. {fired.letterPS}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {nightConfig?.quote && (
+                    <div style={{ borderLeft: '3px solid #c8b870', paddingLeft: 10, marginBottom: 12, fontSize: '0.7rem', fontStyle: 'italic', color: '#555', lineHeight: 1.5 }}>
+                      "{nightConfig.quote}"
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.7rem', color: '#333', lineHeight: 1.6 }}>
+                    {nightConfig?.memo ?? '...'}
+                  </div>
+                  <div style={{ marginTop: 14, fontSize: '0.63rem', color: '#888', borderTop: '1px solid #e0d8a0', paddingTop: 8 }}>
+                    — V.
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#555' }}>{fired.letterSignOff}</div>
-          <div style={{ fontSize: '0.7rem', color: '#444', fontWeight: 'bold', marginTop: 4 }}>Monsieur V.</div>
-          <div style={{
-            marginTop: 10,
-            paddingTop: 8,
-            borderTop: '1px solid #e0d8a0',
-            fontSize: '0.65rem',
-            color: '#666',
-            fontStyle: 'italic',
-          }}>
-            P.S. {fired.letterPS}
-          </div>
-        </div>
-      </div>
-    </Paper>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
-// ---- Main component ----
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
-const openButtonStyle: React.CSSProperties = {
-  background: '#e8e8e8',
-  color: '#111',
-  border: '1px solid #444',
-  padding: '8px 20px',
-  fontSize: '0.75rem',
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase',
-  fontFamily: 'monospace',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-};
-
-const leaveButtonStyle: React.CSSProperties = {
-  background: 'transparent',
-  color: '#555',
-  border: '1px solid #333',
-  padding: '8px 20px',
-  fontSize: '0.75rem',
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase',
-  fontFamily: 'monospace',
-  cursor: 'pointer',
-};
+const LEDGER_ROWS = 10; // total rows in ledger (including dividers)
+const MS_PER_ROW = 120;
+const NEWSPAPER_DELAY_MS = LEDGER_ROWS * MS_PER_ROW + 300;
+const LETTER_DELAY_MS = NEWSPAPER_DELAY_MS + 700;
+const CTA_DELAY_MS = LETTER_DELAY_MS + 600;
 
 export function CorkboardScreen({
   variant,
@@ -363,70 +282,123 @@ export function CorkboardScreen({
   onOpenRestaurant,
   onLeave,
 }: CorkboardScreenProps) {
-  const boardRef = React.useRef<HTMLDivElement>(null);
   const isLoss = variant === 'fired';
   const fired = isLoss ? (firedConfig ?? FIRED_CONFIG['MORALE']) : undefined;
 
-  // Drag-to-scroll
-  const drag = React.useRef({ active: false, startX: 0, scrollLeft: 0 });
+  // Animation sequencing
+  const [ledgerStep, setLedgerStep] = React.useState(0);
+  const [showNewspaper, setShowNewspaper] = React.useState(false);
+  const [showLetter, setShowLetter] = React.useState(false);
+  const [ctaReady, setCtaReady] = React.useState(false);
 
+  React.useEffect(() => {
+    // Tick ledger rows
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let i = 1; i <= LEDGER_ROWS; i++) {
+      timers.push(setTimeout(() => setLedgerStep(i), i * MS_PER_ROW));
+    }
+    timers.push(setTimeout(() => setShowNewspaper(true), NEWSPAPER_DELAY_MS));
+    timers.push(setTimeout(() => setShowLetter(true), LETTER_DELAY_MS));
+    timers.push(setTimeout(() => setCtaReady(true), CTA_DELAY_MS));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  // Drag-to-scroll
+  const boardRef = React.useRef<HTMLDivElement>(null);
+  const drag = React.useRef({ active: false, startX: 0, scrollLeft: 0 });
   const onMouseDown = (e: React.MouseEvent) => {
-    drag.current = {
-      active: true,
-      startX: e.pageX - (boardRef.current?.offsetLeft ?? 0),
-      scrollLeft: boardRef.current?.scrollLeft ?? 0,
-    };
+    drag.current = { active: true, startX: e.pageX - (boardRef.current?.offsetLeft ?? 0), scrollLeft: boardRef.current?.scrollLeft ?? 0 };
   };
   const onMouseMove = (e: React.MouseEvent) => {
     if (!drag.current.active || !boardRef.current) return;
     e.preventDefault();
-    const x = e.pageX - (boardRef.current.offsetLeft);
-    boardRef.current.scrollLeft = drag.current.scrollLeft - (x - drag.current.startX) * 1.2;
+    boardRef.current.scrollLeft = drag.current.scrollLeft - (e.pageX - boardRef.current.offsetLeft - drag.current.startX) * 1.2;
   };
-  const onMouseUp = () => { drag.current.active = false; };
+  const stopDrag = () => { drag.current.active = false; };
 
   return (
-    <div className="h-screen flex flex-col" style={{ background: '#111', fontFamily: 'monospace' }}>
-      {/* Cork board — horizontal scroll */}
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#111', fontFamily: '"Courier New", Courier, monospace' }}>
+
+      {/* Cork board */}
       <div
         ref={boardRef}
-        className="flex-1 overflow-x-auto overflow-y-hidden flex items-center gap-14 px-20 select-none"
-        style={{
-          background: '#1c1c1c',
-          cursor: drag.current.active ? 'grabbing' : 'grab',
-        }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
+        onMouseUp={stopDrag}
+        onMouseLeave={stopDrag}
+        style={{
+          flex: 1, overflowX: 'auto', overflowY: 'hidden',
+          display: 'flex', alignItems: 'center', gap: 56, padding: '40px 80px',
+          background: '#1a1a1a', cursor: drag.current.active ? 'grabbing' : 'grab',
+          userSelect: 'none',
+        }}
       >
-        <LedgerPaper ledger={ledger} stamp={isLoss && fired ? fired.ledgerStamp : undefined} />
+        <LedgerPaper ledger={ledger} stamp={isLoss && fired ? fired.ledgerStamp : undefined} animationStep={ledgerStep} />
         <NewspaperPaper
-          masthead="L'Observateur"
           headline={isLoss && fired ? fired.newspaperHeadline : (nightConfig?.newspaper ?? '')}
           deck={isLoss && fired ? fired.newspaperDeck : ''}
           bodyLeft={isLoss && fired ? fired.newspaperBodyLeft : ''}
           bodyRight={isLoss && fired ? fired.newspaperBodyRight : ''}
+          visible={showNewspaper}
         />
-        {isLoss && fired
-          ? <DismissalLetter fired={fired} />
-          : <MemoLetter nightConfig={nightConfig} />
-        }
+        <LetterPaper nightConfig={nightConfig} fired={fired} isLoss={isLoss} visible={showLetter} />
       </div>
 
-      {/* Fixed bottom bar */}
-      <div
-        className="flex items-center justify-between px-8 py-3 border-t"
-        style={{ background: '#0a0a0a', borderColor: '#2a2a2a' }}
-      >
-        <span style={{ color: '#3a3a3a', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'monospace' }}>
+      {/* Bottom bar — matches game chrome */}
+      <div style={{
+        background: '#0d0d0d', borderTop: '1px solid #222',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 32px',
+      }}>
+        <span style={{ color: '#444', fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
           Night {nightNumber} — {isLoss ? 'Game Over' : 'Ready'}
         </span>
-        {isLoss
-          ? <button onClick={onLeave} style={leaveButtonStyle}>Leave.</button>
-          : <button onClick={onOpenRestaurant} style={openButtonStyle}>⬡ Open Restaurant</button>
-        }
-        <span style={{ color: '#2a2a2a', fontSize: '0.7rem', fontFamily: 'monospace' }}>← scroll to read →</span>
+
+        <AnimatePresence>
+          {ctaReady && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              {isLoss ? (
+                <button
+                  onClick={onLeave}
+                  style={{
+                    background: 'transparent', color: '#777', border: '1px solid #444',
+                    padding: '8px 24px', fontSize: '0.72rem', letterSpacing: '0.15em',
+                    textTransform: 'uppercase', fontFamily: '"Courier New", monospace',
+                    cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.target as HTMLButtonElement).style.borderColor = '#888'; (e.target as HTMLButtonElement).style.color = '#aaa'; }}
+                  onMouseLeave={e => { (e.target as HTMLButtonElement).style.borderColor = '#444'; (e.target as HTMLButtonElement).style.color = '#777'; }}
+                >
+                  Leave.
+                </button>
+              ) : (
+                <button
+                  onClick={onOpenRestaurant}
+                  style={{
+                    background: '#e8e8e0', color: '#111', border: '2px solid #111',
+                    padding: '10px 28px', fontSize: '0.75rem', letterSpacing: '0.18em',
+                    textTransform: 'uppercase', fontFamily: '"Courier New", monospace',
+                    cursor: 'pointer', fontWeight: 'bold',
+                    boxShadow: '3px 3px 0 0 rgba(20,20,20,1)',
+                    transition: 'transform 0.1s, box-shadow 0.1s',
+                  }}
+                  onMouseEnter={e => { (e.target as HTMLButtonElement).style.transform = 'translate(1px, 1px)'; (e.target as HTMLButtonElement).style.boxShadow = '2px 2px 0 0 rgba(20,20,20,1)'; }}
+                  onMouseLeave={e => { (e.target as HTMLButtonElement).style.transform = ''; (e.target as HTMLButtonElement).style.boxShadow = '3px 3px 0 0 rgba(20,20,20,1)'; }}
+                >
+                  ○ Open Restaurant
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <span style={{ color: '#2a2a2a', fontSize: '0.65rem', letterSpacing: '0.1em' }}>
+          {ctaReady ? '← scroll to read →' : ''}
+        </span>
       </div>
     </div>
   );

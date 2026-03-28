@@ -29,6 +29,11 @@ export interface LedgerData {
   rating: number;
   morale: number;
   coversSeated: number;
+  // Fee breakdown
+  shiftRevenue: number;
+  salaryCost: number;
+  electricityCost: number;
+  foodCost: number;
 }
 
 export interface PathScores {
