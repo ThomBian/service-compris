@@ -17,7 +17,7 @@ interface TourOverlayProps {
 }
 
 const PAD = 10;
-const TOOLTIP_WIDTH = 256;
+const TOOLTIP_WIDTH = 300;
 const TOOLTIP_MARGIN = 12;
 const EDGE_GUARD = 12;
 
@@ -127,7 +127,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
         <div
           role="dialog"
           aria-label={`Tour step ${step + 1} of ${TOUR_STEPS.length}: ${tourStep.title}`}
-          className="absolute w-64 rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_rgba(20,20,20,1)]"
+          className="absolute w-[300px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_rgba(20,20,20,1)]"
           style={{
             top: tooltipBelow ? tooltipTop : undefined,
             bottom: tooltipBelow ? undefined : vh - tooltipTop,
