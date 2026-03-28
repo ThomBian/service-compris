@@ -21,11 +21,26 @@ const TOOLTIP_WIDTH = 256;
 const TOOLTIP_MARGIN = 12;
 const EDGE_GUARD = 12;
 
+const COUNTDOWN_START = 3;
+
 export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }) => {
   const [rect, setRect] = useState<TargetRect | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const tourStep = TOUR_STEPS[step];
   const isLastStep = step === TOUR_STEPS.length - 1;
   const maskId = useId().replace(/:/g, '_');
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown === 0) {
+      onSkip();
+      return;
+    }
+    const timer = setTimeout(() => setCountdown((c) => (c ?? 1) - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, onSkip]);
+
+  const handleDone = () => setCountdown(COUNTDOWN_START);
 
   useEffect(() => {
     const update = () => {
@@ -95,8 +110,20 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
         </svg>
       )}
 
+      {/* Countdown screen */}
+      {countdown !== null && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+          <p className="text-2xl font-black uppercase tracking-[0.2em] text-white">
+            Ready to Play!
+          </p>
+          <span className="text-8xl font-black text-white tabular-nums">
+            {countdown === 0 ? 'Go!' : countdown}
+          </span>
+        </div>
+      )}
+
       {/* Tooltip */}
-      {rect && (
+      {rect && countdown === null && (
         <div
           role="dialog"
           aria-label={`Tour step ${step + 1} of ${TOUR_STEPS.length}: ${tourStep.title}`}
@@ -118,22 +145,24 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
           </p>
           <button
             type="button"
-            onClick={isLastStep ? onSkip : onNext}
+            onClick={isLastStep ? handleDone : onNext}
             className="mt-4 w-full rounded-lg bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] transition-opacity hover:opacity-80"
           >
-            {isLastStep ? 'Done' : 'Next →'}
+            {isLastStep ? "Let's go!" : 'Next →'}
           </button>
         </div>
       )}
 
       {/* Skip */}
-      <button
-        type="button"
-        onClick={onSkip}
-        className="absolute top-4 right-4 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:text-white/90"
-      >
-        Skip tour
-      </button>
+      {countdown === null && (
+        <button
+          type="button"
+          onClick={onSkip}
+          className="absolute top-4 right-4 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:text-white/90"
+        >
+          Skip tour
+        </button>
+      )}
     </div>,
     document.body,
   );
