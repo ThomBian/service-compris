@@ -3,7 +3,8 @@ import { Clipboard as ClipboardIcon } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { ClientAvatar } from "../scene/ClientAvatar";
 import { ActivityLog } from "../ActivityLog";
-import type { Vip, Banned } from "../../types";
+import { CHARACTER_ROSTER } from '../../logic/characterRoster';
+import type { CharacterDefinition } from '../../types';
 
 const TABS = [
   "VIPs",
@@ -13,29 +14,29 @@ const TABS = [
 ] as const;
 
 interface VipDossierEntryProps {
-  vip: Vip;
+  char: CharacterDefinition;
   isSeated: boolean;
 }
 
-const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
+const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ char, isSeated }) => {
   const arrivalText =
-    vip.arrivalMO === "RESERVATION_ALIAS"
-      ? `Books as "${vip.aliasFirstName} ${vip.aliasLastName}" · Party of ${vip.expectedPartySize}`
-      : vip.arrivalMO === "WALK_IN"
-        ? `Walk-in, no reservation · Party of ${vip.expectedPartySize}`
-        : `Late arrival · Party of ${vip.expectedPartySize}`;
+    char.arrivalMO === 'RESERVATION_ALIAS'
+      ? `Books as "${char.aliasFirstName} ${char.aliasLastName}" · Party of ${char.expectedPartySize}`
+      : char.arrivalMO === 'WALK_IN' || char.arrivalMO === 'BYPASS'
+        ? `Walk-in, no reservation · Party of ${char.expectedPartySize}`
+        : `Late arrival · Party of ${char.expectedPartySize}`;
 
   const consequenceBadge = isSeated ? (
     <div className="inline-flex items-center gap-1 rounded bg-green-100 border border-green-400 px-1 py-0.5 w-fit">
       <span className="text-[9px]">✓</span>
       <span className="text-[8px] text-green-700 font-semibold">Seated</span>
     </div>
-  ) : vip.consequenceTier === "GAME_OVER" ? (
+  ) : char.gameOver ? (
     <div className="inline-flex items-center gap-1 rounded bg-[#1a0a0a] border border-[#5a1010] px-1 py-0.5 w-fit">
       <span className="text-[9px]">☠️</span>
       <span className="text-[8px] text-[#ff6b6b] font-semibold">Game over</span>
     </div>
-  ) : vip.consequenceTier === "CASH_FINE" ? (
+  ) : char.cashPenalty ? (
     <div className="inline-flex items-center gap-1 rounded bg-orange-50 border border-orange-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">💸</span>
       <span className="text-[8px] text-orange-700 font-semibold">
@@ -64,7 +65,7 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
         style={{ opacity: isSeated ? 0.6 : 1 }}
       >
         <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
-          <ClientAvatar traits={vip.visualTraits} />
+          <ClientAvatar traits={char.visualTraits} />
         </div>
       </div>
       <div
@@ -73,7 +74,7 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
         <div
           className={`text-[10px] font-bold ${isSeated ? "text-green-700" : "text-[#141414]"}`}
         >
-          {vip.name}
+          {char.name}
         </div>
         <div className="text-[8px] text-[#666] leading-tight">
           {arrivalText}
@@ -90,20 +91,20 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ vip, isSeated }) => {
 };
 
 interface BannedDossierEntryProps {
-  banned: Banned;
+  char: CharacterDefinition;
   isSeated: boolean;
 }
 
 const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
-  banned,
+  char,
   isSeated,
 }) => {
   const arrivalText =
-    banned.arrivalMO === "RESERVATION_ALIAS"
-      ? `Books as "${banned.aliasFirstName} ${banned.aliasLastName}" · Party of ${banned.expectedPartySize}`
-      : banned.arrivalMO === "WALK_IN"
-        ? `Walk-in, no reservation · Party of ${banned.expectedPartySize}`
-        : `Late arrival · Party of ${banned.expectedPartySize}`;
+    char.arrivalMO === 'RESERVATION_ALIAS'
+      ? `Books as "${char.aliasFirstName} ${char.aliasLastName}" · Party of ${char.expectedPartySize}`
+      : char.arrivalMO === 'WALK_IN' || char.arrivalMO === 'BYPASS'
+        ? `Walk-in, no reservation · Party of ${char.expectedPartySize}`
+        : `Late arrival · Party of ${char.expectedPartySize}`;
 
   const consequenceBadge = isSeated ? (
     <div className="inline-flex items-center gap-1 rounded bg-red-100 border border-red-400 px-1 py-0.5 w-fit">
@@ -112,19 +113,19 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
         Slipped through
       </span>
     </div>
-  ) : banned.consequenceTier === "GAME_OVER" ? (
+  ) : char.gameOver ? (
     <div className="inline-flex items-center gap-1 rounded bg-[#1a0a0a] border border-[#5a1010] px-1 py-0.5 w-fit">
       <span className="text-[9px]">☠️</span>
       <span className="text-[8px] text-[#ff6b6b] font-semibold">Game over</span>
     </div>
-  ) : banned.consequenceTier === "CASH_FINE" ? (
+  ) : char.cashPenalty ? (
     <div className="inline-flex items-center gap-1 rounded bg-orange-50 border border-orange-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">💸</span>
       <span className="text-[8px] text-orange-700 font-semibold">
         Cash fine
       </span>
     </div>
-  ) : banned.consequenceTier === "MORALE" ? (
+  ) : char.moralePenalty ? (
     <div className="inline-flex items-center gap-1 rounded bg-purple-50 border border-purple-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">😵</span>
       <span className="text-[8px] text-purple-700 font-semibold">
@@ -153,7 +154,7 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
         style={{ opacity: isSeated ? 0.6 : 1 }}
       >
         <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
-          <ClientAvatar traits={banned.visualTraits} />
+          <ClientAvatar traits={char.visualTraits} />
         </div>
       </div>
       <div
@@ -162,7 +163,7 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
         <div
           className={`text-[10px] font-bold ${isSeated ? "text-red-700" : "text-[#141414]"}`}
         >
-          {banned.name}
+          {char.name}
         </div>
         <div className="text-[8px] text-[#666] leading-tight">
           {arrivalText}
@@ -188,6 +189,14 @@ export const Clipboard: React.FC = () => {
       setHasUnseenLogs(true);
     }
   }, [gameState.logs.length, activeTab]);
+
+  const dailyVipDefs = gameState.dailyCharacterIds
+    .map(id => CHARACTER_ROSTER.find(c => c.id === id))
+    .filter((c): c is CharacterDefinition => c !== undefined && c.role === 'VIP');
+
+  const dailyBannedDefs = gameState.dailyCharacterIds
+    .map(id => CHARACTER_ROSTER.find(c => c.id === id))
+    .filter((c): c is CharacterDefinition => c !== undefined && c.role === 'BANNED');
 
   return (
     <div data-tour="clipboard" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
@@ -218,16 +227,16 @@ export const Clipboard: React.FC = () => {
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === "VIPs" ? (
           <div className="flex flex-col gap-2 p-1">
-            {gameState.dailyVips.length === 0 ? (
+            {dailyVipDefs.length === 0 ? (
               <p className="text-[10px] opacity-40 italic p-1">
                 No VIPs expected tonight.
               </p>
             ) : (
-              gameState.dailyVips.map((vip) => (
+              dailyVipDefs.map((char) => (
                 <VipDossierEntry
-                  key={vip.id}
-                  vip={vip}
-                  isSeated={gameState.seatedVipIds.includes(vip.id)}
+                  key={char.id}
+                  char={char}
+                  isSeated={gameState.seatedCharacterIds.includes(char.id)}
                 />
               ))
             )}
@@ -236,16 +245,16 @@ export const Clipboard: React.FC = () => {
           <ActivityLog logs={gameState.logs} />
         ) : activeTab === "Banned" ? (
           <div className="flex flex-col gap-2 p-1">
-            {gameState.dailyBanned.length === 0 ? (
+            {dailyBannedDefs.length === 0 ? (
               <p className="text-[10px] opacity-40 italic p-1">
                 No trouble expected tonight.
               </p>
             ) : (
-              gameState.dailyBanned.map((banned) => (
+              dailyBannedDefs.map((char) => (
                 <BannedDossierEntry
-                  key={banned.id}
-                  banned={banned}
-                  isSeated={gameState.seatedBannedIds.includes(banned.id)}
+                  key={char.id}
+                  char={char}
+                  isSeated={gameState.seatedCharacterIds.includes(char.id)}
                 />
               ))
             )}

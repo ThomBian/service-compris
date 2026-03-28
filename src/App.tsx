@@ -3,6 +3,7 @@ import { Pause, Play } from 'lucide-react';
 import { formatTime } from './utils';
 import { GameProvider, useGame } from './context/GameContext';
 import { PhysicalState, CellState, GameOverReason, type VisualTraits } from './types';
+import { CHARACTER_ROSTER } from './logic/characterRoster';
 import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER, DOORS_CLOSE_TIME } from './constants';
 import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
@@ -132,17 +133,11 @@ function GameContent({
 
   let loseCharacterName: string | undefined;
   let loseCharacterTraits: VisualTraits | undefined;
-  if (loseReason === 'vip' && gameState.gameOverVipId) {
-    const vip = gameState.dailyVips.find((v) => v.id === gameState.gameOverVipId);
-    if (vip) {
-      loseCharacterName = vip.name;
-      loseCharacterTraits = vip.visualTraits;
-    }
-  } else if (loseReason === 'banned' && gameState.gameOverBannedId) {
-    const banned = gameState.dailyBanned.find((b) => b.id === gameState.gameOverBannedId);
-    if (banned) {
-      loseCharacterName = banned.name;
-      loseCharacterTraits = banned.visualTraits;
+  if (gameState.gameOverCharacterId) {
+    const char = CHARACTER_ROSTER.find(c => c.id === gameState.gameOverCharacterId);
+    if (char) {
+      loseCharacterName = char.name;
+      loseCharacterTraits = char.visualTraits;
     }
   }
 
