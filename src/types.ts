@@ -1,3 +1,5 @@
+import type { ActiveRule } from './types/campaign';
+
 export enum PhysicalState {
   IN_QUEUE = 'IN_QUEUE',
   AT_DESK = 'AT_DESK',
@@ -130,7 +132,7 @@ export interface Client {
   chatHistory: ChatMessage[];
 }
 
-export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | null;
+export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | 'COVERS_TARGET' | null;
 
 export interface GameState {
   inGameMinutes: number;
@@ -157,4 +159,5 @@ export interface GameState {
   nightNumber: number;
   coversSeated: number;
   shiftRevenue: number;
+  activeRules: ActiveRule[];
 }
