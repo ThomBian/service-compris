@@ -112,6 +112,7 @@ function GameContent({
       salaryCost: SALARY_COST,
       electricityCost: ELECTRICITY_COST,
       foodCost,
+      logs: gameState.logs,
     };
 
     // Determine loss reason — COVERS_TARGET means win (target reached), not loss
@@ -216,6 +217,39 @@ export default function App() {
     campaign.resetCampaign();
     setPersist(undefined);
     setPhase('LANDING');
+  }, [campaign]);
+
+  // DEV ONLY — Shift+C jumps to corkboard with mock data; Shift+F jumps to fired screen
+  React.useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const DEV_LEDGER: LedgerData = {
+      cash: 1240, netProfit: 340, rating: 4.2, morale: 72,
+      coversSeated: 18, shiftRevenue: 1440, salaryCost: 800,
+      electricityCost: 200, foodCost: 100,
+      logs: [
+        'Party of 2 seated (reservation).',
+        'Walk-in refused — no tables available.',
+        'Scammer caught and removed.',
+        'VIP Monsieur Dupont seated.',
+        'Last call — table cleared early.',
+        'Party of 4 seated.',
+        'Reservation no-show marked.',
+        'Rush hour — 3 parties in queue.',
+      ],
+    };
+    const handler = (e: KeyboardEvent) => {
+      if (!e.shiftKey) return;
+      if (e.key === 'C') {
+        campaign.advanceNight(DEV_LEDGER);
+        setPhase('CORKBOARD');
+      }
+      if (e.key === 'F') {
+        campaign.fireCorkboard('MORALE', DEV_LEDGER);
+        setPhase('CORKBOARD');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [campaign]);
 
   return (
