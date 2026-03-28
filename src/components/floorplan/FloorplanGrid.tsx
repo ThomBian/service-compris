@@ -123,13 +123,15 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
           <span className="text-xs font-bold uppercase tracking-wide text-amber-700 w-full">
             Last Call — rush a table
           </span>
-          {occupiedPartyIds.map(partyId => (
+          {occupiedPartyIds.map((partyId, index) => (
             <button
               key={partyId}
               onClick={() => lastCallTable(partyId)}
               className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-all"
             >
-              Rush table ({partyId.slice(0, 6)})
+              {occupiedPartyIds.length === 1
+                ? 'Rush table'
+                : `Rush table ${index + 1}`}
             </button>
           ))}
         </div>

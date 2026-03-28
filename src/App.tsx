@@ -62,7 +62,13 @@ function GameContent({
 
   const isOvertime = gameState.inGameMinutes >= DOORS_CLOSE_TIME;
   const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
-  const showSummary = gameState.gameOver || (isOvertime && !hasOccupiedCells && !gameState.currentClient);
+  // Do not require an empty podium: when the last table clears, tryMoveToDesk often pulls
+  // the next guest from the queue — summary must still show. Only block during active seating.
+  const summaryBlockedByDesk =
+    gameState.currentClient?.physicalState === PhysicalState.SEATING;
+  const showSummary =
+    gameState.gameOver ||
+    (isOvertime && !hasOccupiedCells && !summaryBlockedByDesk);
 
   // Night 1 always starts with cash:0, rating:5.0, morale:100 regardless of difficulty.
   // Hardcode to avoid a race with the resetGame(initialDifficulty) useEffect below.

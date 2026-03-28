@@ -360,7 +360,12 @@ export function useDecisionActions(
       const nextGrid = prev.grid.map(row =>
         row.map(cell =>
           cell.state === CellState.OCCUPIED && cell.partyId === partyId
-            ? { ...cell, mealDuration: 0 }
+            ? {
+                ...cell,
+                state: CellState.EMPTY,
+                mealDuration: undefined,
+                partyId: undefined,
+              }
             : cell
         )
       );
