@@ -147,7 +147,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
         <div
           role="dialog"
           aria-label={`Tour step ${step + 1} of ${TOUR_STEPS.length}: ${tourStep.title}`}
-          className="absolute w-[420px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_rgba(20,20,20,1)]"
+          className="absolute w-[420px] rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-5 py-4 shadow-[4px_4px_0_0_#141414]"
           style={{
             top: tooltipTop,
             left: tooltipLeft,
@@ -166,7 +166,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
             <button
               type="button"
               onClick={isLastStep ? handleDone : onNext}
-              className="flex-1 rounded-lg bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] transition-opacity hover:opacity-80"
+              className="flex-1 rounded-xl bg-[#141414] px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#E4E3E0] shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
             >
               {isLastStep ? "Let's go!" : 'Next →'}
             </button>
@@ -174,7 +174,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
               <button
                 type="button"
                 onClick={onSkip}
-                className="rounded-lg border-2 border-[#141414]/20 px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#141414]/40 transition-colors hover:border-[#141414]/40 hover:text-[#141414]/60"
+                className="rounded-xl border-2 border-[#141414]/20 px-4 py-2 text-sm font-bold uppercase tracking-wide text-[#141414]/40 transition-colors hover:border-[#141414]/40 hover:text-[#141414]/60"
               >
                 Skip
               </button>

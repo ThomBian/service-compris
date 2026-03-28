@@ -65,11 +65,11 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   )];
 
   return (
-    <div className="flex flex-col gap-4 bg-stone-100 p-6 h-full overflow-hidden" data-tour="floorplan">
+    <div className="flex flex-col gap-4 bg-[#E4E3E0] p-6 h-full overflow-hidden" data-tour="floorplan">
       {/* Header */}
-      <div className="flex items-center justify-between border-b-2 border-stone-200 pb-4 shrink-0">
+      <div className="flex items-center justify-between border-b border-[#141414]/20 pb-4 shrink-0">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[#141414] flex items-center gap-2">
             <Users className="w-5 h-5" />
             Floorplan
           </h2>
@@ -84,7 +84,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
               {partySize})
             </p>
           ) : (
-            <p className="text-xs text-stone-400 font-medium uppercase tracking-wider">
+            <p className="text-xs text-[#141414]/40 font-medium uppercase tracking-wider">
               Viewing mode — numbers are in-game minutes left at the table
             </p>
           )}
@@ -96,11 +96,11 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
               onClick={confirmSeating}
               disabled={!canConfirm}
               className={`
-                px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all border-b-2 active:border-b-0 active:translate-y-px
+                px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all
                 ${
                   canConfirm
-                    ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-800"
-                    : "bg-stone-200 text-stone-400 border-stone-300 cursor-not-allowed"
+                    ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[2px_2px_0_0_#141414] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_0_#141414] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    : "bg-[#141414]/10 text-[#141414]/30 cursor-not-allowed"
                 }
               `}
               id="confirm-seating-btn"
@@ -110,7 +110,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
             </button>
             <button
               onClick={refuseSeatedParty}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-[#141414]/20 text-[#141414]/60 hover:bg-[#141414]/10 transition-colors flex items-center gap-1.5"
               id="refuse-party-btn"
             >
               <X className="w-3 h-3" />
@@ -121,7 +121,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
       </div>
 
       {isOvertime && occupiedPartyIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 shrink-0 border-b-2 border-amber-300 pb-3">
+        <div className="flex flex-wrap gap-2 shrink-0 border-b border-amber-400/40 pb-3">
           <span className="text-xs font-bold uppercase tracking-wide text-amber-700 w-full">
             Last Call — rush a table
           </span>
@@ -129,7 +129,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
             <button
               key={partyId}
               onClick={() => lastCallTable(partyId)}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-all"
+              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-colors"
             >
               {occupiedPartyIds.length === 1
                 ? 'Rush table'
@@ -146,7 +146,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
       >
         <div
           className={`
-            grid gap-1 bg-stone-300 p-1 rounded-lg border-2 border-stone-400
+            grid gap-1 bg-[#141414]/10 p-1 rounded-xl border-2 border-[#141414]/20
             ${!isSeating ? "opacity-80 grayscale-[0.2]" : "ring-4 ring-emerald-500/20"}
           `}
           style={{
@@ -169,11 +169,11 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                   disabled={!isSeating || isBlocked}
                   className={`
                     aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5
-                    ${isBlocked ? "bg-stone-900 cursor-not-allowed opacity-60" : ""}
+                    ${isBlocked ? "bg-[#141414]/70 cursor-not-allowed opacity-60" : ""}
                     ${!isBlocked && cell.state === CellState.EMPTY ? "bg-white" : ""}
                     ${!isBlocked && cell.state === CellState.EMPTY && isSeating ? "hover:bg-emerald-100 cursor-pointer" : ""}
                     ${!isBlocked && cell.state === CellState.SELECTED ? "bg-emerald-500 shadow-inner scale-95" : ""}
-                    ${!isBlocked && cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-stone-800 cursor-not-allowed" : ""}
+                    ${!isBlocked && cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-[#141414] cursor-not-allowed" : ""}
                     ${!isBlocked && isAboutToFree ? "bg-amber-400 cursor-not-allowed" : ""}
                     ${!isSeating ? "cursor-default" : ""}
                   `}
@@ -187,7 +187,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                   {cell.state === CellState.OCCUPIED && (
                     <>
                       <Users
-                        className={`w-3 h-3 shrink-0 ${isAboutToFree ? "text-stone-700" : "text-stone-500"}`}
+                        className={`w-3 h-3 shrink-0 ${isAboutToFree ? "text-amber-900" : "text-[#E4E3E0]/50"}`}
                       />
                       {cell.mealDuration !== undefined && (
                         <span

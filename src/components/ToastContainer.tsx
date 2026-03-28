@@ -26,7 +26,7 @@ export const ToastContainer: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className={`rounded-lg px-3 py-2 text-[11px] border max-w-[240px] ${VARIANT_CLASSES[toast.variant]}`}
+            className={`rounded-xl px-3 py-2 text-[11px] border max-w-[240px] ${VARIANT_CLASSES[toast.variant]}`}
           >
             <div className="font-bold leading-snug">{toast.title}</div>
             {toast.detail && (

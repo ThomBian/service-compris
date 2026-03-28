@@ -161,7 +161,7 @@ function GameContent({
                 : 'Resume game at normal speed'
             }
           >
-            <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-2 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-6 py-4 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
+            <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-2 rounded-xl border-2 border-[#141414] bg-[#E4E3E0] px-6 py-4 text-center shadow-[4px_4px_0_0_#141414]">
               <span className="flex items-center gap-2 text-[#141414]">
                 <Pause size={24} strokeWidth={2.5} className="shrink-0" aria-hidden />
                 <span className="text-2xl font-bold uppercase tracking-[0.2em] sm:text-3xl">Paused</span>

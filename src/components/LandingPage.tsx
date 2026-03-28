@@ -35,13 +35,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           the liars, survive the shift.
         </p>
 
-        <div className="flex items-center gap-1 rounded-lg border border-[#141414]/10 bg-white/50 p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-[#141414]/10 bg-white/50 p-1">
           {DIFFICULTIES.map(({ value, label }) => (
             <button
               key={value}
               type="button"
               onClick={() => onDifficultyChange(value)}
-              className={`rounded px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${
                 difficulty === value
                   ? "bg-[#141414] text-[#E4E3E0]"
                   : "hover:bg-[#141414]/10"
@@ -55,7 +55,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <button
           type="button"
           onClick={onStartGame}
-          className="rounded-xl border-2 border-[#141414] bg-[#141414] px-10 py-3 text-lg font-extrabold uppercase tracking-[0.2em] text-[#E4E3E0] shadow-[4px_4px_0_0_rgba(20,20,20,1)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(20,20,20,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+          className="rounded-xl border-2 border-[#141414] bg-[#141414] px-10 py-3 text-lg font-extrabold uppercase tracking-[0.2em] text-[#E4E3E0] shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
         >
           New Game
         </button>

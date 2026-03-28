@@ -30,7 +30,7 @@ export const TicketField: React.FC<TicketFieldProps> = ({
 
   return (
     <motion.div
-      className={`cursor-pointer rounded-lg px-2 py-1.5 border-2 transition-colors hover:shadow-[2px_2px_0px_0px_rgba(20,20,20,0.12)] ${
+      className={`cursor-pointer rounded-xl px-2 py-1.5 border-2 transition-colors hover:shadow-[2px_2px_0_0_rgba(20,20,20,0.12)] ${
         isEmpty
           ? isHovered
             ? 'border-dashed border-blue-400 bg-blue-50'

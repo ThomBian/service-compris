@@ -34,6 +34,8 @@ export interface LedgerData {
   salaryCost: number;
   electricityCost: number;
   foodCost: number;
+  // Activity log
+  logs: string[];
 }
 
 export interface PathScores {

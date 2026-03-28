@@ -79,13 +79,13 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-      <div className="flex items-center gap-2 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
+      <div className="flex items-center gap-2 bg-white/50 p-1 rounded-xl border border-[#141414]/10">
         {difficulty === 3 ? (
           <div
             className="flex items-center gap-2 px-2 py-1"
             title="Hell mode: 3× speed only"
           >
-            <span className="px-3 py-1 rounded text-xs font-bold bg-[#141414] text-[#E4E3E0]">
+            <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#141414] text-[#E4E3E0]">
               3×
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider opacity-40">
@@ -107,7 +107,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                       ? "2× speed"
                       : "3× speed"
               }
-              className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
                 timeMultiplier === m
                   ? m === 0
                     ? "bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]"
@@ -132,7 +132,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         type="button"
         onClick={onTourClick}
         title="Quick Tour"
-        className="rounded p-1.5 transition-colors hover:bg-[#141414]/10"
+        className="rounded-xl p-1.5 transition-colors hover:bg-[#141414]/10"
       >
         <HelpCircle size={20} />
       </button>

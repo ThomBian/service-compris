@@ -15,7 +15,7 @@ export const PartyTicket: React.FC = () => {
 
   if (!currentClient) {
     return (
-      <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+      <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0_0_#141414] p-3 flex flex-col gap-2 h-full overflow-hidden">
         <div className="flex items-center gap-1.5 shrink-0">
           <Users size={12} />
           <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Party Ticket</span>
@@ -31,7 +31,7 @@ export const PartyTicket: React.FC = () => {
   }
 
   return (
-    <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
+    <div data-tour="party-ticket" className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0_0_#141414] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
       {/* Patience bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
         <motion.div
@@ -107,7 +107,7 @@ export const PartyTicket: React.FC = () => {
       <div className="pt-2 border-t border-[#141414]/10">
         <button
           onClick={() => handleDecision()}
-          className="w-full bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-red-700 transition-colors text-xs shadow-[0px_3px_0px_0px_rgba(185,28,28,1)] active:translate-y-px active:shadow-none"
+          className="w-full bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-red-700 text-xs shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
         >
           <X size={14} />
           REFUSE
