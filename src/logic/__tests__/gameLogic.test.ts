@@ -106,6 +106,7 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   nightNumber: 1,
   coversSeated: 0,
   shiftRevenue: 0,
+  activeRules: [],
   ...overrides,
 });
 

@@ -1,0 +1,40 @@
+import type { FiredConfig } from '../types/campaign';
+
+export const FIRED_CONFIG: Record<'MORALE' | 'VIP' | 'BANNED', FiredConfig> = {
+  MORALE: {
+    ledgerStamp: 'Abandoned',
+    newspaperHeadline: 'ENTIRE STAFF WALKS OUT MID-SERVICE AT LE SOLSTICE',
+    newspaperDeck: 'Witnesses describe scenes of quiet chaos as kitchen and floor staff left simultaneously.',
+    newspaperBodyLeft: 'Diners reported that staff simply stopped mid-task and filed out through the kitchen entrance. One server was overheard saying "not for any amount of money." Tables were left uncleared. Several guests helped themselves to the wine — a minor silver lining, witnesses confirmed.',
+    newspaperBodyRight: 'The Maître D\' reportedly remained at the podium alone for several minutes before the lights were cut. The industry union has been contacted. Our correspondent notes the tips jar was found untouched on the bar — a rare, quietly damning detail on Rue du Solstice.',
+    letterSalutation: 'To the former Maître D\',',
+    letterBody: 'The staff have left. Every last one — including the coat-check girl, who never leaves early.\n\nA restaurant without a team is simply a room full of dirty plates. I cannot operate a room full of dirty plates.',
+    letterQuote: 'You managed the queue. You forgot to manage the people behind you. There is a difference — and now you understand what it costs.',
+    letterSignOff: 'Regretfully,',
+    letterPS: 'She was the first to go. She always knows.',
+  },
+  VIP: {
+    ledgerStamp: 'Dismissed',
+    newspaperHeadline: 'DISTINGUISHED GUEST TURNED AWAY AT DOOR OF LOCAL RESTAURANT',
+    newspaperDeck: 'A diplomatic incident erupted on Rue du Solstice when a Maître D\' refused entry to a notable guest.',
+    newspaperBodyLeft: 'What should have been a quiet dinner became an incident when a VIP was refused entry to Le Solstice, reportedly for an "undisclosed policy." Their security detail was observed escorting them away without comment. The guest was seen later that evening at a brasserie on the Left Bank, eating alone.',
+    newspaperBodyRight: 'A formal protest has been issued. The restaurant\'s owner, reached through an intermediary, issued a single statement: "This person no longer works here." The Maître D\' could not be reached for comment. Their coat was found folded on the pavement outside. It had started to rain.',
+    letterSalutation: 'To the former Maître D\',',
+    letterBody: 'You turned away someone who should not have been turned away.\n\nI have received several calls I did not want to receive, from people I did not want to hear from, about a decision that should not have been made.',
+    letterQuote: 'The rules exist to serve the restaurant. The restaurant exists to serve people. Some people you simply do not refuse. This is not philosophy — it is plumbing.',
+    letterSignOff: 'With all the warmth I have left,',
+    letterPS: 'Your personal items will be posted. Eventually. It may rain.',
+  },
+  BANNED: {
+    ledgerStamp: 'Compromised',
+    newspaperHeadline: 'KNOWN TROUBLEMAKER SEATED AT LE SOLSTICE — CHAOS ENSUES',
+    newspaperDeck: 'Sources confirm a banned individual was admitted and seated, resulting in a disrupted service.',
+    newspaperBodyLeft: 'Industry insiders report that a figure well known to the hospitality community was permitted entry to Le Solstice despite appearing on the establishment\'s own banned register. The resulting disruption cleared three tables and sent two parties into the street without their desserts.',
+    newspaperBodyRight: 'The Maître D\' responsible for the oversight has since left the establishment. Chef Balzac, who declined to be named, remarked only that "the list exists for a reason." The restaurant remains open but declined to comment on its door policy going forward.',
+    letterSalutation: 'To the former Maître D\',',
+    letterBody: 'You seated someone from the Banned list.\n\nThe list is not a suggestion. It is not a guideline. It is the only document in this restaurant that is never wrong.',
+    letterQuote: 'I gave you a list. One list. The list told you exactly what not to do. I am at a loss to explain how this happened — and I am a man who is rarely at a loss.',
+    letterSignOff: 'Without further ceremony,',
+    letterPS: 'Do not use me as a reference.',
+  },
+};

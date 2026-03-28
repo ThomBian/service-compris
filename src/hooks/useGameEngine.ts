@@ -50,6 +50,7 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
     nightNumber,
     coversSeated: 0,
     shiftRevenue: 0,
+    activeRules: [],
   };
 }
 
