@@ -101,7 +101,7 @@ function GameContent({
   React.useEffect(() => {
     if (!isTourActive) return;
     setView(TOUR_STEPS[currentStep].view);
-  }, [isTourActive, currentStep]);
+  }, [isTourActive, currentStep, setView]);
 
   React.useEffect(() => {
     if (isTourActive) return;
@@ -121,10 +121,6 @@ function GameContent({
 
   const handleDifficultyChange = (d: number) => {
     resetGame(d);
-  };
-
-  const handleTourSkip = () => {
-    onTourSkip();
   };
 
   const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
@@ -241,7 +237,7 @@ function GameContent({
         <TourOverlay
           step={currentStep}
           onNext={onTourNext}
-          onSkip={handleTourSkip}
+          onSkip={onTourSkip}
         />
       )}
       <ToastContainer />
