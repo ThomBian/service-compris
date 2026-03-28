@@ -1,6 +1,6 @@
 ---
 title: Campaign Scenario — Architecture Design
-version: 1.1.0
+version: 1.3.0
 date: 2026-03-28
 status: approved
 ---
@@ -12,6 +12,37 @@ status: approved
 The campaign wraps the existing multi-night loop in a structured 7-night story with branching narrative paths. Three systems are added: a **path scoring engine** that tracks player behavior across nights, a **campaign configuration layer** that drives night-specific content and gameplay modifiers, and a **corkboard screen** shown between each shift.
 
 Lore content (character definitions, newspaper headlines, memos) is treated as pure data — the architecture is content-agnostic. All 7 nights and their path variants are populated in a subsequent pass.
+
+---
+
+## Monsieur V. — Voice Guidelines
+
+All text written for Monsieur V. (memos, dismissal letters, quotes) must follow these rules. The voice applies equally in victory and defeat — the register never changes, only the subject matter.
+
+**The voice:**
+- Dry, precise, never emotional. He states things the way one states facts about the weather.
+- Cynical but never cruel. He does not enjoy your failure — he is merely unsurprised by it.
+- Economical. He says one thing too many only when the extra sentence is devastating.
+- Occasionally absurdist. The detail that makes no sense ("my mother, who does not own a television") is always the sharpest.
+- Formal address: always "Maître D'" (never your name) on bad nights; occasionally warmer on good ones.
+
+**What he never does:**
+- Shouts, exclaims, or uses emphatic punctuation.
+- Uses clichés or motivational language.
+- Apologises.
+- Repeats himself.
+
+**Sign-offs by mood:**
+
+| Situation | Sign-off |
+|---|---|
+| Decent night | *"Yours, in cautious optimism"* |
+| Strong night | *"With something approaching satisfaction"* |
+| Catastrophic loss | *"Without further ceremony"* |
+| Diplomatic incident | *"With all the warmth I have left"* |
+| Staff walkout | *"Regretfully"* (the only time he uses this word) |
+
+The P.S. is mandatory. It is always the line that lands.
 
 ---
 
@@ -75,6 +106,30 @@ Nights 1–2 use `'default'` only (no branching). Nights 3–6 have entries for 
 
 When `NightConfig.characterIds` is non-empty, it is passed directly to `buildInitialState` as the daily character list, bypassing `generateDailyCharacters`. This gives campaign nights full control over which characters appear.
 
+### `FiredConfig` — Loss Corkboard Content
+
+Each `GameOverReason` gets its own dismissal content. Stored in `src/data/firedConfig.ts`.
+
+```ts
+interface FiredConfig {
+  ledgerStamp: string;          // e.g. "Insolvent", "Abandoned", "Dismissed"
+  newspaperHeadline: string;
+  newspaperDeck: string;
+  newspaperBodyLeft: string;    // left column body copy
+  newspaperBodyRight: string;   // right column body copy
+  letterSalutation: string;
+  letterBody: string;           // paragraph(s) before the rule
+  letterQuote: string;          // Monsieur V.'s closing quote (italic, left-bordered)
+  letterSignOff: string;        // e.g. "Without further ceremony,"
+  letterPS: string;             // mandatory; always the line that lands
+}
+
+// One entry per loss reason
+const FIRED_CONFIG: Record<Exclude<GameOverReason, 'COVERS_TARGET' | null>, FiredConfig>
+```
+
+`COVERS_TARGET` and `null` are excluded — they are not loss states.
+
 ### `PathScores` + `CampaignState`
 
 ```ts
@@ -87,7 +142,8 @@ interface PathScores {
 interface CampaignState {
   nightNumber: number;
   pathScores: PathScores;
-  lastNightLedger: LedgerData | null;  // null on Night 1 (no prior shift)
+  lastNightLedger: LedgerData | null;      // null on Night 1 (no prior shift)
+  lossReason: Exclude<GameOverReason, 'COVERS_TARGET' | null> | null;  // set on loss, drives fired corkboard
 }
 
 interface LedgerData {
@@ -107,8 +163,10 @@ interface LedgerData {
 `App.tsx` gains a `GamePhase` type driving which screen is rendered:
 
 ```ts
-type GamePhase = 'LANDING' | 'CORKBOARD' | 'PLAYING' | 'SUMMARY';
+type GamePhase = 'LANDING' | 'CORKBOARD' | 'PLAYING';
 ```
+
+There is no separate `SUMMARY` phase. The corkboard screen IS the summary — the ledger shows the shift's P&L, the newspaper and owner's letter react to what happened. Documents appear sequentially (see §6 — Reveal Animation).
 
 ### Flow
 
@@ -117,17 +175,21 @@ LANDING
   → (difficulty selected) → PLAYING (Night 1, no corkboard on first night)
 
 PLAYING
-  → (shift ends — win) → SUMMARY
-  → (shift ends — loss) → LANDING  (App.tsx calls resetCampaign() then sets phase to LANDING)
+  → (shift ends — win)  → CORKBOARD  (next_night variant)
+  → (shift ends — loss) → CORKBOARD  (fired variant, then reset to LANDING)
 
-SUMMARY
-  → (Next Night button) → CORKBOARD
-
-CORKBOARD
+CORKBOARD (next_night)
   → (Open Restaurant button) → PLAYING
+
+CORKBOARD (fired)
+  → (Leave. button) → App.tsx calls resetCampaign() → LANDING
 ```
 
-Night 1 skips the corkboard (no prior shift to show in the Ledger) and goes directly from `LANDING` to `PLAYING`.
+Both variants are the same `'CORKBOARD'` phase. `App.tsx` sets `lossReason` (via `fireCorkboard`) or clears it (via `advanceNight`) before transitioning — `CorkboardScreen` reads `lossReason` to pick its variant.
+
+The `EndOfNightSummary` component and the existing animated P&L receipt screen are **removed**. Bill calculation (§2 of the end-of-service spec) still runs at shift end to populate `LedgerData` — the corkboard ledger displays those figures directly.
+
+Night 1 wins skip the corkboard (no prior shift to display) and go directly from `PLAYING` to `PLAYING` via `resetGame`. Night 1 losses still show the fired corkboard.
 
 ### `GameProvider` lifetime
 
@@ -172,7 +234,14 @@ interface UseCampaignReturn {
 
 `advanceNight(ledger)` increments `nightNumber` and stores `ledger` as `lastNightLedger`. `App.tsx` watches `campaignState.nightNumber` in a `useEffect` and sets `phase` to `'CORKBOARD'` when it increments.
 
-On loss, `App.tsx`'s loss handler calls `resetCampaign()` then sets `phase` to `'LANDING'`, ensuring path scores and night number are cleared before the player sees the landing screen.
+On loss, `App.tsx`'s loss handler sets `lossReason` in `CampaignState` and transitions to `'CORKBOARD'`. The fired variant renders. When the player clicks "Leave.", `App.tsx` calls `resetCampaign()` then sets `phase` to `'LANDING'`, ensuring path scores and night number are cleared before the player sees the landing screen.
+
+`useCampaign` gains one additional method:
+
+```ts
+fireCorkboard: (reason: Exclude<GameOverReason, 'COVERS_TARGET' | null>, ledger: LedgerData) => void;
+// Sets lossReason + lastNightLedger, App.tsx useEffect transitions to 'CORKBOARD'
+```
 
 ### Wiring `incrementPathScore` into hooks
 
@@ -262,37 +331,65 @@ A new full-screen component `<CorkboardScreen>` rendered when `phase === 'CORKBO
 ### Props
 
 ```ts
+type CorkboardVariant = 'next_night' | 'fired';
+
 interface CorkboardScreenProps {
+  variant: CorkboardVariant;
   nightNumber: number;
   activePath: CampaignPath;
-  nightConfig: NightConfig;
-  ledger: LedgerData;          // last night's figures — from campaignState.lastNightLedger
-  onOpenRestaurant: () => void; // sets phase to PLAYING
+  // next_night only:
+  nightConfig?: NightConfig;
+  // both variants:
+  ledger: LedgerData;
+  // fired only:
+  firedConfig?: FiredConfig;
+  // callbacks:
+  onOpenRestaurant: () => void;  // next_night: starts shift
+  onLeave: () => void;           // fired: resetCampaign → LANDING
 }
 ```
 
-`ledger` is always non-null when `CorkboardScreen` renders (Night 1 never shows the corkboard).
+`ledger` is always non-null when `CorkboardScreen` renders (Night 1 win skips the corkboard; Night 1 losses still show the fired variant).
 
-### Layout
+### Visual Design
 
-Three papers pinned to a dark cork board, arranged horizontally. The board scrolls horizontally — the player can drag or trackpad-scroll to read all three documents. The "Open Restaurant" button lives in a fixed bottom bar, always visible regardless of scroll position.
+**Background and chrome:** Pure black-and-white. Dark textured wall (`#1c1c1c`), bottom bar (`#0a0a0a`), all chrome text and buttons in greyscale. No colour in the UI shell.
 
-### Papers
+**Documents:** Rendered as physical objects — the colour, texture, and typography of the real items they represent. Shadows and slight rotations give them depth.
 
-**The Ledger** (gold pin, slight tilt)
-Shows last night's cash earned, net profit, star rating, covers seated, and a path indicator badge (e.g. "Leaning Underworld"). All values from `ledger` prop.
+- **Ledger:** Cream paper with green accounting-book ruled lines, left-border accent, monospaced figures. Gold pin on win; black pin on loss.
+- **L'Observateur:** Aged newsprint (`#f0ead8`) with torn top edge. *IM Fell English* masthead, proper broadsheet columns. White pin.
+- **Letter / Memo:** Lined company letterhead (`#fdfaf0`), typewriter body text, italic quote with left rule, formal sign-off. Gold pin on win; black pin on loss.
 
-**L'Observateur** (silver pin, straight)
-A newspaper clipping. Masthead, date, headline (`nightConfig.newspaper`), and two columns of flavour body copy. Purely decorative — no interaction required.
+On the **fired variant**, the Ledger shows a loss-specific stamp (e.g. "Insolvent", "Abandoned", "Dismissed") and the third document changes from a Memo to a **Notice of Termination** — same letterhead, different content drawn from `FiredConfig`.
 
-**Monsieur V.'s Memo** (red pin, rotated 2°)
-Monsieur V.'s quote in italics (`nightConfig.quote`), a dashed rule, then the actual night instructions (`nightConfig.memo`). A "Confidential" rubber stamp overlaid at the bottom.
+### Three Papers
+
+**Next-night variant:**
+
+| Paper | Pin | Content |
+|---|---|---|
+| The Ledger | Gold, tilted −1.5° | Revenue, costs, net profit, rating, covers, path badge |
+| L'Observateur | White, straight | `nightConfig.newspaper` headline + body copy |
+| Monsieur V.'s Memo | Gold, rotated +2° | `nightConfig.quote` → rule → `nightConfig.memo` → "Confidential" stamp |
+
+**Fired variant:**
+
+| Paper | Pin | Content |
+|---|---|---|
+| The Ledger | Black, tilted −1.5° | Same figures + `firedConfig.ledgerStamp` overlaid |
+| L'Observateur | Black, straight | `firedConfig.newspaperHeadline/Deck/Body*` |
+| Notice of Termination | Black, rotated +2° | `firedConfig.letterSalutation` → `letterBody` → rule → `letterQuote` → `letterSignOff` → signature → `letterPS` |
 
 ### Bottom Bar
-Fixed. Left: night label (e.g. "Night 4 — Ready"). Center: "⬡ Open Restaurant" button (calls `onOpenRestaurant()`). Right: "← scroll to read →" hint that fades once the user has scrolled.
 
-### Night 1 exception
-No corkboard on Night 1. `App.tsx` goes directly from `LANDING` to `PLAYING`. The corkboard sequence begins from Night 2 onward.
+Fixed. Same layout in both variants.
+
+- **Next-night:** Left: "Night N — Ready". Center: "⬡ Open Restaurant" (white/grey button). Right: "← scroll to read →".
+- **Fired:** Left: "Night N — Game Over". Center: "Leave." (dark grey, muted — no red, the gravity is in the documents). Right: "← scroll to read →".
+
+### Night 1 win exception
+Night 1 wins skip the corkboard entirely — `App.tsx` goes directly from `SUMMARY` to `PLAYING`. Night 1 losses show the fired corkboard as normal.
 
 ---
 
@@ -304,6 +401,7 @@ src/
     useCampaign.ts              — new: campaign state, path scores, advanceNight, resetCampaign
   data/
     campaignConfig.ts           — new: CAMPAIGN_CONFIG static data (lore content TBD)
+    firedConfig.ts              — new: FIRED_CONFIG per GameOverReason (lore content TBD)
     pathScoreWeights.ts         — new: delta constants per event type
   logic/
     nightRules.ts               — new: getRule() helper, RuleKey type, ActiveRule interface
@@ -332,7 +430,7 @@ src/
 
 ## 8. Out of Scope (this spec)
 
-- Lore content: newspaper copy, memo text, character assignments per night — populated in a follow-up content pass
+- Lore content: newspaper copy, memo/letter text, `FiredConfig` entries per loss reason, character assignments per night — populated in a follow-up content pass
 - Path score tuning — placeholder deltas ship with implementation; balanced in playtesting
 - Night 7 finale mechanics beyond what `NightRules` already supports (cop/mob adjacency constraint, etc.) — modeled as future `RuleKey` additions
 - Save/load persistence of `CampaignState` across browser sessions
