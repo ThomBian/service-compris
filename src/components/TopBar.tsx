@@ -75,7 +75,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
-      <div className={`flex items-center gap-2 bg-white/50 p-1 rounded-lg border border-[#141414]/10 ${timeMultiplier === 4 ? 'opacity-40' : ''}`}>
+      <div className="flex items-center gap-2 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
         {difficulty === 3 ? (
           <div
             className="flex items-center gap-2 px-2 py-1"
@@ -94,26 +94,21 @@ export const TopBar: React.FC<TopBarProps> = ({
               key={m}
               type="button"
               onClick={() => setTimeMultiplier(m)}
-              disabled={timeMultiplier === 4}
               title={
-                timeMultiplier === 4
-                  ? 'Speed locked — overtime in progress'
-                  : m === 0
-                    ? "Pause"
-                    : m === 1
-                      ? "1× speed"
-                      : m === 2
-                        ? "2× speed"
-                        : "3× speed"
+                m === 0
+                  ? "Pause"
+                  : m === 1
+                    ? "1× speed"
+                    : m === 2
+                      ? "2× speed"
+                      : "3× speed"
               }
               className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-                timeMultiplier === 4
-                  ? 'cursor-not-allowed'
-                  : timeMultiplier === m
-                    ? m === 0
-                      ? "bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]"
-                      : "bg-[#141414] text-[#E4E3E0]"
-                    : "hover:bg-[#141414]/10"
+                timeMultiplier === m
+                  ? m === 0
+                    ? "bg-amber-500 text-[#141414] ring-2 ring-[#141414] ring-offset-2 ring-offset-[#E4E3E0]"
+                    : "bg-[#141414] text-[#E4E3E0]"
+                  : "hover:bg-[#141414]/10"
               }`}
             >
               {m === 0 ? (
@@ -131,30 +126,22 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
       <div className="w-px h-5 bg-[#141414]/20 mx-1" />
       <div className="flex items-center gap-1 bg-white/50 p-1 rounded-lg border border-[#141414]/10">
-        <span className="text-[10px] font-bold uppercase tracking-wider opacity-40 px-1">Risk</span>
-        {[0, 1, 2, 3].map((d) => {
-          const titles = [
-            'Chill — no VIPs or banned guests',
-            'Normal — VIPs and banned guests possible',
-            'Busy — VIPs and banned guests likely',
-            'Hell — 3× speed, VIPs and banned guests guaranteed',
-          ];
-          return (
-            <button
-              key={d}
-              type="button"
-              onClick={() => onDifficultyChange(d)}
-              title={titles[d]}
-              className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-                difficulty === d
-                  ? 'bg-[#141414] text-[#E4E3E0]'
-                  : 'hover:bg-[#141414]/10'
-              }`}
-            >
-              {d}
-            </button>
-          );
-        })}
+        <span className="text-[10px] font-bold uppercase tracking-wider opacity-40 px-1">VIPs</span>
+        {[0, 1, 2, 3].map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => onDifficultyChange(d)}
+            title={d === 0 ? 'No VIPs tonight' : `${d} VIP${d > 1 ? 's' : ''} tonight`}
+            className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
+              difficulty === d
+                ? 'bg-[#141414] text-[#E4E3E0]'
+                : 'hover:bg-[#141414]/10'
+            }`}
+          >
+            {d}
+          </button>
+        ))}
       </div>
       <button
         type="button"
