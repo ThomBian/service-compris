@@ -27,6 +27,7 @@ export interface LedgerData {
   cash: number;
   netProfit: number;
   rating: number;
+  morale: number;
   coversSeated: number;
 }
 

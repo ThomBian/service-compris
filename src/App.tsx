@@ -2,45 +2,27 @@ import React from 'react';
 import { Pause, Play } from 'lucide-react';
 import { formatTime } from './utils';
 import { GameProvider, useGame } from './context/GameContext';
-import { PhysicalState, CellState, GameOverReason, type VisualTraits } from './types';
-import { CHARACTER_ROSTER } from './logic/characterRoster';
+import { PhysicalState, CellState } from './types';
 import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER, DOORS_CLOSE_TIME } from './constants';
 import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
 import { LandingPage } from './components/LandingPage';
-import { EndOfNightSummary } from './components/EndOfNightSummary';
+import { CorkboardScreen } from './components/CorkboardScreen';
 import { TourOverlay } from './components/TourOverlay';
 import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
 import { TOUR_STEPS } from './tour/tourSteps';
+import { useCampaign } from './hooks/useCampaign';
+import { FIRED_CONFIG } from './data/firedConfig';
+import type { LedgerData } from './types/campaign';
 
-type SummaryLoseReason =
-  | 'none'
-  | 'bankruptcy'
-  | 'morale'
-  | 'vip'
-  | 'banned';
-
-/** How the night ended for the summary screen (bankruptcy can happen without gameOver). */
-function summaryLoseReason(
-  gameOver: boolean,
-  reason: GameOverReason,
-  morale: number,
-  cashAfter: number,
-): SummaryLoseReason {
-  if (!gameOver) {
-    return cashAfter < 0 ? 'bankruptcy' : 'none';
-  }
-  if (reason === 'MORALE') return 'morale';
-  if (reason === 'VIP') return 'vip';
-  if (reason === 'BANNED') return 'banned';
-  return morale <= 0 ? 'morale' : 'vip';
-}
+type GamePhase = 'LANDING' | 'CORKBOARD' | 'PLAYING';
 
 interface GameContentProps {
   initialDifficulty: number;
-  onTryAgain: () => void;
+  persist?: { cash: number; rating: number; morale: number; nightNumber: number };
+  onShiftEnd: (ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => void;
   isTourActive: boolean;
   currentStep: number;
   onTourNext: () => void;
@@ -50,7 +32,8 @@ interface GameContentProps {
 
 function GameContent({
   initialDifficulty,
-  onTryAgain,
+  persist,
+  onShiftEnd,
   isTourActive,
   currentStep,
   onTourNext,
@@ -62,27 +45,15 @@ function GameContent({
 
   const isOvertime = gameState.inGameMinutes >= DOORS_CLOSE_TIME;
   const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
-  // Do not require an empty podium: when the last table clears, tryMoveToDesk often pulls
-  // the next guest from the queue — summary must still show. Only block during active seating.
   const summaryBlockedByDesk =
     gameState.currentClient?.physicalState === PhysicalState.SEATING;
-  const showSummary =
+  const shiftEnded =
     gameState.gameOver ||
     (isOvertime && !hasOccupiedCells && !summaryBlockedByDesk);
 
-  // Night 1 always starts with cash:0, rating:5.0, morale:100 regardless of difficulty.
-  // Hardcode to avoid a race with the resetGame(initialDifficulty) useEffect below.
-  const [nightStartStats, setNightStartStats] = React.useState({
-    cash: 0, rating: 5.0, morale: 100,
-  });
-
   React.useEffect(() => {
-    setNightStartStats({ cash: gameState.cash, rating: gameState.rating, morale: gameState.morale });
+    resetGame(initialDifficulty, persist);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState.nightNumber]);
-
-  React.useEffect(() => {
-    resetGame(initialDifficulty);
   }, []);
 
   // Auto-launch tour on first play
@@ -112,93 +83,68 @@ function GameContent({
 
   React.useEffect(() => {
     if (isTourActive) return;
-    if (isOvertime && !showSummary) {
+    if (isOvertime && !shiftEnded) {
       setView('floorplan');
       return;
     }
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
       setView('desk');
     }
-  }, [view, gameState.currentClient?.physicalState, isOvertime, showSummary, isTourActive]);
+  }, [view, gameState.currentClient?.physicalState, isOvertime, shiftEnded, isTourActive]);
+
+  // Fire onShiftEnd exactly once when shift ends
+  const shiftEndFiredRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!shiftEnded || shiftEndFiredRef.current) return;
+    shiftEndFiredRef.current = true;
+
+    const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
+    const cashAfter = Math.max(0, gameState.cash - bill);
+
+    const ledger: LedgerData = {
+      cash: cashAfter,
+      netProfit: cashAfter - (persist?.cash ?? 0),
+      rating: Math.max(1.0, gameState.rating),
+      morale: Math.max(0, gameState.morale),
+      coversSeated: gameState.coversSeated,
+    };
+
+    // Determine loss reason — COVERS_TARGET means win (target reached), not loss
+    let lossReason: 'MORALE' | 'VIP' | 'BANNED' | null = null;
+    if (gameState.gameOver && gameState.gameOverReason !== 'COVERS_TARGET') {
+      const r = gameState.gameOverReason;
+      if (r === 'MORALE' || r === 'VIP' || r === 'BANNED') lossReason = r;
+    }
+
+    onShiftEnd(ledger, lossReason);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shiftEnded]);
 
   const handleSeatParty = () => {
     seatParty();
     setView('floorplan');
   };
 
-  const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
-  const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
-  const cashAfter = gameState.cash - bill;
-
-  const loseReason = summaryLoseReason(
-    gameState.gameOver,
-    gameState.gameOverReason,
-    gameState.morale,
-    cashAfter,
-  );
-
-  let loseCharacterName: string | undefined;
-  let loseCharacterTraits: VisualTraits | undefined;
-  if (gameState.gameOverCharacterId) {
-    const char = CHARACTER_ROSTER.find(c => c.id === gameState.gameOverCharacterId);
-    if (char) {
-      loseCharacterName = char.name;
-      loseCharacterTraits = char.visualTraits;
-    }
-  }
-
-  const summaryData = {
-    nightNumber: gameState.nightNumber,
-    shiftRevenue: gameState.shiftRevenue,
-    // Actual net = unclamped cashAfter minus night-start cash; accounts for penalties
-    // (scammer fines, banned CASH_FINE) that reduce cash but don't appear in shiftRevenue.
-    shiftNet: cashAfter - nightStartStats.cash,
-    coversSeated: gameState.coversSeated,
-    overtimeMinutes,
-    cashBefore: nightStartStats.cash,
-    ratingBefore: nightStartStats.rating,
-    moraleBefore: nightStartStats.morale,
-    cashAfter: Math.max(0, cashAfter),
-    ratingAfter: Math.max(1.0, gameState.rating),
-    moraleAfter: gameState.morale,
-    loseReason,
-    ...(loseCharacterName && loseCharacterTraits
-      ? { loseCharacterName, loseCharacterTraits }
-      : {}),
-  };
-
-  const handleNextShift = () => {
-    const persist = {
-      cash: Math.max(0, cashAfter),
-      rating: Math.max(1.0, gameState.rating),
-      morale: Math.max(0, gameState.morale),
-      nightNumber: gameState.nightNumber + 1,
-    };
-    resetGame(gameState.difficulty, persist);
-    setNightStartStats({ cash: persist.cash, rating: persist.rating, morale: persist.morale });
-  };
-
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
-      {!showSummary && (
-        <TopBar
-          inGameMinutes={gameState.inGameMinutes}
-          rating={gameState.rating}
-          cash={gameState.cash}
-          morale={gameState.morale}
-          timeMultiplier={gameState.timeMultiplier}
-          setTimeMultiplier={setTimeMultiplier}
-          formatTime={formatTime}
-          difficulty={gameState.difficulty}
-          onTourClick={startTour}
-          nightNumber={gameState.nightNumber}
-          isOvertime={isOvertime && !showSummary}
-        />
-      )}
+      <TopBar
+        inGameMinutes={gameState.inGameMinutes}
+        rating={gameState.rating}
+        cash={gameState.cash}
+        morale={gameState.morale}
+        timeMultiplier={gameState.timeMultiplier}
+        setTimeMultiplier={setTimeMultiplier}
+        formatTime={formatTime}
+        difficulty={gameState.difficulty}
+        onTourClick={startTour}
+        nightNumber={gameState.nightNumber}
+        isOvertime={isOvertime}
+        activeRules={gameState.activeRules}
+      />
       <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
         <ScenePanel view={view} onSeatParty={handleSeatParty} />
-        <BottomPanel view={view} isOvertime={isOvertime && !showSummary} />
-        {gameState.timeMultiplier === 0 && !showSummary && !isTourActive && (
+        <BottomPanel view={view} isOvertime={isOvertime} />
+        {gameState.timeMultiplier === 0 && !shiftEnded && !isTourActive && (
           <button
             type="button"
             className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
@@ -221,13 +167,6 @@ function GameContent({
             </span>
           </button>
         )}
-        {showSummary && (
-          <EndOfNightSummary
-            data={summaryData}
-            onNextShift={handleNextShift}
-            onTryAgain={onTryAgain}
-          />
-        )}
       </div>
       {isTourActive && (
         <TourOverlay
@@ -242,30 +181,78 @@ function GameContent({
 }
 
 export default function App() {
-  const [gameStarted, setGameStarted] = React.useState(false);
+  const [phase, setPhase] = React.useState<GamePhase>('LANDING');
   const [difficulty, setDifficulty] = React.useState(1);
+  const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
+  const campaign = useCampaign();
   const tour = useTour(TOUR_STEPS.length);
+
+  const handleShiftEnd = React.useCallback((ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => {
+    if (lossReason) {
+      campaign.fireCorkboard(lossReason, ledger);
+    } else {
+      const nextNightNumber = campaign.campaignState.nightNumber + 1;
+      campaign.advanceNight(ledger);
+      setPersist({
+        cash: ledger.cash,
+        rating: ledger.rating,
+        morale: ledger.morale,
+        nightNumber: nextNightNumber,
+      });
+    }
+    setPhase('CORKBOARD');
+  }, [campaign]);
+
+  const handleOpenRestaurant = React.useCallback(() => {
+    setPhase('PLAYING');
+  }, []);
+
+  const handleLeave = React.useCallback(() => {
+    campaign.resetCampaign();
+    setPersist(undefined);
+    setPhase('LANDING');
+  }, [campaign]);
 
   return (
     <>
-      {gameStarted ? (
-        <GameProvider>
-          <GameContent
-            initialDifficulty={difficulty}
-            onTryAgain={() => setGameStarted(false)}
-            isTourActive={tour.isTourActive}
-            currentStep={tour.currentStep}
-            onTourNext={tour.nextStep}
-            onTourSkip={tour.skipTour}
-            startTour={tour.startTour}
-          />
-        </GameProvider>
-      ) : (
+      {phase === 'LANDING' && (
         <LandingPage
           difficulty={difficulty}
           onDifficultyChange={setDifficulty}
-          onStartGame={() => setGameStarted(true)}
+          onStartGame={() => {
+            campaign.resetCampaign();
+            setPersist(undefined);
+            setPhase('PLAYING');
+          }}
         />
+      )}
+      {phase !== 'LANDING' && (
+        <GameProvider incrementPathScore={campaign.incrementPathScore}>
+          {phase === 'CORKBOARD' && campaign.campaignState.lastNightLedger && (
+            <CorkboardScreen
+              variant={campaign.campaignState.lossReason ? 'fired' : 'next_night'}
+              nightNumber={campaign.campaignState.nightNumber}
+              activePath={campaign.activePath}
+              nightConfig={campaign.activeNightConfig}
+              ledger={campaign.campaignState.lastNightLedger}
+              firedConfig={campaign.campaignState.lossReason ? FIRED_CONFIG[campaign.campaignState.lossReason] : undefined}
+              onOpenRestaurant={handleOpenRestaurant}
+              onLeave={handleLeave}
+            />
+          )}
+          {phase === 'PLAYING' && (
+            <GameContent
+              initialDifficulty={difficulty}
+              persist={persist}
+              onShiftEnd={handleShiftEnd}
+              isTourActive={tour.isTourActive}
+              currentStep={tour.currentStep}
+              onTourNext={tour.nextStep}
+              onTourSkip={tour.skipTour}
+              startTour={tour.startTour}
+            />
+          )}
+        </GameProvider>
       )}
     </>
   );
