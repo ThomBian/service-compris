@@ -25,12 +25,14 @@ export function useTour(totalSteps: number): TourControls {
   }, []);
 
   const nextStep = useCallback(() => {
-    if (currentStep >= totalSteps - 1) {
-      skipTour();
-      return;
-    }
-    setCurrentStep((s) => s + 1);
-  }, [currentStep, totalSteps, skipTour]);
+    setCurrentStep((s) => {
+      if (s >= totalSteps - 1) {
+        setIsTourActive(false);
+        return s;
+      }
+      return s + 1;
+    });
+  }, [totalSteps]);
 
   return { isTourActive, currentStep, startTour, nextStep, skipTour };
 }
