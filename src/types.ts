@@ -59,35 +59,24 @@ export interface VisualTraits {
   eyebrows?: 0 | 1;  // 0=heavy furrowed brow, 1=droopy half-closed lids (drunk)
 }
 
-export type VipConsequenceTier = 'RATING' | 'CASH_FINE' | 'GAME_OVER';
-
-export type BannedConsequenceTier = 'CASH_FINE' | 'MORALE' | 'RATING' | 'GAME_OVER';
-
-export interface Banned {
-  id: string;
-  name: string;
-  visualTraits: VisualTraits;
-  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
-  aliasFirstName?: string;
-  aliasLastName?: string;
+export interface CharacterDefinition {
+  id:                string;
+  name:              string;
+  role:              'VIP' | 'BANNED';
+  behaviorType:      string;
+  visualTraits:      VisualTraits;
+  clueText:          string;
+  arrivalMO:         'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE' | 'BYPASS';
+  aliasFirstName?:   string;
+  aliasLastName?:    string;
   expectedPartySize: number;
-  consequenceTier: BannedConsequenceTier;
-  cashFinePenalty?: number;
-  moralePenalty?: number;
-  ratingPenalty?: number;
-  consequenceDescription: string;
-}
-
-export interface Vip {
-  id: string;
-  name: string;
-  visualTraits: VisualTraits;
-  arrivalMO: 'RESERVATION_ALIAS' | 'WALK_IN' | 'LATE';
-  aliasFirstName?: string;
-  aliasLastName?: string;
-  expectedPartySize: number;
-  consequenceTier: VipConsequenceTier;
-  cashFinePenalty?: number;
+  auraRecovery?:      'ON_SEATING';
+  reservedPartySize?: number;  // size injected into the reservation (when different from expectedPartySize)
+  cashBonus?:         number;
+  cashPenalty?:       number;
+  ratingPenalty?:     number;
+  moralePenalty?:     number;
+  gameOver?:          boolean;
   consequenceDescription: string;
 }
 
@@ -134,8 +123,7 @@ export interface Client {
   hasLied: boolean; // Flag for "Grateful Liar" or "Justified Refusal"
   visualTraits: VisualTraits;
   isCaught: boolean; // Flag for successful accusation
-  vipId?: string;
-  bannedId?: string;
+  characterId?: string;
 
   // Dialogue
   lastMessage: string;
@@ -158,17 +146,14 @@ export interface GameState {
   rating: number; // 0-5 stars
   morale: number; // 0-100
   logs: string[];
-  dailyVips: Vip[];
-  seatedVipIds: string[];
-  dailyBanned: Banned[];
-  seatedBannedIds: string[];
+  dailyCharacterIds: string[];
+  seatedCharacterIds: string[];
   gameOver: boolean;
   /** Set when gameOver becomes true so the summary can show the right story (not everything is morale). */
   gameOverReason: GameOverReason;
-  /** Roster id of the VIP whose refusal caused game over (GAME_OVER tier). */
-  gameOverVipId: string | null;
-  /** Roster id of the banned guest whose seating caused game over (GAME_OVER tier). */
-  gameOverBannedId: string | null;
+  /** Roster id of the character whose action caused game over. */
+  gameOverCharacterId: string | null;
+  strikeActive: boolean;
   nightNumber: number;
   coversSeated: number;
   shiftRevenue: number;

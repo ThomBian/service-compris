@@ -22,7 +22,22 @@ import {
   PARTY_SIZE_TIP_PER_SEAT_PARTY,
 } from "../constants";
 import { getRandom, formatTime } from "../utils";
-import { traitsMatch } from "./vipLogic";
+
+function traitsMatch(a: VisualTraits, b: VisualTraits): boolean {
+  return (
+    a.skinTone      === b.skinTone &&
+    a.hairStyle     === b.hairStyle &&
+    a.hairColor     === b.hairColor &&
+    a.clothingStyle === b.clothingStyle &&
+    a.clothingColor === b.clothingColor &&
+    a.height        === b.height &&
+    a.hat           === b.hat &&
+    a.facialHair    === b.facialHair &&
+    a.neckwear      === b.neckwear &&
+    a.glasses       === b.glasses &&
+    a.eyebrows      === b.eyebrows
+  );
+}
 
 export function seedTraits(id: string, index: number): VisualTraits {
   const seed = id + String(index);
@@ -255,21 +270,23 @@ export function prepareClientForDesk(client: Client): Client {
   return preparedClient;
 }
 
-function updateQueuePatience(queue: Client[]): Client[] {
+function updateQueuePatience(queue: Client[], strikeMultiplier = 1): Client[] {
   return queue.map((c) => ({
     ...c,
-    patience: Math.max(0, c.patience - 1),
+    patience: Math.max(0, c.patience - 1 * strikeMultiplier),
   }));
 }
 
 function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
-  const stormedOutCount = queue.filter((c) => c.patience <= 0).length;
+  const stormedOut = queue.filter((c) => c.patience <= 0);
+  const stormedOutCount = stormedOut.length;
   if (stormedOutCount === 0)
     return {
       nextQueue: queue,
       nextRating: rating,
       nextLogs: logs,
       occurred: false,
+      stormedOutClientIds: [] as string[],
     };
 
   const nextQueue = queue.filter((c) => c.patience > 0);
@@ -279,7 +296,13 @@ function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
     ...logs,
   ].slice(0, 50);
 
-  return { nextQueue, nextRating, nextLogs, occurred: true };
+  return {
+    nextQueue,
+    nextRating,
+    nextLogs,
+    occurred: true,
+    stormedOutClientIds: stormedOut.map((c) => c.id),
+  };
 }
 
 function tryMoveToDesk(
@@ -308,6 +331,7 @@ function tryMoveToDesk(
 export interface QueueTickResult {
   state: GameState;
   stormedCount: number;
+  stormedOutClientIds: string[];
 }
 
 export function processQueueTick(prev: GameState): QueueTickResult {
@@ -336,12 +360,14 @@ export function processQueueTick(prev: GameState): QueueTickResult {
     }),
   );
 
-  nextQueue = updateQueuePatience(nextQueue);
+  const strikeMultiplier = prev.strikeActive ? 2 : 1;
+  nextQueue = updateQueuePatience(nextQueue, strikeMultiplier);
 
   const stormResult = handleStormOuts(nextQueue, nextRating, nextLogs);
   nextQueue = stormResult.nextQueue;
   nextRating = stormResult.nextRating;
   nextLogs = stormResult.nextLogs;
+  const { stormedOutClientIds } = stormResult;
   const stormedCount = prev.queue.length - nextQueue.length;
 
   const moveResult = tryMoveToDesk(nextQueue, nextCurrentClient, nextLogs);
@@ -359,6 +385,7 @@ export function processQueueTick(prev: GameState): QueueTickResult {
       logs: nextLogs,
     },
     stormedCount,
+    stormedOutClientIds,
   };
 }
 
@@ -741,8 +768,7 @@ export function applyMoraleGameOver(state: GameState): GameState {
     grid: clearedGrid,
     gameOver: true,
     gameOverReason: 'MORALE',
-    gameOverVipId: null,
-    gameOverBannedId: null,
+    gameOverCharacterId: null,
     timeMultiplier: 0,
     logs: ["Staff morale collapsed. Shift ended.", ...state.logs].slice(0, 50),
   };

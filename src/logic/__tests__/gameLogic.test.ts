@@ -97,14 +97,12 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   rating: 3.0,
   morale: 50,
   logs: [],
-  dailyVips: [],
-  seatedVipIds: [],
-  dailyBanned: [],
-  seatedBannedIds: [],
+  dailyCharacterIds: [],
+  seatedCharacterIds: [],
   gameOver: false,
   gameOverReason: null,
-  gameOverVipId: null,
-  gameOverBannedId: null,
+  gameOverCharacterId: null,
+  strikeActive: false,
   nightNumber: 1,
   coversSeated: 0,
   shiftRevenue: 0,
@@ -823,6 +821,39 @@ describe('applyMoraleGameOver', () => {
   it('returns state unchanged when gameOver already true', () => {
     const state = makeGameState({ morale: 0, gameOver: true });
     expect(applyMoraleGameOver(state)).toBe(state);
+  });
+});
+
+describe('processQueueTick — strikeActive', () => {
+  it('drains queue patience at ×1 when strikeActive is false', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const state = makeGameState({ strikeActive: false, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
+    const { state: next } = processQueueTick(state);
+    expect(next.queue[0].patience).toBe(49);
+  });
+
+  it('drains queue patience at ×2 when strikeActive is true', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const state = makeGameState({ strikeActive: true, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
+    const { state: next } = processQueueTick(state);
+    expect(next.queue[0].patience).toBe(48);
+  });
+});
+
+describe('processQueueTick — stormedOutClientIds', () => {
+  it('returns IDs of clients who stormed out', () => {
+    const client = makeClient({ patience: 1, physicalState: PhysicalState.IN_QUEUE });
+    const state = makeGameState({ queue: [client] });
+    const { stormedOutClientIds } = processQueueTick(state);
+    expect(stormedOutClientIds).toContain(client.id);
+  });
+
+  it('returns empty array when no storm-outs', () => {
+    const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
+    const client = makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE });
+    const state = makeGameState({ queue: [client], currentClient: occupant });
+    const { stormedOutClientIds } = processQueueTick(state);
+    expect(stormedOutClientIds).toEqual([]);
   });
 });
 

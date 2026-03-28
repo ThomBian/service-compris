@@ -1,4 +1,4 @@
-import { useCallback, Dispatch, SetStateAction } from "react";
+import React, { useCallback, Dispatch, SetStateAction } from "react";
 import { flushSync } from "react-dom";
 import {
   GameState,
@@ -15,9 +15,8 @@ import {
   canSelectCell,
   applyMoraleGameOver,
 } from "../logic/gameLogic";
-import { computeVipRefusalOutcome } from '../logic/vipLogic';
-import { computeBannedSeatingOutcome } from '../logic/bannedLogic';
 import { type Toast } from "../context/ToastContext";
+import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 
 type ShowToast = (
   title: string,
@@ -57,6 +56,7 @@ function buildDeltaDetail(
 export function useDecisionActions(
   setGameState: Dispatch<SetStateAction<GameState>>,
   showToast: ShowToast,
+  characters: React.RefObject<Map<string, SpecialCharacter>>,
 ) {
   const handleDecision = useCallback(() => {
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
@@ -68,28 +68,20 @@ export function useDecisionActions(
 
         const deskClient = prev.currentClient;
 
-        // VIP REFUSE — short-circuit normal logic
-        if (deskClient.vipId) {
-          const vip = prev.dailyVips.find(v => v.id === deskClient.vipId);
-          if (vip) {
-            const outcome = computeVipRefusalOutcome(vip, {
-              cash: prev.cash,
-              rating: prev.rating,
-              gameOver: prev.gameOver,
-            });
-            toastArgs = [vip.consequenceDescription, undefined, 'error'];
-            return {
+        // CHARACTER REFUSE — short-circuit normal logic
+        if (deskClient.characterId) {
+          const ch = characters.current.get(deskClient.characterId);
+          if (ch) {
+            const outcome = ch.onRefused(prev);
+            const def = ch.def;
+            toastArgs = [def.consequenceDescription, undefined, 'error'];
+            const next = {
               ...prev,
+              ...outcome,
               currentClient: null,
-              cash: outcome.cash,
-              rating: outcome.rating,
-              gameOver: outcome.gameOver,
-              gameOverReason: outcome.gameOver ? 'VIP' : prev.gameOverReason,
-              gameOverVipId: outcome.gameOver ? vip.id : prev.gameOverVipId,
-              gameOverBannedId: outcome.gameOver ? null : prev.gameOverBannedId,
-              timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
-              logs: [`VIP refused: ${vip.name}.`, ...prev.logs].slice(0, 50),
+              logs: [`${def.role === 'VIP' ? 'VIP' : 'Banned'} refused: ${def.name}.`, ...prev.logs].slice(0, 50),
             };
+            return applyMoraleGameOver(next);
           }
         }
 
@@ -129,7 +121,7 @@ export function useDecisionActions(
     });
 
     if (toastArgs) showToast(...toastArgs);
-  }, [setGameState, showToast]);
+  }, [setGameState, showToast, characters]);
 
   const waitInLine = useCallback(() => {
     setGameState((prev) => {
@@ -203,39 +195,28 @@ export function useDecisionActions(
         if (selectedCells.length === 0) return prev;
 
         const deskClient = prev.currentClient;
-        if (deskClient.bannedId) {
-          const banned = prev.dailyBanned.find((b) => b.id === deskClient.bannedId);
-          if (banned) {
-            const outcome = computeBannedSeatingOutcome(banned, {
-              cash: prev.cash,
-              morale: prev.morale,
-              rating: prev.rating,
-              gameOver: prev.gameOver,
-            });
-            toastArgs = [banned.consequenceDescription, undefined, 'error'];
+
+        // BANNED CHARACTER SEATED — game-over path
+        if (deskClient.characterId) {
+          const ch = characters.current.get(deskClient.characterId);
+          const def = ch?.def;
+          if (ch && def?.role === 'BANNED') {
+            const outcome = ch.onSeated(prev);
             const gridClearedSelection = prev.grid.map((row) =>
               row.map((c) =>
                 c.state === CellState.SELECTED ? { ...c, state: CellState.EMPTY } : c,
               ),
             );
-            return applyMoraleGameOver({
+            toastArgs = [def.consequenceDescription, undefined, 'error'];
+            const next = {
               ...prev,
+              ...outcome,
               currentClient: null,
               grid: gridClearedSelection,
-              cash: outcome.cash,
-              morale: outcome.morale,
-              rating: outcome.rating,
-              gameOver: outcome.gameOver,
-              gameOverReason: outcome.gameOver ? 'BANNED' : prev.gameOverReason,
-              gameOverVipId: outcome.gameOver ? null : prev.gameOverVipId,
-              gameOverBannedId: outcome.gameOver ? banned.id : prev.gameOverBannedId,
-              timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
-              seatedBannedIds: [...prev.seatedBannedIds, banned.id],
-              logs: [`Banned customer seated: ${banned.name}.`, ...prev.logs].slice(
-                0,
-                50,
-              ),
-            });
+              seatedCharacterIds: [...prev.seatedCharacterIds, def.id],
+              logs: [`Banned customer seated: ${def.name}.`, ...prev.logs].slice(0, 50),
+            };
+            return applyMoraleGameOver(next);
           }
         }
 
@@ -290,27 +271,34 @@ export function useDecisionActions(
             )
           : prev.reservations;
 
-        const nextSeatedVipIds = client.vipId
-          ? [...prev.seatedVipIds, client.vipId]
-          : prev.seatedVipIds;
+        const nextSeatedCharacterIds = client.characterId
+          ? [...prev.seatedCharacterIds, client.characterId]
+          : prev.seatedCharacterIds;
 
-        if (client.vipId) {
-          const vip = prev.dailyVips.find(v => v.id === client.vipId);
-          if (vip) {
-            toastArgs = [`Well handled — ${vip.name} has been seated.`, undefined, 'success'];
+        const finalState: Partial<GameState> = {
+          cash: nextCash,
+          rating: nextRating,
+          morale: nextMorale,
+        };
+
+        if (client.characterId) {
+          const ch = characters.current.get(client.characterId);
+          if (ch) {
+            // onSeated receives prev, so character cash outcomes replace (not augment) base revenue
+            const outcome = ch.onSeated(prev);
+            Object.assign(finalState, outcome);
+            toastArgs = [`Well handled — ${ch.def.name} has been seated.`, undefined, 'success'];
           }
         }
 
         return applyMoraleGameOver({
           ...prev,
+          ...finalState,
           currentClient: null,
           grid: nextGrid,
           reservations: nextReservations,
-          cash: nextCash,
-          rating: nextRating,
-          morale: nextMorale,
           logs: nextLogs.slice(0, 50),
-          seatedVipIds: nextSeatedVipIds,
+          seatedCharacterIds: nextSeatedCharacterIds,
           coversSeated: prev.coversSeated + client.truePartySize,
           shiftRevenue: prev.shiftRevenue + Math.max(0, nextCash - prev.cash),
         });
@@ -318,7 +306,7 @@ export function useDecisionActions(
     });
 
     if (toastArgs) showToast(...toastArgs);
-  }, [setGameState, showToast]);
+  }, [setGameState, showToast, characters]);
 
   const refuseSeatedParty = useCallback(() => {
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =

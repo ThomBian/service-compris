@@ -1,8 +1,9 @@
-import { useCallback, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, Dispatch, SetStateAction } from 'react';
 import { flushSync } from 'react-dom';
 import { GameState } from '../types';
 import { AccusationField, checkAccusation } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
+import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 
 type ShowToast = (
   title: string,
@@ -14,6 +15,7 @@ type ShowToast = (
 export function useAccusationActions(
   setGameState: Dispatch<SetStateAction<GameState>>,
   showToast: ShowToast,
+  characters: React.RefObject<Map<string, SpecialCharacter>>,
 ) {
   const callOutLie = useCallback((field: AccusationField) => {
     let toastArgs: [string, string | undefined, Toast['variant']] | null = null;
@@ -21,6 +23,14 @@ export function useAccusationActions(
     flushSync(() => {
       setGameState(prev => {
         if (!prev.currentClient) return prev;
+
+        let characterOutcome: Partial<GameState> = {};
+        if (prev.currentClient.characterId) {
+          const ch = characters.current.get(prev.currentClient.characterId);
+          if (ch) {
+            characterOutcome = ch.onRefused(prev);
+          }
+        }
 
         const {
           caught,
@@ -41,6 +51,7 @@ export function useAccusationActions(
           toastArgs = ['Client stormed out!', '★ −0.5', 'error'];
           return {
             ...prev,
+            ...characterOutcome,
             currentClient: null,
             rating: Math.max(0, prev.rating - 0.5),
             logs: [`Client stormed out after false accusation!`, ...nextLogs].slice(0, 50)
@@ -55,6 +66,7 @@ export function useAccusationActions(
 
         return {
           ...prev,
+          ...characterOutcome,
           currentClient: {
             ...prev.currentClient,
             patience: nextPatience,
@@ -72,7 +84,7 @@ export function useAccusationActions(
     });
 
     if (toastArgs) showToast(...toastArgs);
-  }, [setGameState, showToast]);
+  }, [setGameState, showToast, characters]);
 
   return { callOutLie };
 }

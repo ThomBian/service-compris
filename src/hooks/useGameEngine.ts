@@ -1,11 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { GameState } from "../types";
 import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
 import { createInitialGrid } from "../logic/gameLogic";
-import { generateDailyVips, injectVipReservations } from '../logic/vipLogic';
-import { generateDailyBanned, injectBannedReservations } from '../logic/bannedLogic';
-import { VIP_ROSTER } from '../logic/vipRoster';
-import { BANNED_ROSTER } from '../logic/bannedRoster';
+import { generateDailyCharacters, injectCharacterReservations, CHARACTER_ROSTER } from '../logic/characterRoster';
+import { createCharacter } from '../logic/characters/factory';
+import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { generateReservations } from '../logic/reservationGenerator';
 import { useGameClock } from "./useGameClock";
 import { useClientSpawner } from "./useClientSpawner";
@@ -22,16 +21,12 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
   const nightNumber = persist?.nightNumber ?? 1;
   const rating = persist ? Math.max(1.0, persist.rating) : 5.0;
 
-  const dailyVips = generateDailyVips(difficulty, VIP_ROSTER);
-  const dailyBanned = generateDailyBanned(difficulty, BANNED_ROSTER);
+  const dailyChars = generateDailyCharacters(difficulty, CHARACTER_ROSTER);
 
   const baseReservations = nightNumber === 1
     ? INITIAL_RESERVATIONS
     : generateReservations({ nightNumber, rating });
-  const reservations = injectBannedReservations(
-    dailyBanned,
-    injectVipReservations(dailyVips, baseReservations),
-  );
+  const reservations = injectCharacterReservations(dailyChars, baseReservations);
 
   return {
     inGameMinutes: START_TIME,
@@ -46,14 +41,12 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
     rating,
     morale: persist ? Math.max(0, persist.morale) : 100,
     logs: ["Welcome to The Maitre D'. The doors are open."],
-    dailyVips,
-    seatedVipIds: [],
-    dailyBanned,
-    seatedBannedIds: [],
+    dailyCharacterIds: dailyChars.map(c => c.id),
+    seatedCharacterIds: [],
+    gameOverCharacterId: null,
+    strikeActive: false,
     gameOver: false,
     gameOverReason: null,
-    gameOverVipId: null,
-    gameOverBannedId: null,
     nightNumber,
     coversSeated: 0,
     shiftRevenue: 0,
@@ -67,13 +60,26 @@ export function useGameEngine() {
     setGameState(buildInitialState(difficulty, persist));
   }, []);
 
+  // Runtime character instances — never serialized, rebuilt on each session start
+  const characters = useRef<Map<string, SpecialCharacter>>(new Map());
+
+  // Populate characters ref whenever dailyCharacterIds changes (i.e., on session start)
+  useEffect(() => {
+    const map = new Map<string, SpecialCharacter>();
+    gameState.dailyCharacterIds.forEach(id => {
+      const def = CHARACTER_ROSTER.find(c => c.id === id);
+      if (def) map.set(id, createCharacter(def));
+    });
+    characters.current = map;
+  }, [gameState.dailyCharacterIds]);
+
   const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
-  useClientSpawner(gameState, setGameState);
-  useQueueManager(gameState, setGameState, showToast);
+  useClientSpawner(gameState, setGameState, characters);
+  useQueueManager(gameState, setGameState, showToast, characters);
 
   const { askQuestion } = useQuestionActions(setGameState, showToast);
-  const { callOutLie } = useAccusationActions(setGameState, showToast);
+  const { callOutLie } = useAccusationActions(setGameState, showToast, characters);
   const {
     handleDecision,
     waitInLine,
@@ -82,7 +88,7 @@ export function useGameEngine() {
     confirmSeating,
     refuseSeatedParty,
     lastCallTable,
-  } = useDecisionActions(setGameState, showToast);
+  } = useDecisionActions(setGameState, showToast, characters);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
   return {
