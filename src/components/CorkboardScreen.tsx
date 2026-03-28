@@ -105,7 +105,7 @@ function LedgerPaper({
       style={{ position: "relative", flexShrink: 0 }}
     >
       <DocPin />
-      <div className="w-72 bg-white border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
+      <div className="w-72 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
         <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
             Le Solstice
@@ -208,7 +208,7 @@ function NewspaperPaper({
           style={{ position: "relative", flexShrink: 0 }}
         >
           <DocPin />
-          <div className="w-96 bg-white border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
+          <div className="w-96 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             {/* Masthead */}
             <div className="border-b-2 border-[#141414] px-5 py-3 text-center">
               <p
@@ -283,7 +283,7 @@ function LetterPaper({
           style={{ position: "relative", flexShrink: 0 }}
         >
           <DocPin />
-          <div className="w-80 bg-white border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
+          <div className="w-80 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
                 Le Solstice
@@ -357,7 +357,7 @@ function ActivityLogPaper({
           style={{ position: "relative", flexShrink: 0 }}
         >
           <DocPin />
-          <div className="w-64 bg-white border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
+          <div className="w-64 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             <div className="bg-[#141414] text-[#E4E3E0] px-4 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.25em]">
                 Le Solstice
