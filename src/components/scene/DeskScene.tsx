@@ -329,18 +329,12 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                 </motion.div>
               )}
             </AnimatePresence>
-            <span className="text-[9px] font-bold uppercase tracking-widest mt-8">
-              No guests
-            </span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Queue */}
       <div className="flex items-end gap-2 flex-1 overflow-x-auto pb-1">
-        {queue.length === 0 && !stormedOut && (
-          <span className="text-xs italic opacity-30">Queue is empty</span>
-        )}
         {queue.map((c) => (
           <div
             key={c.id}
@@ -360,6 +354,8 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                 height: 0,
               }}
             />
+            {/* Spacer matching desk-character label height so items-end aligns avatar feet */}
+            <span className="invisible text-[9px] font-bold uppercase tracking-widest leading-none">x</span>
           </div>
         ))}
       </div>
