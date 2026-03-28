@@ -9,6 +9,8 @@ import {
   Heart,
   HelpCircle,
 } from "lucide-react";
+import type { ActiveRule } from "../types/campaign";
+import { getRule } from "../logic/nightRules";
 
 interface TopBarProps {
   inGameMinutes: number;
@@ -22,6 +24,7 @@ interface TopBarProps {
   onTourClick: () => void;
   nightNumber: number;
   isOvertime: boolean;
+  activeRules?: ActiveRule[];
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -36,7 +39,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   onTourClick,
   nightNumber,
   isOvertime,
+  activeRules = [],
 }) => {
+  const pauseDisabled = getRule<boolean>(activeRules, 'PAUSE_DISABLED', false);
   return (
     <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
       <div className="flex items-center gap-8" data-tour="topbar">
@@ -88,7 +93,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             </span>
           </div>
         ) : (
-          [0, 1, 2, 3].map((m) => (
+          [0, 1, 2, 3].filter(m => !(m === 0 && pauseDisabled)).map((m) => (
             <button
               key={m}
               type="button"

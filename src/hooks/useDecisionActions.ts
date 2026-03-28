@@ -8,6 +8,7 @@ import {
   LieType,
 } from "../types";
 import { mealDurationForPartySize, LAST_CALL_RATING_PENALTY } from "../constants";
+import { getRule } from "../logic/nightRules";
 import {
   handleAcceptedClient,
   handleRefusedClient,
@@ -291,6 +292,10 @@ export function useDecisionActions(
           }
         }
 
+        const nextCoversSeated = prev.coversSeated + client.truePartySize;
+        const coversTarget = getRule<number>(prev.activeRules, 'COVERS_TARGET', 0);
+        const coversTargetHit = coversTarget > 0 && nextCoversSeated >= coversTarget;
+
         return applyMoraleGameOver({
           ...prev,
           ...finalState,
@@ -299,8 +304,9 @@ export function useDecisionActions(
           reservations: nextReservations,
           logs: nextLogs.slice(0, 50),
           seatedCharacterIds: nextSeatedCharacterIds,
-          coversSeated: prev.coversSeated + client.truePartySize,
+          coversSeated: nextCoversSeated,
           shiftRevenue: prev.shiftRevenue + Math.max(0, nextCash - prev.cash),
+          ...(coversTargetHit ? { gameOver: true, gameOverReason: 'COVERS_TARGET' as const } : {}),
         });
       });
     });

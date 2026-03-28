@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react'
 import { GameState, CellState } from '../types';
 import { TICK_RATE, OVERTIME_MORALE_DRAIN_PER_MINUTE, DOORS_CLOSE_TIME } from '../constants';
 import { applyMoraleGameOver } from '../logic/gameLogic';
+import { getRule } from '../logic/nightRules';
 
 export function useGameClock(
   gameState: GameState,
@@ -58,7 +59,8 @@ export function useGameClock(
 
   useEffect(() => {
     if (gameState.timeMultiplier > 0) {
-      const interval = TICK_RATE / gameState.timeMultiplier;
+      const clockSpeed = getRule<number>(gameState.activeRules, 'CLOCK_SPEED', 1);
+      const interval = TICK_RATE / gameState.timeMultiplier / clockSpeed;
       tickTimerRef.current = setInterval(tickTime, interval);
     } else {
       if (tickTimerRef.current) clearInterval(tickTimerRef.current);

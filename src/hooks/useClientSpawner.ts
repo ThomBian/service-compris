@@ -15,6 +15,7 @@ import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
 import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
+import { getRule } from '../logic/nightRules';
 
 export function useClientSpawner(
   gameState: GameState,
@@ -148,11 +149,13 @@ export function useClientSpawner(
       return gameState.inGameMinutes >= res.time + arrivalOffset;
     });
 
-    if (toSpawn.length > 0) {
+    const reservationsDisabled = getRule<boolean>(gameState.activeRules, 'RESERVATIONS_DISABLED', false);
+    if (!reservationsDisabled && toSpawn.length > 0) {
       toSpawn.forEach(res => spawnClient(res));
     }
 
-    if (Math.random() < 0.05 && gameState.queue.length < 5) {
+    const spawnRateMultiplier = getRule<number>(gameState.activeRules, 'QUEUE_SPAWN_RATE', 1);
+    if (Math.random() < 0.05 * spawnRateMultiplier && gameState.queue.length < 5) {
       spawnClient();
     }
 

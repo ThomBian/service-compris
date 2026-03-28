@@ -4,6 +4,7 @@ import { GameState } from '../types';
 import { AccusationField, checkAccusation } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
+import { getRule } from '../logic/nightRules';
 
 type ShowToast = (
   title: string,
@@ -64,9 +65,13 @@ export function useAccusationActions(
           toastArgs = ['False accusation!', `Patience −${patiencePenalty}`, 'warning'];
         }
 
+        const strict = getRule<boolean>(prev.activeRules, 'STRICT_FALSE_ACCUSATION', false);
+        const strictPenaltyRating = strict && !caught ? 1.0 : prev.rating;
+
         return {
           ...prev,
           ...characterOutcome,
+          rating: strictPenaltyRating,
           currentClient: {
             ...prev.currentClient,
             patience: nextPatience,

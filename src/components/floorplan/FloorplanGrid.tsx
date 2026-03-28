@@ -7,6 +7,7 @@ import { canSelectCell } from "../../logic/gameLogic";
 import { Check, X, Users } from "lucide-react";
 import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
+import { getRule } from "../../logic/nightRules";
 
 interface FloorplanGridProps {
   isOvertime?: boolean;
@@ -17,8 +18,9 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
     useGame();
   const { showToast } = useToast();
 
-  const { grid, currentClient } = gameState;
+  const { grid, currentClient, activeRules } = gameState;
   const isSeating = currentClient?.physicalState === PhysicalState.SEATING;
+  const blockedCells = getRule<[number, number][]>(activeRules, 'BLOCKED_GRID_CELLS', []);
 
   const selectedCells = grid
     .flat()
@@ -159,18 +161,20 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                 cell.state === CellState.OCCUPIED &&
                 cell.mealDuration !== undefined &&
                 cell.mealDuration <= TABLE_TURNING_SOON_THRESHOLD;
+              const isBlocked = blockedCells.some(([r, c]) => r === y && c === x);
               return (
                 <button
                   key={cell.id}
-                  onClick={() => handleCellClick(x, y)}
-                  disabled={!isSeating}
+                  onClick={() => !isBlocked && handleCellClick(x, y)}
+                  disabled={!isSeating || isBlocked}
                   className={`
                     aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5
-                    ${cell.state === CellState.EMPTY ? "bg-white" : ""}
-                    ${cell.state === CellState.EMPTY && isSeating ? "hover:bg-emerald-100 cursor-pointer" : ""}
-                    ${cell.state === CellState.SELECTED ? "bg-emerald-500 shadow-inner scale-95" : ""}
-                    ${cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-stone-800 cursor-not-allowed" : ""}
-                    ${isAboutToFree ? "bg-amber-400 cursor-not-allowed" : ""}
+                    ${isBlocked ? "bg-stone-900 cursor-not-allowed opacity-60" : ""}
+                    ${!isBlocked && cell.state === CellState.EMPTY ? "bg-white" : ""}
+                    ${!isBlocked && cell.state === CellState.EMPTY && isSeating ? "hover:bg-emerald-100 cursor-pointer" : ""}
+                    ${!isBlocked && cell.state === CellState.SELECTED ? "bg-emerald-500 shadow-inner scale-95" : ""}
+                    ${!isBlocked && cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-stone-800 cursor-not-allowed" : ""}
+                    ${!isBlocked && isAboutToFree ? "bg-amber-400 cursor-not-allowed" : ""}
                     ${!isSeating ? "cursor-default" : ""}
                   `}
                   id={`cell-${x}-${y}`}
