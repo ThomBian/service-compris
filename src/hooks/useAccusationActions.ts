@@ -60,9 +60,9 @@ export function useAccusationActions(
         }
 
         if (caught) {
-          toastArgs = ['Caught in a lie!', `Patience −${patiencePenalty}`, 'success'];
+          toastArgs = ['Caught in a lie!', patiencePenalty > 0 ? `Patience −${patiencePenalty}` : undefined, 'success'];
         } else {
-          toastArgs = ['False accusation!', `Patience −${patiencePenalty}`, 'warning'];
+          toastArgs = ['False accusation!', patiencePenalty > 0 ? `Patience −${patiencePenalty}` : undefined, 'warning'];
         }
 
         const strict = getRule<boolean>(prev.activeRules, 'STRICT_FALSE_ACCUSATION', false);
