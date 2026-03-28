@@ -9,6 +9,8 @@ import {
 } from "../types";
 import { mealDurationForPartySize, LAST_CALL_RATING_PENALTY } from "../constants";
 import { getRule } from "../logic/nightRules";
+import { PATH_SCORE_WEIGHTS } from '../data/pathScoreWeights';
+import type { CampaignPath } from '../types/campaign';
 import {
   handleAcceptedClient,
   handleRefusedClient,
@@ -58,10 +60,12 @@ export function useDecisionActions(
   setGameState: Dispatch<SetStateAction<GameState>>,
   showToast: ShowToast,
   characters: React.RefObject<Map<string, SpecialCharacter>>,
+  incrementPathScore?: (path: CampaignPath, delta: number) => void,
 ) {
   const handleDecision = useCallback(() => {
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
       null;
+    let pathScoreEvent: { key: string } | null = null;
 
     flushSync(() => {
       setGameState((prev) => {
@@ -76,6 +80,7 @@ export function useDecisionActions(
             const outcome = ch.onRefused(prev);
             const def = ch.def;
             toastArgs = [def.consequenceDescription, undefined, 'error'];
+            pathScoreEvent = { key: `${deskClient.characterId}:refused` };
             const next = {
               ...prev,
               ...outcome,
@@ -122,7 +127,11 @@ export function useDecisionActions(
     });
 
     if (toastArgs) showToast(...toastArgs);
-  }, [setGameState, showToast, characters]);
+    if (pathScoreEvent && incrementPathScore) {
+      const weight = PATH_SCORE_WEIGHTS[(pathScoreEvent as { key: string }).key];
+      if (weight) incrementPathScore(weight.path, weight.delta);
+    }
+  }, [setGameState, showToast, characters, incrementPathScore]);
 
   const waitInLine = useCallback(() => {
     setGameState((prev) => {
@@ -186,6 +195,7 @@ export function useDecisionActions(
   const confirmSeating = useCallback(() => {
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =
       null;
+    let seatPathKey: string | null = null;
 
     flushSync(() => {
       setGameState((prev) => {
@@ -196,6 +206,9 @@ export function useDecisionActions(
         if (selectedCells.length === 0) return prev;
 
         const deskClient = prev.currentClient;
+        if (deskClient.characterId) {
+          seatPathKey = `${deskClient.characterId}:seated`;
+        }
 
         // BANNED CHARACTER SEATED — game-over path
         if (deskClient.characterId) {
@@ -312,7 +325,11 @@ export function useDecisionActions(
     });
 
     if (toastArgs) showToast(...toastArgs);
-  }, [setGameState, showToast, characters]);
+    if (seatPathKey && incrementPathScore) {
+      const weight = PATH_SCORE_WEIGHTS[seatPathKey];
+      if (weight) incrementPathScore(weight.path, weight.delta);
+    }
+  }, [setGameState, showToast, characters, incrementPathScore]);
 
   const refuseSeatedParty = useCallback(() => {
     let toastArgs: [string, string | undefined, Toast["variant"]] | null =

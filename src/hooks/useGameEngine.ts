@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { GameState } from "../types";
 import { buildInitialState, PersistState } from "../logic/gameLogic";
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
+import type { CampaignPath } from '../types/campaign';
 import { createCharacter } from '../logic/characters/factory';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { useGameClock } from "./useGameClock";
@@ -13,7 +14,7 @@ import { useDecisionActions } from "./useDecisionActions";
 import { useReservationActions } from "./useReservationActions";
 import { useToast } from "../context/ToastContext";
 
-export function useGameEngine() {
+export function useGameEngine(incrementPathScore?: (path: CampaignPath, delta: number) => void) {
   const [gameState, setGameState] = useState<GameState>(() => buildInitialState(0));
 
   const resetGame = useCallback((difficulty: number, persist?: PersistState) => {
@@ -48,7 +49,7 @@ export function useGameEngine() {
     confirmSeating,
     refuseSeatedParty,
     lastCallTable,
-  } = useDecisionActions(setGameState, showToast, characters);
+  } = useDecisionActions(setGameState, showToast, characters, incrementPathScore);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
   return {

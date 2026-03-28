@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { GameState } from '../types';
+import type { CampaignPath } from '../types/campaign';
 
 interface GameContextType {
   gameState: GameState;
@@ -18,10 +19,15 @@ interface GameContextType {
   lastCallTable: (partyId: string) => void;
 }
 
+interface GameProviderProps {
+  children: ReactNode;
+  incrementPathScore?: (path: CampaignPath, delta: number) => void;
+}
+
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export function GameProvider({ children }: { children: ReactNode }) {
-  const engine = useGameEngine();
+export function GameProvider({ children, incrementPathScore }: GameProviderProps) {
+  const engine = useGameEngine(incrementPathScore);
 
   return (
     <GameContext.Provider value={engine}>
