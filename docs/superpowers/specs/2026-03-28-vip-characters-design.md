@@ -150,7 +150,7 @@ export const CHARACTER_ROSTER: CharacterDefinition[]
 
 **Spawn condition:** `queue.length >= 3` AND grid has `<= 4` empty cells. Checked each tick by `useClientSpawner`.
 
-**Prerequisite — queue patience drain:** The current `useGameClock` does not drain patience for clients in the queue (it only handles overtime morale and meal timers). This spec introduces queue patience drain as a new tick-level mechanic — required both for the Syndicate interruption pressure and the Strike aura. Queue patience drain must be implemented as part of this spec (see Section 5 — Tick Logic).
+**Prerequisite — queue patience drain:** The current `useGameClock` does not drain patience for clients in the queue (it only handles overtime morale and meal timers). This spec introduces queue patience drain as a new tick-level mechanic — required both for the Syndicate interruption pressure and the Strike aura. Queue patience drain must be implemented as part of this spec (see Section 6 — Tick Logic).
 
 **State flow:**
 
@@ -247,7 +247,43 @@ class AuraDrainVip extends VipCharacter {
 
 ---
 
-## 5. Tick Logic — Queue Patience Drain
+## 5. Characters Ref — Hook Interface
+
+Runtime `SpecialCharacter` instances are created once per session in `useGameEngine` and stored in a `useRef`. They must be accessible to three hooks that currently have no reference to them: `useClientSpawner`, `useAccusationActions`, and the storm-out path in `useQueueManager` / `useGameClock`.
+
+**Passing the ref:** Each hook that needs character lookup receives the ref as a parameter:
+
+```ts
+// useGameEngine creates it
+const characters = useRef<Map<string, SpecialCharacter>>(new Map())
+
+// Passed into hooks that need it
+useClientSpawner(..., characters)
+useAccusationActions(setGameState, showToast, characters)
+useQueueManager(..., characters)
+```
+
+**Using the ref inside `setGameState`:** `setGameState` functional updates cannot close over state, but they *can* close over refs (refs are stable across renders). Character lookups inside `setGameState` use `characters.current.get(id)` directly — this is safe because the ref value is populated before the first tick.
+
+**Storm-out path:** `processQueueTick` is a pure function and cannot call character hooks. Instead, `useQueueManager` (or `useGameClock`, whichever calls `processQueueTick`) handles the character consequence *after* the pure function returns the list of stormed-out client IDs:
+
+```ts
+const { nextQueue, stormedOutIds } = processQueueTick(state);
+// Apply character onStormOut for any special character who stormed out
+stormedOutIds.forEach(id => {
+  const client = /* find by id */;
+  if (client.characterId) {
+    const ch = characters.current.get(client.characterId);
+    if (ch?.onStormOut) Object.assign(next, ch.onStormOut(next));
+  }
+});
+```
+
+`processQueueTick` is refactored to return `stormedOutIds` alongside `nextQueue` rather than calling any external function.
+
+---
+
+## 6. Tick Logic — Queue Patience Drain
 
 This spec introduces queue patience drain. `useGameClock` must add the following on each tick:
 
@@ -268,7 +304,7 @@ Clients whose patience reaches 0 in the queue storm out (same outcome as stormin
 
 ---
 
-## 6. Clipboard Integration
+## 7. Clipboard Integration
 
 The Clipboard VIP tab renders all `dailyCharacterIds` where `role === 'VIP'`. The Banned tab renders those where `role === 'BANNED'`. No separate data sources needed.
 
@@ -276,7 +312,7 @@ The Syndicate's clue is **informational only** — no click required. Other VIPs
 
 ---
 
-## 7. Migration Path
+## 8. Migration Path
 
 1. Add `CharacterDefinition` to `types.ts`; deprecate `Vip` and `Banned` interfaces.
 2. Update `Client` in `types.ts`: replace `vipId?: string` and `bannedId?: string` with `characterId?: string`.
@@ -293,7 +329,7 @@ The Syndicate's clue is **informational only** — no click required. Other VIPs
 
 ---
 
-## 8. Out of Scope (this spec)
+## 9. Out of Scope (this spec)
 
 - The remaining 5 lore characters (Culinary Inquisition, Old Money Aristocrats, Donny Tromp, Mr. Feast, Gordon Angry)
 - Daily Menu mechanic (required for Gordon Angry)
