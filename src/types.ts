@@ -142,9 +142,13 @@ export interface Client {
   chatHistory: ChatMessage[];
 }
 
+export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | null;
+
 export interface GameState {
   inGameMinutes: number;
   timeMultiplier: number;
+  /** 0–3 (Chill…Hell). Hell locks the clock to 3×. */
+  difficulty: number;
   reservations: Reservation[];
   spawnedReservationIds: string[];
   queue: Client[];
@@ -159,6 +163,12 @@ export interface GameState {
   dailyBanned: Banned[];
   seatedBannedIds: string[];
   gameOver: boolean;
+  /** Set when gameOver becomes true so the summary can show the right story (not everything is morale). */
+  gameOverReason: GameOverReason;
+  /** Roster id of the VIP whose refusal caused game over (GAME_OVER tier). */
+  gameOverVipId: string | null;
+  /** Roster id of the banned guest whose seating caused game over (GAME_OVER tier). */
+  gameOverBannedId: string | null;
   nightNumber: number;
   coversSeated: number;
   shiftRevenue: number;

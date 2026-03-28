@@ -2,8 +2,8 @@ import React from 'react';
 import { Pause, Play } from 'lucide-react';
 import { formatTime } from './utils';
 import { GameProvider, useGame } from './context/GameContext';
-import { PhysicalState, CellState } from './types';
-import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER } from './constants';
+import { PhysicalState, CellState, GameOverReason, type VisualTraits } from './types';
+import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER, DOORS_CLOSE_TIME } from './constants';
 import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
@@ -11,6 +11,30 @@ import { ToastContainer } from './components/ToastContainer';
 import { HowToPlay } from './components/HowToPlay';
 import { LandingPage } from './components/LandingPage';
 import { EndOfNightSummary } from './components/EndOfNightSummary';
+
+type SummaryLoseReason =
+  | 'none'
+  | 'bankruptcy'
+  | 'morale'
+  | 'vip'
+  | 'banned';
+
+/** How the night ended for the summary screen (bankruptcy can happen without gameOver). */
+function summaryLoseReason(
+  gameOver: boolean,
+  reason: GameOverReason,
+  morale: number,
+  cashAfter: number,
+): SummaryLoseReason {
+  if (!gameOver) {
+    return cashAfter < 0 ? 'bankruptcy' : 'none';
+  }
+  if (reason === 'MORALE') return 'morale';
+  if (reason === 'VIP') return 'vip';
+  if (reason === 'BANNED') return 'banned';
+  // Legacy / defensive: game ended but reason not set — infer from state
+  return morale <= 0 ? 'morale' : 'vip';
+}
 
 interface GameContentProps {
   initialDifficulty: number;
@@ -21,9 +45,8 @@ interface GameContentProps {
 function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentProps) {
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
-  const [difficulty, setDifficulty] = React.useState(initialDifficulty);
 
-  const isOvertime = gameState.inGameMinutes >= 1560;
+  const isOvertime = gameState.inGameMinutes >= DOORS_CLOSE_TIME;
   const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
   const showSummary = gameState.gameOver || (isOvertime && !hasOccupiedCells);
 
@@ -56,18 +79,35 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
   };
 
   const handleDifficultyChange = (d: number) => {
-    setDifficulty(d);
     resetGame(d);
   };
 
-  const overtimeMinutes = Math.max(0, gameState.inGameMinutes - 1560);
+  const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
   const bill = (SALARY_COST + ELECTRICITY_COST) + gameState.coversSeated * FOOD_COST_PER_COVER;
   const cashAfter = gameState.cash - bill;
 
-  const loseReason: 'none' | 'bankruptcy' | 'walkout' =
-    gameState.gameOver ? 'walkout'
-    : cashAfter < 0 ? 'bankruptcy'
-    : 'none';
+  const loseReason = summaryLoseReason(
+    gameState.gameOver,
+    gameState.gameOverReason,
+    gameState.morale,
+    cashAfter,
+  );
+
+  let loseCharacterName: string | undefined;
+  let loseCharacterTraits: VisualTraits | undefined;
+  if (loseReason === 'vip' && gameState.gameOverVipId) {
+    const vip = gameState.dailyVips.find((v) => v.id === gameState.gameOverVipId);
+    if (vip) {
+      loseCharacterName = vip.name;
+      loseCharacterTraits = vip.visualTraits;
+    }
+  } else if (loseReason === 'banned' && gameState.gameOverBannedId) {
+    const banned = gameState.dailyBanned.find((b) => b.id === gameState.gameOverBannedId);
+    if (banned) {
+      loseCharacterName = banned.name;
+      loseCharacterTraits = banned.visualTraits;
+    }
+  }
 
   const summaryData = {
     nightNumber: gameState.nightNumber,
@@ -81,6 +121,9 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
     ratingAfter: Math.max(1.0, gameState.rating),
     moraleAfter: gameState.morale,
     loseReason,
+    ...(loseCharacterName && loseCharacterTraits
+      ? { loseCharacterName, loseCharacterTraits }
+      : {}),
   };
 
   const handleNextShift = () => {
@@ -90,7 +133,7 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
       morale: Math.max(0, gameState.morale),
       nightNumber: gameState.nightNumber + 1,
     };
-    resetGame(difficulty, persist);
+    resetGame(gameState.difficulty, persist);
     setNightStartStats({ cash: persist.cash, rating: persist.rating, morale: persist.morale });
   };
 
@@ -109,7 +152,7 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
           timeMultiplier={gameState.timeMultiplier}
           setTimeMultiplier={setTimeMultiplier}
           formatTime={formatTime}
-          difficulty={difficulty}
+          difficulty={gameState.difficulty}
           onDifficultyChange={handleDifficultyChange}
           onHelpClick={onShowHelp}
           nightNumber={gameState.nightNumber}
@@ -123,8 +166,12 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
           <button
             type="button"
             className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
-            onClick={() => setTimeMultiplier(1)}
-            aria-label="Resume game at normal speed"
+            onClick={() => setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1)}
+            aria-label={
+              gameState.difficulty === 3
+                ? 'Resume game at 3× speed'
+                : 'Resume game at normal speed'
+            }
           >
             <span className="pointer-events-none flex max-w-[min(100%,20rem)] flex-col items-center gap-2 rounded-2xl border-2 border-[#141414] bg-[#E4E3E0] px-6 py-4 text-center shadow-[4px_4px_0_0_rgba(20,20,20,1)]">
               <span className="flex items-center gap-2 text-[#141414]">

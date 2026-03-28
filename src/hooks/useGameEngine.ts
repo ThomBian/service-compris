@@ -35,7 +35,8 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
 
   return {
     inGameMinutes: START_TIME,
-    timeMultiplier: 1,
+    timeMultiplier: difficulty === 3 ? 3 : 1,
+    difficulty,
     reservations,
     spawnedReservationIds: [],
     queue: [],
@@ -50,6 +51,9 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
     dailyBanned,
     seatedBannedIds: [],
     gameOver: false,
+    gameOverReason: null,
+    gameOverVipId: null,
+    gameOverBannedId: null,
     nightNumber,
     coversSeated: 0,
     shiftRevenue: 0,

@@ -84,6 +84,9 @@ export function useDecisionActions(
               cash: outcome.cash,
               rating: outcome.rating,
               gameOver: outcome.gameOver,
+              gameOverReason: outcome.gameOver ? 'VIP' : prev.gameOverReason,
+              gameOverVipId: outcome.gameOver ? vip.id : prev.gameOverVipId,
+              gameOverBannedId: outcome.gameOver ? null : prev.gameOverBannedId,
               timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
               logs: [`VIP refused: ${vip.name}.`, ...prev.logs].slice(0, 50),
             };
@@ -223,6 +226,9 @@ export function useDecisionActions(
               morale: outcome.morale,
               rating: outcome.rating,
               gameOver: outcome.gameOver,
+              gameOverReason: outcome.gameOver ? 'BANNED' : prev.gameOverReason,
+              gameOverVipId: outcome.gameOver ? null : prev.gameOverVipId,
+              gameOverBannedId: outcome.gameOver ? banned.id : prev.gameOverBannedId,
               timeMultiplier: outcome.gameOver ? 0 : prev.timeMultiplier,
               seatedBannedIds: [...prev.seatedBannedIds, banned.id],
               logs: [`Banned customer seated: ${banned.name}.`, ...prev.logs].slice(

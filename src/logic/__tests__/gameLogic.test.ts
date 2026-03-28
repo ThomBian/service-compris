@@ -87,6 +87,7 @@ const makeClient = (overrides?: Partial<Client>): Client => ({
 const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   inGameMinutes: 1200,
   timeMultiplier: 1,
+  difficulty: 1,
   reservations: [],
   spawnedReservationIds: [],
   queue: [],
@@ -101,6 +102,9 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   dailyBanned: [],
   seatedBannedIds: [],
   gameOver: false,
+  gameOverReason: null,
+  gameOverVipId: null,
+  gameOverBannedId: null,
   nightNumber: 1,
   coversSeated: 0,
   shiftRevenue: 0,
@@ -583,7 +587,8 @@ describe('handleAcceptedClient', () => {
   it('honest customer earns cash and a small rating boost', () => {
     const client = makeClient({ hasLied: false, truePartySize: 2 });
     const { nextCash, nextRating } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
-    expect(nextCash).toBe(40); // basePay = 40
+    // 2 * (40 + 5 * 2) = 100
+    expect(nextCash).toBe(100);
     expect(nextRating).toBeCloseTo(3.1);
   });
 
@@ -606,7 +611,7 @@ describe('handleAcceptedClient', () => {
       truePartySize: 2,
     });
     const { nextCash } = handleAcceptedClient(client, 2, 0, 3.0, 50, []);
-    expect(nextCash).toBe(100); // 40 * 2.5
+    expect(nextCash).toBe(250); // 100 * 2.5
   });
 
   it('cropped party (fewer seated than actual) drops rating', () => {
@@ -797,6 +802,7 @@ describe('applyMoraleGameOver', () => {
     const state = makeGameState({ morale: 0, gameOver: false });
     const result = applyMoraleGameOver(state);
     expect(result.gameOver).toBe(true);
+    expect(result.gameOverReason).toBe('MORALE');
     expect(result.timeMultiplier).toBe(0);
   });
 

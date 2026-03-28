@@ -11,7 +11,7 @@ import {
   Banned,
 } from '../types';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
-import { START_TIME, FIRST_NAMES, LAST_NAMES } from '../constants';
+import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
 
 export function useClientSpawner(
   gameState: GameState,
@@ -137,7 +137,7 @@ export function useClientSpawner(
 
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
-    if (gameState.inGameMinutes >= 1560) return;
+    if (gameState.inGameMinutes >= DOORS_CLOSE_TIME) return;
 
     const toSpawn = gameState.reservations.filter(res => {
       if (gameState.spawnedReservationIds.includes(res.id)) return false;

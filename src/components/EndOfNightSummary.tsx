@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER } from '../constants';
+import type { VisualTraits } from '../types';
+import { ClientAvatar } from './scene/ClientAvatar';
 
 export interface SummaryData {
   nightNumber: number;
@@ -12,13 +14,46 @@ export interface SummaryData {
   cashAfter: number;
   ratingAfter: number;
   moraleAfter: number;
-  loseReason: 'none' | 'bankruptcy' | 'walkout';
+  loseReason: 'none' | 'bankruptcy' | 'morale' | 'vip' | 'banned';
+  /** Present when loseReason is vip or banned — who ended the run. */
+  loseCharacterName?: string;
+  loseCharacterTraits?: VisualTraits;
 }
 
 interface Props {
   data: SummaryData;
   onNextShift: () => void;
   onTryAgain: () => void;
+}
+
+/** Body copy under the stats when the night ends in a loss (null = no loss banner). */
+function loseMessage(
+  reason: SummaryData['loseReason'],
+  showPortrait: boolean,
+  characterName: string | undefined,
+): string | null {
+  switch (reason) {
+    case 'bankruptcy':
+      return "You can't cover tonight's costs. The restaurant closes its doors.";
+    case 'morale':
+      return "Your staff has had enough. The doors close.";
+    case 'vip':
+      if (showPortrait) return 'A VIP incident forced the house to close tonight.';
+      if (characterName) {
+        return `${characterName} — a VIP incident forced the house to close tonight.`;
+      }
+      return 'A VIP incident forced the house to close tonight.';
+    case 'banned':
+      if (showPortrait) {
+        return 'Seating this guest had consequences the restaurant could not survive.';
+      }
+      if (characterName) {
+        return `${characterName} — seating them had consequences the restaurant could not survive.`;
+      }
+      return 'Seating the wrong guest had consequences the restaurant could not survive.';
+    default:
+      return null;
+  }
 }
 
 function useCountUp(target: number, duration: number, active: boolean): number {
@@ -47,6 +82,8 @@ export const EndOfNightSummary: React.FC<Props> = ({ data, onNextShift, onTryAga
     cashBefore, ratingBefore, moraleBefore,
     cashAfter, ratingAfter, moraleAfter,
     loseReason,
+    loseCharacterName,
+    loseCharacterTraits,
   } = data;
 
   const foodCost = coversSeated * FOOD_COST_PER_COVER;
@@ -69,13 +106,16 @@ export const EndOfNightSummary: React.FC<Props> = ({ data, onNextShift, onTryAga
   const foodCount = useCountUp(foodCost, 400, step >= 8);
   const netCount = useCountUp(Math.abs(net), 600, step >= 9);
 
-  const headline = loseReason === 'walkout' ? 'Shift Cut Short' : 'Service Complete';
-  const loseMsg =
-    loseReason === 'bankruptcy'
-      ? "You can't cover tonight's costs. The restaurant closes its doors."
-      : loseReason === 'walkout'
-      ? "Your staff has had enough. The doors close."
+  const headline =
+    loseReason === 'none' || loseReason === 'bankruptcy' ? 'Service Complete' : 'Shift Cut Short';
+  const losePortrait =
+    (loseReason === 'vip' || loseReason === 'banned') &&
+    loseCharacterName &&
+    loseCharacterTraits
+      ? { name: loseCharacterName, traits: loseCharacterTraits }
       : null;
+
+  const loseMsg = loseMessage(loseReason, losePortrait !== null, loseCharacterName);
 
   const s = (n: number) => `opacity-0 translate-y-1 transition-all duration-300 ${n <= step ? 'opacity-100 translate-y-0' : ''}`;
 
@@ -145,9 +185,21 @@ export const EndOfNightSummary: React.FC<Props> = ({ data, onNextShift, onTryAga
         </div>
 
         {loseMsg && (
-          <p className={`text-xs font-bold text-center text-red-700 border border-red-300 rounded-lg px-3 py-2 bg-red-50 ${s(11)}`}>
-            {loseMsg}
-          </p>
+          <div
+            className={`flex flex-col gap-2 text-red-700 border border-red-300 rounded-lg px-3 py-2 bg-red-50 ${s(11)}`}
+          >
+            {losePortrait && (
+              <div className="flex items-center gap-3">
+                <div className="shrink-0 w-12 flex items-end justify-center [&_svg]:w-full [&_svg]:h-auto">
+                  <ClientAvatar traits={losePortrait.traits} />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-wide text-[#141414] leading-tight">
+                  {losePortrait.name}
+                </p>
+              </div>
+            )}
+            <p className="text-xs font-bold text-center">{loseMsg}</p>
+          </div>
         )}
 
         <div className={s(12)}>

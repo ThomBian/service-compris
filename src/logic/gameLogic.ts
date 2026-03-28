@@ -1,26 +1,28 @@
-import { 
-  ClientType, 
+import {
+  ClientType,
   LieType,
-  Client, 
-  GameState, 
+  Client,
+  GameState,
   Reservation,
   PhysicalState,
   DialogueState,
   ChatMessage,
   Cell,
   CellState,
-  VisualTraits
-} from '../types';
-import { 
-  FIRST_NAMES, 
+  VisualTraits,
+} from "../types";
+import {
+  FIRST_NAMES,
   LAST_NAMES,
   GREETINGS,
   SCAMMER_GREETINGS,
   WALK_IN_GREETINGS,
-  GRID_SIZE
-} from '../constants';
-import { getRandom, formatTime } from '../utils';
-import { traitsMatch } from './vipLogic';
+  GRID_SIZE,
+  BASE_REVENUE_PER_SEAT,
+  PARTY_SIZE_TIP_PER_SEAT_PARTY,
+} from "../constants";
+import { getRandom, formatTime } from "../utils";
+import { traitsMatch } from "./vipLogic";
 
 export function seedTraits(id: string, index: number): VisualTraits {
   const seed = id + String(index);
@@ -31,16 +33,16 @@ export function seedTraits(id: string, index: number): VisualTraits {
   }
   const pick = (range: number): number => {
     const v = h % range;
-    h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) >>> 0;
+    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
     return v;
   };
   return {
-    skinTone:      pick(5) as VisualTraits['skinTone'],
-    hairStyle:     pick(5) as VisualTraits['hairStyle'],
-    hairColor:     pick(6) as VisualTraits['hairColor'],
-    clothingStyle: pick(4) as VisualTraits['clothingStyle'],
-    clothingColor: pick(5) as VisualTraits['clothingColor'],
-    height:        pick(3) as VisualTraits['height'],
+    skinTone: pick(5) as VisualTraits["skinTone"],
+    hairStyle: pick(5) as VisualTraits["hairStyle"],
+    hairColor: pick(6) as VisualTraits["hairColor"],
+    clothingStyle: pick(4) as VisualTraits["clothingStyle"],
+    clothingColor: pick(5) as VisualTraits["clothingColor"],
+    height: pick(3) as VisualTraits["height"],
   };
 }
 
@@ -136,32 +138,57 @@ export const generateClientData = (
   let visualTraits: VisualTraits;
   do {
     visualTraits = {
-      skinTone:      Math.floor(Math.random() * 5) as VisualTraits['skinTone'],
-      hairStyle:     Math.floor(Math.random() * 5) as VisualTraits['hairStyle'],
-      hairColor:     Math.floor(Math.random() * 6) as VisualTraits['hairColor'],
-      clothingStyle: Math.floor(Math.random() * 4) as VisualTraits['clothingStyle'],
-      clothingColor: Math.floor(Math.random() * 5) as VisualTraits['clothingColor'],
-      height:        Math.floor(Math.random() * 3) as VisualTraits['height'],
+      skinTone: Math.floor(Math.random() * 5) as VisualTraits["skinTone"],
+      hairStyle: Math.floor(Math.random() * 5) as VisualTraits["hairStyle"],
+      hairColor: Math.floor(Math.random() * 6) as VisualTraits["hairColor"],
+      clothingStyle: Math.floor(
+        Math.random() * 4,
+      ) as VisualTraits["clothingStyle"],
+      clothingColor: Math.floor(
+        Math.random() * 5,
+      ) as VisualTraits["clothingColor"],
+      height: Math.floor(Math.random() * 3) as VisualTraits["height"],
     };
   } while (excludeTraits?.some((e) => traitsMatch(e, visualTraits)));
 
-  return { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, claimedReservationId, visualTraits };
+  return {
+    type,
+    trueFirstName,
+    trueLastName,
+    truePartySize,
+    trueReservationId,
+    lieType,
+    claimedReservationId,
+    visualTraits,
+  };
 };
 
 export const createNewClient = ({
   data,
   currentMinutes,
-  res
+  res,
 }: {
   data: ReturnType<typeof generateClientData>;
   currentMinutes: number;
   res?: Reservation;
 }): Client => {
-  const { type, trueFirstName, trueLastName, truePartySize, trueReservationId, lieType, visualTraits } = data;
-  let finalIsLate = res ? (currentMinutes - res.time > 30) : false;
+  const {
+    type,
+    trueFirstName,
+    trueLastName,
+    truePartySize,
+    trueReservationId,
+    lieType,
+    visualTraits,
+  } = data;
+  let finalIsLate = res ? currentMinutes - res.time > 30 : false;
 
   let finalLieType: LieType = lieType;
-  if (type === ClientType.LEGITIMATE && finalIsLate && finalLieType === LieType.NONE) {
+  if (
+    type === ClientType.LEGITIMATE &&
+    finalIsLate &&
+    finalLieType === LieType.NONE
+  ) {
     finalLieType = LieType.TIME;
   }
 
@@ -187,7 +214,7 @@ export const createNewClient = ({
     hasLied: finalLieType !== LieType.NONE,
     visualTraits,
     isCaught: false,
-    lastMessage: 'Waiting in line...',
+    lastMessage: "Waiting in line...",
     chatHistory: [],
   };
 
@@ -197,11 +224,12 @@ export const createNewClient = ({
 // --- Queue Management Logic ---
 
 export function prepareClientForDesk(client: Client): Client {
-  const greeting = client.type === ClientType.WALK_IN 
-    ? getRandom(WALK_IN_GREETINGS) 
-    : client.type === ClientType.SCAMMER 
-      ? getRandom(SCAMMER_GREETINGS) 
-      : getRandom(GREETINGS);
+  const greeting =
+    client.type === ClientType.WALK_IN
+      ? getRandom(WALK_IN_GREETINGS)
+      : client.type === ClientType.SCAMMER
+        ? getRandom(SCAMMER_GREETINGS)
+        : getRandom(GREETINGS);
 
   const preparedClient: Client = {
     ...client,
@@ -209,9 +237,9 @@ export function prepareClientForDesk(client: Client): Client {
     dialogueState: DialogueState.OPENING_GAMBIT,
     lastMessage: greeting,
     chatHistory: [
-      { sender: 'maitre-d', text: 'Good evening! How may I help you?' },
-      { sender: 'guest', text: greeting }
-    ]
+      { sender: "maitre-d", text: "Good evening! How may I help you?" },
+      { sender: "guest", text: greeting },
+    ],
   };
 
   if (!preparedClient.claimedReservationId) {
@@ -220,36 +248,59 @@ export function prepareClientForDesk(client: Client): Client {
     if (shouldAnnounce) {
       preparedClient.knownFirstName = preparedClient.trueFirstName;
     }
-    if (Math.random() > 0.5) preparedClient.knownPartySize = preparedClient.truePartySize;
+    if (Math.random() > 0.5)
+      preparedClient.knownPartySize = preparedClient.truePartySize;
   }
 
   return preparedClient;
 }
 
 function updateQueuePatience(queue: Client[]): Client[] {
-  return queue.map(c => ({
+  return queue.map((c) => ({
     ...c,
-    patience: Math.max(0, c.patience - 1)
+    patience: Math.max(0, c.patience - 1),
   }));
 }
 
 function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
-  const stormedOutCount = queue.filter(c => c.patience <= 0).length;
-  if (stormedOutCount === 0) return { nextQueue: queue, nextRating: rating, nextLogs: logs, occurred: false };
+  const stormedOutCount = queue.filter((c) => c.patience <= 0).length;
+  if (stormedOutCount === 0)
+    return {
+      nextQueue: queue,
+      nextRating: rating,
+      nextLogs: logs,
+      occurred: false,
+    };
 
-  const nextQueue = queue.filter(c => c.patience > 0);
-  const nextRating = Math.max(0, rating - (0.5 * stormedOutCount));
-  const nextLogs = [`${stormedOutCount} guest(s) stormed out of the queue!`, ...logs].slice(0, 50);
-  
+  const nextQueue = queue.filter((c) => c.patience > 0);
+  const nextRating = Math.max(0, rating - 0.5 * stormedOutCount);
+  const nextLogs = [
+    `${stormedOutCount} guest(s) stormed out of the queue!`,
+    ...logs,
+  ].slice(0, 50);
+
   return { nextQueue, nextRating, nextLogs, occurred: true };
 }
 
-function tryMoveToDesk(queue: Client[], currentClient: Client | null, logs: string[]) {
-  if (currentClient || queue.length === 0) return { nextQueue: queue, nextCurrentClient: currentClient, nextLogs: logs, occurred: false };
+function tryMoveToDesk(
+  queue: Client[],
+  currentClient: Client | null,
+  logs: string[],
+) {
+  if (currentClient || queue.length === 0)
+    return {
+      nextQueue: queue,
+      nextCurrentClient: currentClient,
+      nextLogs: logs,
+      occurred: false,
+    };
 
   const [first, ...rest] = queue;
   const nextCurrentClient = prepareClientForDesk(first);
-  const nextLogs = [`Next guest stepped up to the podium.`, ...logs].slice(0, 50);
+  const nextLogs = [`Next guest stepped up to the podium.`, ...logs].slice(
+    0,
+    50,
+  );
 
   return { nextQueue: rest, nextCurrentClient, nextLogs, occurred: true };
 }
@@ -264,16 +315,26 @@ export function processQueueTick(prev: GameState): QueueTickResult {
   let nextCurrentClient = prev.currentClient;
   let nextRating = prev.rating;
   let nextLogs = prev.logs;
-  let nextGrid = prev.grid.map(row => row.map(cell => {
-    if (cell.state === CellState.OCCUPIED && cell.mealDuration !== undefined) {
-      const nextDuration = cell.mealDuration - 1;
-      if (nextDuration <= 0) {
-        return { ...cell, state: CellState.EMPTY, mealDuration: undefined, partyId: undefined };
+  let nextGrid = prev.grid.map((row) =>
+    row.map((cell) => {
+      if (
+        cell.state === CellState.OCCUPIED &&
+        cell.mealDuration !== undefined
+      ) {
+        const nextDuration = cell.mealDuration - 1;
+        if (nextDuration <= 0) {
+          return {
+            ...cell,
+            state: CellState.EMPTY,
+            mealDuration: undefined,
+            partyId: undefined,
+          };
+        }
+        return { ...cell, mealDuration: nextDuration };
       }
-      return { ...cell, mealDuration: nextDuration };
-    }
-    return cell;
-  }));
+      return cell;
+    }),
+  );
 
   nextQueue = updateQueuePatience(nextQueue);
 
@@ -295,7 +356,7 @@ export function processQueueTick(prev: GameState): QueueTickResult {
       currentClient: nextCurrentClient,
       grid: nextGrid,
       rating: nextRating,
-      logs: nextLogs
+      logs: nextLogs,
     },
     stormedCount,
   };
@@ -303,14 +364,18 @@ export function processQueueTick(prev: GameState): QueueTickResult {
 
 // --- Questioning Logic ---
 
-export type QuestionField = 'firstName' | 'lastName' | 'time';
+export type QuestionField = "firstName" | "lastName" | "time";
 
 function getFieldQuestionText(field: QuestionField): string {
   switch (field) {
-    case 'firstName': return "What is your first name?";
-    case 'lastName': return "What is your last name?";
-    case 'time': return "What time was your reservation?";
-    default: return "";
+    case "firstName":
+      return "What is your first name?";
+    case "lastName":
+      return "What is your last name?";
+    case "time":
+      return "What time was your reservation?";
+    default:
+      return "";
   }
 }
 
@@ -318,99 +383,104 @@ function handleFieldQuestion(
   field: QuestionField,
   client: Client,
   reservations: Reservation[],
-  inGameMinutes: number
+  inGameMinutes: number,
 ) {
   // Impersonators lie using the stolen reservation's data
   if (client.claimedReservationId) {
-    const stolenRes = reservations.find(r => r.id === client.claimedReservationId);
+    const stolenRes = reservations.find(
+      (r) => r.id === client.claimedReservationId,
+    );
     if (stolenRes) {
       const alreadyKnownForImpersonator =
-        (field === 'firstName' && client.knownFirstName) ||
-        (field === 'lastName' && client.knownLastName) ||
-        (field === 'time' && client.knownTime);
+        (field === "firstName" && client.knownFirstName) ||
+        (field === "lastName" && client.knownLastName) ||
+        (field === "time" && client.knownTime);
 
       if (alreadyKnownForImpersonator) {
         return {
           patiencePenalty: 20,
           logMsg: `Client is frustrated. You already asked that.`,
           guestResponse: "I already told you that!",
-          revealedInfo: {}
+          revealedInfo: {},
         };
       }
 
-      if (field === 'firstName') {
+      if (field === "firstName") {
         return {
           patiencePenalty: 10,
-          logMsg: '',
+          logMsg: "",
           guestResponse: `My name is ${stolenRes.firstName}.`,
-          revealedInfo: { knownFirstName: stolenRes.firstName }
+          revealedInfo: { knownFirstName: stolenRes.firstName },
         };
       }
-      if (field === 'lastName') {
+      if (field === "lastName") {
         return {
           patiencePenalty: 10,
-          logMsg: '',
+          logMsg: "",
           guestResponse: `My last name is ${stolenRes.lastName}.`,
-          revealedInfo: { knownLastName: stolenRes.lastName }
+          revealedInfo: { knownLastName: stolenRes.lastName },
         };
       }
-      if (field === 'time') {
+      if (field === "time") {
         const liesAboutTime = Math.random() < 0.4;
         const offset = Math.random() < 0.5 ? 15 : -15;
-        const claimedTime = liesAboutTime ? stolenRes.time + offset : stolenRes.time;
+        const claimedTime = liesAboutTime
+          ? stolenRes.time + offset
+          : stolenRes.time;
         return {
           patiencePenalty: 10,
-          logMsg: '',
+          logMsg: "",
           guestResponse: `Our reservation was for ${formatTime(claimedTime)}.`,
-          revealedInfo: { knownTime: claimedTime }
+          revealedInfo: { knownTime: claimedTime },
         };
       }
     }
   }
 
   // Original logic for all other clients
-  const alreadyKnown = (field === 'firstName' && client.knownFirstName) ||
-                       (field === 'lastName' && client.knownLastName) ||
-                       (field === 'time' && client.knownTime);
+  const alreadyKnown =
+    (field === "firstName" && client.knownFirstName) ||
+    (field === "lastName" && client.knownLastName) ||
+    (field === "time" && client.knownTime);
 
   if (alreadyKnown) {
     return {
       patiencePenalty: 20,
       logMsg: `Client is frustrated. You already asked that.`,
       guestResponse: "I already told you that!",
-      revealedInfo: {}
+      revealedInfo: {},
     };
   }
 
   let revealedInfo: Partial<Client> = {};
-  let guestResponse = '';
+  let guestResponse = "";
 
-  if (field === 'firstName') {
+  if (field === "firstName") {
     revealedInfo = { knownFirstName: client.trueFirstName };
     guestResponse = `My name is ${client.trueFirstName}.`;
-  } else if (field === 'lastName') {
+  } else if (field === "lastName") {
     revealedInfo = { knownLastName: client.trueLastName };
     guestResponse = `My last name is ${client.trueLastName}.`;
-  } else if (field === 'time') {
-    const res = reservations.find(r => r.id === client.trueReservationId);
-    const trueTime = res ? res.time : (inGameMinutes - 10);
+  } else if (field === "time") {
+    const res = reservations.find((r) => r.id === client.trueReservationId);
+    const trueTime = res ? res.time : inGameMinutes - 10;
     revealedInfo = { knownTime: trueTime };
     guestResponse = `Our reservation was for ${formatTime(trueTime)}.`;
   }
 
   return {
     patiencePenalty: 10,
-    logMsg: '',
+    logMsg: "",
     guestResponse,
-    revealedInfo
+    revealedInfo,
   };
 }
 
 export function generateQuestionResponse({
-  field, 
-  client, 
-  reservations, 
-  inGameMinutes
+  field,
+  client,
+  reservations,
+  inGameMinutes,
 }: {
   field: QuestionField;
   client: Client;
@@ -418,28 +488,33 @@ export function generateQuestionResponse({
   inGameMinutes: number;
 }) {
   const playerQuestion = getFieldQuestionText(field);
-  const result = handleFieldQuestion(field, client, reservations, inGameMinutes);
+  const result = handleFieldQuestion(
+    field,
+    client,
+    reservations,
+    inGameMinutes,
+  );
   return { playerQuestion, ...result, caught: false };
 }
 
 // --- Accusation Logic ---
 
-export type AccusationField = 'size' | 'time' | 'reservation';
+export type AccusationField = "size" | "time" | "reservation";
 
 function isAccusationCorrect(
   field: AccusationField,
   client: Client,
-  res?: Reservation
+  res?: Reservation,
 ): boolean {
-  if (field === 'reservation') {
+  if (field === "reservation") {
     return client.type === ClientType.SCAMMER;
   }
-  
-  if (field === 'time') {
+
+  if (field === "time") {
     return client.isLate;
   }
 
-  if (field === 'size') {
+  if (field === "size") {
     if (!res) return false;
     return client.truePartySize > res.partySize;
   }
@@ -449,23 +524,27 @@ function isAccusationCorrect(
 
 function getAccusationText(field: AccusationField): string {
   switch (field) {
-    case 'reservation': return "I don't think you have a reservation at all.";
-    case 'size': return "You're bringing more people than you booked for!";
-    case 'time': return "You're far too late for your reservation.";
-    default: return "";
+    case "reservation":
+      return "I don't think you have a reservation at all.";
+    case "size":
+      return "You're bringing more people than you booked for!";
+    case "time":
+      return "You're far too late for your reservation.";
+    default:
+      return "";
   }
 }
 
 export function checkAccusation({
-  field, 
-  client, 
-  reservations
+  field,
+  client,
+  reservations,
 }: {
   field: AccusationField;
   client: Client;
   reservations: Reservation[];
 }) {
-  const res = reservations.find(r => r.id === client.trueReservationId);
+  const res = reservations.find((r) => r.id === client.trueReservationId);
   const caught = isAccusationCorrect(field, client, res);
   const accusationText = getAccusationText(field);
 
@@ -475,7 +554,7 @@ export function checkAccusation({
       accusationText,
       guestResponse: "You caught me... I didn't think you'd notice. *sweats*",
       logMsg: `CAUGHT IN A LIE: You correctly called out their ${field} lie!`,
-      patiencePenalty: 0
+      patiencePenalty: 0,
     };
   } else {
     return {
@@ -483,16 +562,12 @@ export function checkAccusation({
       accusationText,
       guestResponse: "I'm telling the truth! This is insulting!",
       logMsg: `False Accusation: They weren't lying about ${field}!`,
-      patiencePenalty: 50
+      patiencePenalty: 50,
     };
   }
 }
 
 // --- Decision Logic ---
-
-function calculateBasePay(client: Client): number {
-  return 20 + (client.truePartySize * 10);
-}
 
 export function handleAcceptedClient(
   client: Client,
@@ -500,23 +575,27 @@ export function handleAcceptedClient(
   currentCash: number,
   currentRating: number,
   currentMorale: number,
-  currentLogs: string[]
+  currentLogs: string[],
 ) {
   let nextCash = currentCash;
   let nextRating = currentRating;
   let nextMorale = currentMorale;
   let nextLogs = [...currentLogs];
-  
+
   const partySize = client.truePartySize;
   const croppedCount = partySize - seatedCount;
-  const basePayPerPerson = (20 + (partySize * 10)) / partySize;
-  let basePay = basePayPerPerson * seatedCount;
+  const basePay =
+    BASE_REVENUE_PER_SEAT * seatedCount +
+    PARTY_SIZE_TIP_PER_SEAT_PARTY * partySize * seatedCount;
 
   // Cropping Penalty
   if (croppedCount > 0) {
     const penalty = -0.5 * Math.pow(2, croppedCount - 1);
     nextRating = Math.max(0, nextRating + penalty);
-    nextLogs = [`CROPPED: Left ${croppedCount} guest(s) behind. Rating penalty: ${penalty.toFixed(2)}`, ...nextLogs];
+    nextLogs = [
+      `CROPPED: Left ${croppedCount} guest(s) behind. Rating penalty: ${penalty.toFixed(2)}`,
+      ...nextLogs,
+    ];
   }
 
   if (client.hasLied) {
@@ -525,25 +604,37 @@ export function handleAcceptedClient(
       nextCash += basePay * 2.5;
       nextRating = Math.min(5, nextRating + 0.8);
       nextMorale = Math.min(100, nextMorale + 10);
-      nextLogs = [`Grateful Liar: You caught them, but sat them anyway! Massive bonus.`, ...nextLogs];
+      nextLogs = [
+        `Grateful Liar: You caught them, but sat them anyway! Massive bonus.`,
+        ...nextLogs,
+      ];
     } else {
       // Fooled!
       if (client.type === ClientType.SCAMMER) {
         nextCash -= 50;
         nextRating = Math.max(0, nextRating - 1.0);
         nextMorale = Math.max(0, nextMorale - 20);
-        nextLogs = [`FOOLED: You sat a scammer! They skipped the bill and left a mess.`, ...nextLogs];
+        nextLogs = [
+          `FOOLED: You sat a scammer! They skipped the bill and left a mess.`,
+          ...nextLogs,
+        ];
       } else {
         nextRating = Math.max(0, nextRating - 0.5);
         nextMorale = Math.max(0, nextMorale - 10);
-        nextLogs = [`FOOLED: You sat a rule-breaker without calling them out. Staff is annoyed.`, ...nextLogs];
+        nextLogs = [
+          `FOOLED: You sat a rule-breaker without calling them out. Staff is annoyed.`,
+          ...nextLogs,
+        ];
       }
     }
   } else {
     // Honest customer
     nextCash += basePay;
     nextRating = Math.min(5, nextRating + 0.1);
-    nextLogs = [`Accepted ${client.trueFirstName}. Standard service.`, ...nextLogs];
+    nextLogs = [
+      `Accepted ${client.trueFirstName}. Standard service.`,
+      ...nextLogs,
+    ];
   }
 
   return { nextCash, nextRating, nextMorale, nextLogs };
@@ -553,7 +644,7 @@ export function handleRefusedClient(
   client: Client,
   currentRating: number,
   currentMorale: number,
-  currentLogs: string[]
+  currentLogs: string[],
 ) {
   let nextRating = currentRating;
   let nextMorale = currentMorale;
@@ -569,18 +660,27 @@ export function handleRefusedClient(
   }
 
   // Justified if: Scammer, or Size Lie, or Time Crime (>30 mins late)
-  const isJustified = client.type === ClientType.SCAMMER || client.lieType === LieType.SIZE || client.isLate;
+  const isJustified =
+    client.type === ClientType.SCAMMER ||
+    client.lieType === LieType.SIZE ||
+    client.isLate;
 
   if (isJustified) {
     // Justified Refusal
     nextRating = Math.min(5, nextRating + 0.2);
     nextMorale = Math.min(100, nextMorale + 5);
-    nextLogs = [`Justified Refusal: You protected the house from a problematic guest.`, ...nextLogs];
+    nextLogs = [
+      `Justified Refusal: You protected the house from a problematic guest.`,
+      ...nextLogs,
+    ];
   } else {
     // Unjustified Refusal
     nextRating = Math.max(0, nextRating - 0.5);
     nextMorale = Math.max(0, nextMorale - 15);
-    nextLogs = [`Unjustified Refusal: You turned away an honest guest!`, ...nextLogs];
+    nextLogs = [
+      `Unjustified Refusal: You turned away an honest guest!`,
+      ...nextLogs,
+    ];
   }
 
   return { nextRating, nextMorale, nextLogs };
@@ -590,20 +690,23 @@ export function handleSeatingRefusal(
   client: Client,
   currentRating: number,
   currentMorale: number,
-  currentLogs: string[]
+  currentLogs: string[],
 ) {
   const nextRating = Math.max(0, currentRating - 1.5);
   const nextMorale = Math.max(0, currentMorale - 30);
   const nextLogs = [
     `Refused after seating: You accepted ${client.trueFirstName} then turned them away. Guests are furious.`,
-    ...currentLogs
+    ...currentLogs,
   ];
   return { nextRating, nextMorale, nextLogs };
 }
 
 // --- Grid Interaction Logic ---
 
-export function isAdjacent(cell1: { x: number, y: number }, cell2: { x: number, y: number }): boolean {
+export function isAdjacent(
+  cell1: { x: number; y: number },
+  cell2: { x: number; y: number },
+): boolean {
   const dx = Math.abs(cell1.x - cell2.x);
   const dy = Math.abs(cell1.y - cell2.y);
   return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
@@ -612,7 +715,7 @@ export function isAdjacent(cell1: { x: number, y: number }, cell2: { x: number, 
 export function canSelectCell(cell: Cell, selectedCells: Cell[]): boolean {
   if (cell.state !== CellState.EMPTY) return false;
   if (selectedCells.length === 0) return true;
-  return selectedCells.some(selected => isAdjacent(cell, selected));
+  return selectedCells.some((selected) => isAdjacent(cell, selected));
 }
 
 /**
@@ -621,18 +724,26 @@ export function canSelectCell(cell: Cell, selectedCells: Cell[]): boolean {
  */
 export function applyMoraleGameOver(state: GameState): GameState {
   if (state.morale > 0 || state.gameOver) return state;
-  const clearedGrid = state.grid.map(row =>
-    row.map(cell =>
+  const clearedGrid = state.grid.map((row) =>
+    row.map((cell) =>
       cell.state === CellState.OCCUPIED
-        ? { ...cell, state: CellState.EMPTY, mealDuration: undefined, partyId: undefined }
-        : cell
-    )
+        ? {
+            ...cell,
+            state: CellState.EMPTY,
+            mealDuration: undefined,
+            partyId: undefined,
+          }
+        : cell,
+    ),
   );
   return {
     ...state,
     grid: clearedGrid,
     gameOver: true,
+    gameOverReason: 'MORALE',
+    gameOverVipId: null,
+    gameOverBannedId: null,
     timeMultiplier: 0,
-    logs: ['Staff morale collapsed. Shift ended.', ...state.logs].slice(0, 50),
+    logs: ["Staff morale collapsed. Shift ended.", ...state.logs].slice(0, 50),
   };
 }

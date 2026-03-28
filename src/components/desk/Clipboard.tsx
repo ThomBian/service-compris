@@ -5,7 +5,12 @@ import { ClientAvatar } from "../scene/ClientAvatar";
 import { ActivityLog } from "../ActivityLog";
 import type { Vip, Banned } from "../../types";
 
-const TABS = ["VIPs", "Menu", "Banned", "Log"] as const;
+const TABS = [
+  "VIPs",
+  "Banned",
+  // "Menu" ,
+  "Log",
+] as const;
 
 interface VipDossierEntryProps {
   vip: Vip;
@@ -103,7 +108,9 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
   const consequenceBadge = isSeated ? (
     <div className="inline-flex items-center gap-1 rounded bg-red-100 border border-red-400 px-1 py-0.5 w-fit">
       <span className="text-[9px]">⚠️</span>
-      <span className="text-[8px] text-red-700 font-semibold">Slipped through</span>
+      <span className="text-[8px] text-red-700 font-semibold">
+        Slipped through
+      </span>
     </div>
   ) : banned.consequenceTier === "GAME_OVER" ? (
     <div className="inline-flex items-center gap-1 rounded bg-[#1a0a0a] border border-[#5a1010] px-1 py-0.5 w-fit">
@@ -113,17 +120,23 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
   ) : banned.consequenceTier === "CASH_FINE" ? (
     <div className="inline-flex items-center gap-1 rounded bg-orange-50 border border-orange-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">💸</span>
-      <span className="text-[8px] text-orange-700 font-semibold">Cash fine</span>
+      <span className="text-[8px] text-orange-700 font-semibold">
+        Cash fine
+      </span>
     </div>
   ) : banned.consequenceTier === "MORALE" ? (
     <div className="inline-flex items-center gap-1 rounded bg-purple-50 border border-purple-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">😵</span>
-      <span className="text-[8px] text-purple-700 font-semibold">Morale hit</span>
+      <span className="text-[8px] text-purple-700 font-semibold">
+        Morale hit
+      </span>
     </div>
   ) : (
     <div className="inline-flex items-center gap-1 rounded bg-amber-50 border border-amber-300 px-1 py-0.5 w-fit">
       <span className="text-[9px]">⭐</span>
-      <span className="text-[8px] text-amber-700 font-semibold">Rating loss</span>
+      <span className="text-[8px] text-amber-700 font-semibold">
+        Rating loss
+      </span>
     </div>
   );
 

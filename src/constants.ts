@@ -1,6 +1,8 @@
 import { Reservation } from "./types";
 
 export const START_TIME = 1170; // 19:30
+/** End of seated service / doors closed — 23:30, minutes from midnight (must match formatTime). */
+export const DOORS_CLOSE_TIME = 23 * 60 + 30;
 export const TICK_RATE = 2500; // 1 in-game minute = 1 real-world seconds (at 1x)
 
 export const FIRST_NAMES = [
@@ -370,6 +372,13 @@ export const SPAWN_PROBABILITY: readonly number[] = [0, 0.5, 0.7, 0.9];
 export const SALARY_COST = 200;
 export const ELECTRICITY_COST = 40;
 export const FOOD_COST_PER_COVER = 23;
+/** Gross cash per seated guest on a standard honest seating (keep above FOOD_COST_PER_COVER for night P&L). */
+export const BASE_REVENUE_PER_SEAT = 40;
+/**
+ * Tip / upsell component: multiplied by `truePartySize * seatedCount` (bigger tables = riskier, longer turns).
+ * Total seating cash = BASE_REVENUE_PER_SEAT * seatedCount + this * partySize * seatedCount.
+ */
+export const PARTY_SIZE_TIP_PER_SEAT_PARTY = 5;
 export const OVERTIME_MORALE_DRAIN_PER_MINUTE = 1;
 export const LAST_CALL_RATING_PENALTY = 0.1;
 

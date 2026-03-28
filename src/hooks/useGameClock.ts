@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react';
-import { GameState } from '../types';
-import { TICK_RATE, OVERTIME_MORALE_DRAIN_PER_MINUTE } from '../constants';
+import { GameState, CellState } from '../types';
+import { TICK_RATE, OVERTIME_MORALE_DRAIN_PER_MINUTE, DOORS_CLOSE_TIME } from '../constants';
 import { applyMoraleGameOver } from '../logic/gameLogic';
 
 export function useGameClock(
@@ -13,13 +13,27 @@ export function useGameClock(
     setGameState(prev => {
       if (prev.timeMultiplier === 0 || prev.gameOver) return prev;
 
-      const nextMinutes = prev.inGameMinutes + 1;
-      const isOvertime = nextMinutes >= 1560;
-      const wasOvertime = prev.inGameMinutes >= 1560;
+      // Shift ended for P&L: past closing with no tables still dining — freeze time so
+      // overtime morale drain does not continue under the summary overlay.
+      if (prev.inGameMinutes >= DOORS_CLOSE_TIME) {
+        const hasOccupied = prev.grid.some(row =>
+          row.some(c => c.state === CellState.OCCUPIED),
+        );
+        if (!hasOccupied) {
+          return prev.timeMultiplier === 0 ? prev : { ...prev, timeMultiplier: 0 };
+        }
+      }
 
-      const nextMultiplier = isOvertime && !wasOvertime && prev.timeMultiplier < 4
-        ? 4
-        : prev.timeMultiplier;
+      const nextMinutes = prev.inGameMinutes + 1;
+      const isOvertime = nextMinutes >= DOORS_CLOSE_TIME;
+      const wasOvertime = prev.inGameMinutes >= DOORS_CLOSE_TIME;
+
+      const nextMultiplier =
+        isOvertime && !wasOvertime && prev.timeMultiplier < 4
+          ? prev.difficulty === 3
+            ? 3
+            : 4
+          : prev.timeMultiplier;
 
       let nextMorale = prev.morale;
       let nextLogs = prev.logs;
@@ -55,7 +69,10 @@ export function useGameClock(
   }, [gameState.timeMultiplier, tickTime]);
 
   const setTimeMultiplier = useCallback((m: number) => {
-    setGameState(prev => ({ ...prev, timeMultiplier: m }));
+    setGameState(prev => ({
+      ...prev,
+      timeMultiplier: prev.difficulty === 3 ? 3 : m,
+    }));
   }, [setGameState]);
 
   return { setTimeMultiplier };

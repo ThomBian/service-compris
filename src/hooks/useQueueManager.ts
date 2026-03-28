@@ -1,5 +1,6 @@
 import { useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { GameState } from '../types';
+import { DOORS_CLOSE_TIME } from '../constants';
 import { processQueueTick } from '../logic/gameLogic';
 import { type Toast } from '../context/ToastContext';
 
@@ -37,11 +38,11 @@ export function useQueueManager(
 
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
-    if (gameState.inGameMinutes < 1560) return;
+    if (gameState.inGameMinutes < DOORS_CLOSE_TIME) return;
     if (gameState.queue.length === 0) return;
 
     setGameState(prev => {
-      if (prev.queue.length === 0 || prev.inGameMinutes < 1560) return prev;
+      if (prev.queue.length === 0 || prev.inGameMinutes < DOORS_CLOSE_TIME) return prev;
       return {
         ...prev,
         queue: [],

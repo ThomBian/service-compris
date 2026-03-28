@@ -68,6 +68,10 @@ Three-column layout:
 
 `@/*` resolves to the project root (not `src/`). Use `@/src/...` for src imports.
 
+## Code style
+
+- **Early returns:** Write functions with guard clauses and early `return`s instead of deep `if`/`else` nesting, long `else` chains, or `switch` statements when the logic is a sequence of mutually exclusive outcomes. Handle invalid or terminal cases first; leave the main path at the bottom.
+
 ## Docs
 
 Design intent lives in `docs/`:
