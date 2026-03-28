@@ -4,7 +4,6 @@ interface LandingPageProps {
   difficulty: number;
   onDifficultyChange: (d: number) => void;
   onStartGame: () => void;
-  onShowHelp: () => void;
 }
 
 const DIFFICULTIES = [
@@ -18,7 +17,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   difficulty,
   onDifficultyChange,
   onStartGame,
-  onShowHelp,
 }) => {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] px-6">
@@ -60,14 +58,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           className="rounded-xl border-2 border-[#141414] bg-[#141414] px-10 py-3 text-lg font-extrabold uppercase tracking-[0.2em] text-[#E4E3E0] shadow-[4px_4px_0_0_rgba(20,20,20,1)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(20,20,20,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
         >
           New Game
-        </button>
-
-        <button
-          type="button"
-          onClick={onShowHelp}
-          className="cursor-pointer text-xs font-bold uppercase tracking-wide text-[#141414]/40 transition-colors hover:text-[#141414]/70"
-        >
-          How to Play
         </button>
       </div>
     </div>

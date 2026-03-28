@@ -20,7 +20,7 @@ interface TopBarProps {
   formatTime: (minutes: number) => string;
   difficulty: number;
   onDifficultyChange: (d: number) => void;
-  onHelpClick: () => void;
+  onTourClick: () => void;
   nightNumber: number;
   isOvertime: boolean;
 }
@@ -35,7 +35,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   formatTime,
   difficulty,
   onDifficultyChange,
-  onHelpClick,
+  onTourClick,
   nightNumber,
   isOvertime,
 }) => {
@@ -145,8 +145,8 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
       <button
         type="button"
-        onClick={onHelpClick}
-        title="How to Play"
+        onClick={onTourClick}
+        title="Quick Tour"
         className="rounded p-1.5 transition-colors hover:bg-[#141414]/10"
       >
         <HelpCircle size={20} />

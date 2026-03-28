@@ -8,9 +8,11 @@ import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
-import { HowToPlay } from './components/HowToPlay';
 import { LandingPage } from './components/LandingPage';
 import { EndOfNightSummary } from './components/EndOfNightSummary';
+import { TourOverlay } from './components/TourOverlay';
+import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
+import { TOUR_STEPS } from './tour/tourSteps';
 
 type SummaryLoseReason =
   | 'none'
@@ -32,17 +34,28 @@ function summaryLoseReason(
   if (reason === 'MORALE') return 'morale';
   if (reason === 'VIP') return 'vip';
   if (reason === 'BANNED') return 'banned';
-  // Legacy / defensive: game ended but reason not set — infer from state
   return morale <= 0 ? 'morale' : 'vip';
 }
 
 interface GameContentProps {
   initialDifficulty: number;
-  onShowHelp: () => void;
   onTryAgain: () => void;
+  isTourActive: boolean;
+  currentStep: number;
+  onTourNext: () => void;
+  onTourSkip: () => void;
+  startTour: () => void;
 }
 
-function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentProps) {
+function GameContent({
+  initialDifficulty,
+  onTryAgain,
+  isTourActive,
+  currentStep,
+  onTourNext,
+  onTourSkip,
+  startTour,
+}: GameContentProps) {
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
@@ -63,6 +76,26 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
     resetGame(initialDifficulty);
   }, []);
 
+  // Auto-launch tour on first play
+  React.useEffect(() => {
+    if (!localStorage.getItem(TOUR_SEEN_KEY)) {
+      startTour();
+    }
+  }, []);
+
+  // Freeze clock during tour
+  React.useEffect(() => {
+    if (isTourActive) {
+      setTimeMultiplier(0);
+    }
+  }, [isTourActive]);
+
+  // Switch view to match the current tour step
+  React.useEffect(() => {
+    if (!isTourActive) return;
+    setView(TOUR_STEPS[currentStep].view);
+  }, [isTourActive, currentStep]);
+
   React.useEffect(() => {
     if (isOvertime && !showSummary) {
       setView('floorplan');
@@ -80,6 +113,11 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
 
   const handleDifficultyChange = (d: number) => {
     resetGame(d);
+  };
+
+  const handleTourSkip = () => {
+    onTourSkip();
+    setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1);
   };
 
   const overtimeMinutes = Math.max(0, gameState.inGameMinutes - DOORS_CLOSE_TIME);
@@ -137,10 +175,6 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
     setNightStartStats({ cash: persist.cash, rating: persist.rating, morale: persist.morale });
   };
 
-  const handleTryAgain = () => {
-    onTryAgain();
-  };
-
   return (
     <div className="h-screen flex flex-col bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       {!showSummary && (
@@ -154,7 +188,7 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
           formatTime={formatTime}
           difficulty={gameState.difficulty}
           onDifficultyChange={handleDifficultyChange}
-          onHelpClick={onShowHelp}
+          onTourClick={startTour}
           nightNumber={gameState.nightNumber}
           isOvertime={isOvertime && !showSummary}
         />
@@ -162,7 +196,7 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
       <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
         <ScenePanel view={view} onSeatParty={handleSeatParty} />
         <BottomPanel view={view} isOvertime={isOvertime && !showSummary} />
-        {gameState.timeMultiplier === 0 && !showSummary && (
+        {gameState.timeMultiplier === 0 && !showSummary && !isTourActive && (
           <button
             type="button"
             className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
@@ -189,10 +223,17 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
           <EndOfNightSummary
             data={summaryData}
             onNextShift={handleNextShift}
-            onTryAgain={handleTryAgain}
+            onTryAgain={onTryAgain}
           />
         )}
       </div>
+      {isTourActive && (
+        <TourOverlay
+          step={currentStep}
+          onNext={onTourNext}
+          onSkip={handleTourSkip}
+        />
+      )}
       <ToastContainer />
     </div>
   );
@@ -201,12 +242,7 @@ function GameContent({ initialDifficulty, onShowHelp, onTryAgain }: GameContentP
 export default function App() {
   const [gameStarted, setGameStarted] = React.useState(false);
   const [difficulty, setDifficulty] = React.useState(1);
-  const [showHelp, setShowHelp] = React.useState(false);
-
-  const handleCloseHelp = () => {
-    setShowHelp(false);
-    localStorage.setItem('service-compris-help-seen', 'true');
-  };
+  const tour = useTour(TOUR_STEPS.length);
 
   return (
     <>
@@ -214,8 +250,12 @@ export default function App() {
         <GameProvider>
           <GameContent
             initialDifficulty={difficulty}
-            onShowHelp={() => setShowHelp(true)}
             onTryAgain={() => setGameStarted(false)}
+            isTourActive={tour.isTourActive}
+            currentStep={tour.currentStep}
+            onTourNext={tour.nextStep}
+            onTourSkip={tour.skipTour}
+            startTour={tour.startTour}
           />
         </GameProvider>
       ) : (
@@ -223,10 +263,8 @@ export default function App() {
           difficulty={difficulty}
           onDifficultyChange={setDifficulty}
           onStartGame={() => setGameStarted(true)}
-          onShowHelp={() => setShowHelp(true)}
         />
       )}
-      {showHelp && <HowToPlay onClose={handleCloseHelp} />}
     </>
   );
 }
