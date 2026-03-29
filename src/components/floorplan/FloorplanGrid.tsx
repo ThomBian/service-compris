@@ -31,6 +31,47 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   const { width, height } = useContainerSize(wrapperRef);
   const gridSize = Math.min(width, height);
 
+  // Drag-to-select state
+  const isDragging = useRef(false);
+  const dragDirection = useRef<'select' | 'deselect'>('select');
+
+  const handleGridPointerUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  // Called on pointerdown on a cell — starts drag and performs first toggle
+  const handleCellPointerDown = useCallback((x: number, y: number) => {
+    if (!isSeating) return;
+    const cell = grid[y][x];
+    if (cell.state === CellState.OCCUPIED) {
+      showToast('Table is occupied', `${cell.mealDuration ?? 0}m remaining`, 'info', 1500);
+      return;
+    }
+    if (cell.state === CellState.EMPTY && !canSelectCell(cell, selectedCells)) {
+      showToast('Must be adjacent', 'Select a cell next to an existing selection', 'info', 1500);
+      return;
+    }
+    dragDirection.current = cell.state === CellState.SELECTED ? 'deselect' : 'select';
+    isDragging.current = true;
+    toggleCellSelection(x, y);
+  }, [isSeating, grid, selectedCells, toggleCellSelection, showToast]);
+
+  // Called on pointerenter on a cell during drag — continues selection silently
+  const handleCellPointerEnter = useCallback((x: number, y: number) => {
+    if (!isDragging.current || !isSeating) return;
+    const cell = grid[y][x];
+    if (cell.state === CellState.OCCUPIED) return;
+    const isBlocked = blockedCells.some(([r, c]) => r === y && c === x);
+    if (isBlocked) return;
+    if (dragDirection.current === 'select' && cell.state !== CellState.SELECTED) {
+      if (canSelectCell(cell, selectedCells)) {
+        toggleCellSelection(x, y);
+      }
+    } else if (dragDirection.current === 'deselect' && cell.state === CellState.SELECTED) {
+      toggleCellSelection(x, y);
+    }
+  }, [isSeating, grid, selectedCells, blockedCells, toggleCellSelection]);
+
   const occupiedPartyIds = [...new Set<string>(
     gameState.grid.flat()
       .filter(c => c.state === CellState.OCCUPIED && c.partyId)
@@ -46,20 +87,6 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
       return () => clearTimeout(timer);
     }
   }, [selectedCells.length, partySize, isSeating, confirmSeating]);
-
-  const handleCellClick = useCallback((x: number, y: number) => {
-    if (!isSeating) return;
-    const cell = grid[y][x];
-    if (cell.state === CellState.OCCUPIED) {
-      showToast('Table is occupied', `${cell.mealDuration ?? 0}m remaining`, 'info', 1500);
-      return;
-    }
-    if (cell.state === CellState.EMPTY && !canSelectCell(cell, selectedCells)) {
-      showToast('Must be adjacent', 'Select a cell next to an existing selection', 'info', 1500);
-      return;
-    }
-    toggleCellSelection(x, y);
-  }, [isSeating, grid, selectedCells, toggleCellSelection, showToast]);
 
   return (
     <div className="flex flex-col bg-[#E4E3E0] h-full overflow-hidden" data-tour="floorplan">
@@ -154,7 +181,10 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
           style={{
             width: gridSize || "100%",
             gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+            touchAction: 'none',
           }}
+          onPointerUp={handleGridPointerUp}
+          onPointerLeave={handleGridPointerUp}
           id="floorplan-grid"
         >
           {grid.map((row, y) =>
@@ -167,7 +197,11 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
               return (
                 <button
                   key={cell.id}
-                  onClick={() => !isBlocked && handleCellClick(x, y)}
+                  onPointerDown={(e) => {
+                    e.preventDefault(); // prevent focus ring flicker on drag
+                    !isBlocked && handleCellPointerDown(x, y);
+                  }}
+                  onPointerEnter={() => !isBlocked && handleCellPointerEnter(x, y)}
                   disabled={!isSeating || isBlocked}
                   className={`
                     aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5
