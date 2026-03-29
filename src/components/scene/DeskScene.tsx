@@ -340,22 +340,13 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
         {queue.map((c) => (
           <div
             key={c.id}
-            className="flex flex-col items-center gap-0.5 shrink-0 opacity-40 grayscale"
+            className="flex flex-col items-center gap-0.5 shrink-0 opacity-70"
           >
             <div
-              className="h-1 rounded-full bg-emerald-500"
+              className="h-1 rounded-full bg-emerald-400"
               style={{ width: Math.max(2, (c.patience / 100) * 20) }}
             />
-            <ClientAvatar
-              traits={{
-                skinTone: 2,
-                hairStyle: 0,
-                hairColor: 0,
-                clothingStyle: 0,
-                clothingColor: 2,
-                height: 0,
-              }}
-            />
+            <ClientAvatar traits={seedTraits(c.id, 0)} />
             {/* Spacer matching desk-character label height so items-end aligns avatar feet */}
             <span className="invisible text-[9px] font-bold uppercase tracking-widest leading-none">x</span>
           </div>
