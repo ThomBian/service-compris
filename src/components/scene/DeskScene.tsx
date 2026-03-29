@@ -186,45 +186,49 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   return (
     <StreetSceneBackground>
       <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] overflow-visible" data-tour="queue">
-      {/* Seat party — positioned over the Le Solstice entrance in the background */}
-      <AnimatePresence>
-        {canSeat && (
-          <motion.button
-            type="button"
-            data-tour="seat-party"
-            onClick={onSeatParty}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            title="Seat party — choose tables on the floorplan"
-            className="absolute top-[30%] left-[1%] z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow"
-          >
-            <DoorOpen size={28} className="text-[#f0c040]" />
-            <span className="text-[8px] font-bold uppercase tracking-widest text-[#f0c040] text-center leading-tight">
-              Seat Party
-            </span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Maitre d' column — stacked: button → fixed speech zone → avatar */}
+      <div className="flex flex-col items-center w-[160px] shrink-0">
+        {/* Seat Party button — sits just above the speech bubble zone */}
+        <AnimatePresence>
+          {canSeat && (
+            <motion.button
+              type="button"
+              data-tour="seat-party"
+              onClick={onSeatParty}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              title="Seat party — choose tables on the floorplan"
+              className="z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow mb-1"
+            >
+              <DoorOpen size={28} className="text-[#f0c040]" />
+              <span className="text-[8px] font-bold uppercase tracking-widest text-[#f0c040] text-center leading-tight">
+                Seat Party
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
 
-      {/* Maitre d' */}
-      <div className="relative flex flex-col items-center gap-1 min-w-[160px]">
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 pb-1 w-max">
+        {/* Fixed-height speech bubble zone — always reserves space so button never shifts */}
+        <div className="h-14 flex items-end justify-center w-full mb-3">
           <SpeechBubble text={maitreDMessage} />
         </div>
+
+        {/* Maitre D' avatar */}
         <MaitreDAvatar
           animState={maitreDAnimState}
           onAnimationComplete={() => setMaitreDAnimState(null)}
         />
       </div>
 
-      {/* Current party at desk */}
+      {/* Current party at desk — fixed width slot so queue never shifts */}
+      <div className="relative flex flex-col items-end min-w-[80px]">
       <AnimatePresence mode="wait">
         {currentClient ? (
           <motion.div
             key={currentClient.id}
-            className="relative flex flex-col items-center gap-1 min-w-[60px]"
+            className="relative flex flex-col items-center gap-1"
             initial={{ x: 120, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -266,13 +270,16 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className="flex gap-2 items-end">
-                {/* Lead avatar — the spokesperson */}
-                <ClientAvatar
-                  traits={currentClient.visualTraits}
-                  animState={guestAnimState}
-                  onAnimationComplete={() => setGuestAnimState(null)}
-                />
+              <div className="flex items-end">
+                {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
+                  <div key={i} className={i > 0 ? "-ml-4" : ""}>
+                    <ClientAvatar
+                      traits={i === 0 ? currentClient.visualTraits : seedTraits(currentClient.id, i)}
+                      animState={i === 0 ? guestAnimState : null}
+                      onAnimationComplete={i === 0 ? () => setGuestAnimState(null) : undefined}
+                    />
+                  </div>
+                ))}
               </div>
             </motion.div>
           </motion.div>
@@ -300,6 +307,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
       {/* Queue */}
       <div className="flex items-end gap-2 flex-1 overflow-x-auto pb-1">
@@ -312,7 +320,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
               className="h-1 rounded-full bg-emerald-400"
               style={{ width: Math.max(2, (c.patience / 100) * 20) }}
             />
-            <ClientAvatar traits={seedTraits(c.id, 0)} />
+            <ClientAvatar traits={c.visualTraits} />
             {/* Spacer matching desk-character label height so items-end aligns avatar feet */}
             <span className="invisible text-[9px] font-bold uppercase tracking-widest leading-none">x</span>
           </div>
