@@ -82,6 +82,14 @@ describe('CHARACTER_ROSTER', () => {
     expect(CHARACTER_ROSTER.find(c => c.id === 'mr-feast')?.factionPath).toBe('viral');
     expect(CHARACTER_ROSTER.find(c => c.id === 'sodium-bae')?.factionPath).toBe('viral');
   });
+
+  it('donny-tromp, the-phantom-eater, chef-balzac have no factionPath', () => {
+    ['donny-tromp', 'the-phantom-eater', 'chef-balzac'].forEach(id => {
+      const char = CHARACTER_ROSTER.find(c => c.id === id);
+      expect(char).toBeDefined();
+      expect(char!.factionPath).toBeUndefined();
+    });
+  });
 });
 
 describe('generateDailyCharacters', () => {
