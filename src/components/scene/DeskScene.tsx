@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { DoorClosed, DoorOpen } from "lucide-react";
+import { DoorOpen } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useGame } from "../../context/GameContext";
 import { PhysicalState } from "../../types";
@@ -186,45 +186,27 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   return (
     <StreetSceneBackground>
       <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] overflow-visible" data-tour="queue">
-      {/* Seat party — door opens on hover when a party is at the desk */}
-      <button
-        type="button"
-        data-tour="seat-party"
-        onClick={canSeat ? onSeatParty : undefined}
-        disabled={!canSeat}
-        title={
-          canSeat
-            ? "Seat party — choose tables on the floorplan"
-            : "No party at the desk to seat"
-        }
-        className={`group flex flex-col items-center gap-1 rounded-xl p-2 transition-all duration-150 ${
-          canSeat
-            ? "cursor-pointer border-2 border-transparent hover:border-emerald-600 hover:bg-emerald-50 hover:shadow-[2px_2px_0px_0px_rgba(4,120,87,0.3)]"
-            : "cursor-default border-2 border-transparent opacity-40"
-        }`}
-      >
-        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
-          {canSeat ? (
-            <>
-              <DoorClosed
-                size={40}
-                className="absolute text-[#141414] transition-opacity duration-150 group-hover:opacity-0"
-                aria-hidden
-              />
-              <DoorOpen
-                size={40}
-                className="absolute text-emerald-700 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                aria-hidden
-              />
-            </>
-          ) : (
-            <DoorClosed size={40} className="text-stone-500" aria-hidden />
-          )}
-        </span>
-        <span className="text-[8px] font-bold uppercase tracking-widest text-center leading-tight max-w-[56px]">
-          Seat Party
-        </span>
-      </button>
+      {/* Seat party — positioned over the Le Solstice entrance in the background */}
+      <AnimatePresence>
+        {canSeat && (
+          <motion.button
+            type="button"
+            data-tour="seat-party"
+            onClick={onSeatParty}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            title="Seat party — choose tables on the floorplan"
+            className="absolute bottom-[18%] left-[7%] z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow"
+          >
+            <DoorOpen size={28} className="text-[#f0c040]" />
+            <span className="text-[8px] font-bold uppercase tracking-widest text-[#f0c040] text-center leading-tight">
+              Seat Party
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Maitre d' */}
       <div className="relative flex flex-col items-center gap-1 min-w-[160px]">
@@ -294,17 +276,8 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                   animState={guestAnimState}
                   onAnimationComplete={() => setGuestAnimState(null)}
                 />
-                {/* Count pill — shown only for parties larger than 1 */}
-                {currentClient.truePartySize > 1 && (
-                  <div className="self-center mb-2 inline-flex items-center justify-center rounded-full border border-[#141414] bg-white px-2 py-0.5 text-[10px] font-bold leading-none shadow-[1px_1px_0px_0px_rgba(20,20,20,1)]">
-                    +{currentClient.truePartySize - 1}
-                  </div>
-                )}
               </div>
             </motion.div>
-            <span className="text-[9px] font-bold uppercase tracking-widest">
-              {currentClient.knownFirstName || "???"}
-            </span>
           </motion.div>
         ) : (
           <motion.div

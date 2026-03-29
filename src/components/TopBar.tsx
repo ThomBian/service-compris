@@ -45,7 +45,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const { t } = useTranslation('ui');
   const pauseDisabled = getRule<boolean>(activeRules, 'PAUSE_DISABLED', false);
   return (
-    <header className="border-b border-[#141414] p-4 flex items-center justify-between sticky top-0 bg-[#E4E3E0] z-20 shrink-0">
+    <header className="border-b border-[#141414]/20 p-4 flex items-center justify-between bg-[#E4E3E0]/60 backdrop-blur-sm z-20 shrink-0">
       <div className="flex items-center gap-8" data-tour="topbar">
         <div className="flex items-center gap-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">{t('topbar.night')}</span>
