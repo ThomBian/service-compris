@@ -185,6 +185,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
           }}
           onPointerUp={handleGridPointerUp}
           onPointerLeave={handleGridPointerUp}
+          onPointerCancel={handleGridPointerUp}
           id="floorplan-grid"
         >
           {grid.map((row, y) =>
