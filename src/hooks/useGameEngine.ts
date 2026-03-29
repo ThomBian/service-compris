@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { GameState } from "../types";
 import { buildInitialState, PersistState } from "../logic/gameLogic";
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
-import type { CampaignPath } from '../types/campaign';
+import type { CampaignPath, PathScores } from '../types/campaign';
 import { createCharacter } from '../logic/characters/factory';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { useGameClock } from "./useGameClock";
@@ -14,12 +14,15 @@ import { useDecisionActions } from "./useDecisionActions";
 import { useReservationActions } from "./useReservationActions";
 import { useToast } from "../context/ToastContext";
 
-export function useGameEngine(incrementPathScore?: (path: CampaignPath, delta: number) => void) {
+export function useGameEngine(
+  incrementPathScore?: (path: CampaignPath, delta: number) => void,
+  pathScores?: PathScores,
+) {
   const [gameState, setGameState] = useState<GameState>(() => buildInitialState(0));
 
   const resetGame = useCallback((difficulty: number, persist?: PersistState) => {
-    setGameState(buildInitialState(difficulty, persist));
-  }, []);
+    setGameState(buildInitialState(difficulty, persist, [], undefined, pathScores));
+  }, [pathScores]);
 
   // Runtime character instances — never serialized, rebuilt on each session start
   const characters = useRef<Map<string, SpecialCharacter>>(new Map());
@@ -54,6 +57,7 @@ export function useGameEngine(incrementPathScore?: (path: CampaignPath, delta: n
 
   return {
     gameState,
+    pathScores,
     askQuestion,
     callOutLie,
     handleDecision,

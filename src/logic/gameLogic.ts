@@ -11,7 +11,7 @@ import {
   CellState,
   VisualTraits,
 } from "../types";
-import type { ActiveRule } from "../types/campaign";
+import type { ActiveRule, PathScores } from "../types/campaign";
 import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
 import { generateDailyCharacters, injectCharacterReservations, CHARACTER_ROSTER } from "./characterRoster";
 import { generateReservations } from "./reservationGenerator";
@@ -802,13 +802,14 @@ export function buildInitialState(
   persist?: PersistState,
   rules: ActiveRule[] = [],
   characterIds?: string[],
+  pathScores?: PathScores,
 ): GameState {
   const nightNumber = persist?.nightNumber ?? 1;
   const rating = persist ? Math.max(1.0, persist.rating) : 5.0;
 
   const dailyChars = characterIds && characterIds.length > 0
     ? CHARACTER_ROSTER.filter(c => characterIds.includes(c.id))
-    : generateDailyCharacters(difficulty, CHARACTER_ROSTER);
+    : generateDailyCharacters(difficulty, CHARACTER_ROSTER, pathScores);
 
   const baseReservations = nightNumber === 1
     ? INITIAL_RESERVATIONS

@@ -274,31 +274,32 @@ export default function App() {
           }}
         />
       )}
-      {phase !== 'LANDING' && (
-        <GameProvider incrementPathScore={campaign.incrementPathScore}>
-          {phase === 'CORKBOARD' && campaign.campaignState.lastNightLedger && (
-            <CorkboardScreen
-              variant={campaign.campaignState.lossReason ? 'fired' : 'next_night'}
-              nightNumber={campaign.campaignState.nightNumber}
-              activePath={campaign.activePath}
-              ledger={campaign.campaignState.lastNightLedger}
-              firedReason={campaign.campaignState.lossReason ?? undefined}
-              onOpenRestaurant={handleOpenRestaurant}
-              onLeave={handleLeave}
-            />
-          )}
-          {phase === 'PLAYING' && (
-            <GameContent
-              initialDifficulty={difficulty}
-              persist={persist}
-              onShiftEnd={handleShiftEnd}
-              isTourActive={tour.isTourActive}
-              currentStep={tour.currentStep}
-              onTourNext={tour.nextStep}
-              onTourSkip={tour.skipTour}
-              startTour={tour.startTour}
-            />
-          )}
+      {phase === 'CORKBOARD' && campaign.campaignState.lastNightLedger && (
+        <CorkboardScreen
+          variant={campaign.campaignState.lossReason ? 'fired' : 'next_night'}
+          nightNumber={campaign.campaignState.nightNumber}
+          activePath={campaign.activePath}
+          ledger={campaign.campaignState.lastNightLedger}
+          firedReason={campaign.campaignState.lossReason ?? undefined}
+          onOpenRestaurant={handleOpenRestaurant}
+          onLeave={handleLeave}
+        />
+      )}
+      {phase === 'PLAYING' && (
+        <GameProvider
+          incrementPathScore={campaign.incrementPathScore}
+          pathScores={campaign.campaignState.pathScores}
+        >
+          <GameContent
+            initialDifficulty={difficulty}
+            persist={persist}
+            onShiftEnd={handleShiftEnd}
+            isTourActive={tour.isTourActive}
+            currentStep={tour.currentStep}
+            onTourNext={tour.nextStep}
+            onTourSkip={tour.skipTour}
+            startTour={tour.startTour}
+          />
         </GameProvider>
       )}
     </>

@@ -1,10 +1,11 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { GameState } from '../types';
-import type { CampaignPath } from '../types/campaign';
+import type { CampaignPath, PathScores } from '../types/campaign';
 
 interface GameContextType {
   gameState: GameState;
+  pathScores?: PathScores;
   askQuestion: (field: 'firstName' | 'lastName' | 'time') => void;
   callOutLie: (field: 'size' | 'time' | 'reservation') => void;
   handleDecision: () => void;
@@ -22,12 +23,13 @@ interface GameContextType {
 interface GameProviderProps {
   children: ReactNode;
   incrementPathScore?: (path: CampaignPath, delta: number) => void;
+  pathScores?: PathScores;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export function GameProvider({ children, incrementPathScore }: GameProviderProps) {
-  const engine = useGameEngine(incrementPathScore);
+export function GameProvider({ children, incrementPathScore, pathScores }: GameProviderProps) {
+  const engine = useGameEngine(incrementPathScore, pathScores);
 
   return (
     <GameContext.Provider value={engine}>
