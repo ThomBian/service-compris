@@ -5,7 +5,7 @@ import { ClientAvatar } from "../scene/ClientAvatar";
 import { ActivityLog } from "../ActivityLog";
 import { CHARACTER_ROSTER } from '../../logic/characterRoster';
 import type { CharacterDefinition } from '../../types';
-import type { CampaignPath, PathScores } from '../../types/campaign';
+import type { CampaignPath } from '../../types/campaign';
 import { MAX_PATH_SCORE } from '../../constants';
 
 const TABS = [
