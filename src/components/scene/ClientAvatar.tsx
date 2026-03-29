@@ -109,7 +109,7 @@ function Clothing({ style, color, skin }: { style: number; color: string; skin: 
 function Accessories({ hat, facialHair, neckwear, hairColor, glasses, eyebrows, skin }: {
   hat?: 0 | 1 | 2;
   facialHair?: 0 | 1;
-  neckwear?: 0 | 1 | 2;
+  neckwear?: 0 | 1 | 2 | 3;
   hairColor: string;
   glasses?: 0 | 1;
   eyebrows?: 0 | 1;
@@ -141,6 +141,13 @@ function Accessories({ hat, facialHair, neckwear, hairColor, glasses, eyebrows, 
       )}
       {neckwear === 2 && (
         <path d="M16,27 Q18,30 24,29 Q30,30 32,27 Q30,32 26,33 L24,38 L22,33 Q18,32 16,27Z" fill="#c0392b" />
+      )}
+      {neckwear === 3 && (
+        // Long red tie — same shape as neckwear:0 but extended further down
+        <g>
+          <polygon points="22,27 26,27 25,50 24,53 23,50" fill="#c0392b" />
+          <polygon points="22,27 26,27 24.5,31 23.5,31" fill="#e74c3c" />
+        </g>
       )}
       {hat === 0 && (
         <g>
