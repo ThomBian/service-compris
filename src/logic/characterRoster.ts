@@ -256,7 +256,7 @@ export function generateDailyCharacters(
   return [...roster].sort(() => Math.random() - 0.5).filter(char => {
     const boost =
       char.factionPath && pathScores
-        ? (pathScores[char.factionPath] / MAX_PATH_SCORE) * FACTION_BOOST
+        ? (Math.max(0, pathScores[char.factionPath]) / MAX_PATH_SCORE) * FACTION_BOOST
         : 0;
     return Math.random() < Math.min(0.95, p + boost);
   });
