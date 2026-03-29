@@ -46,22 +46,31 @@ export const PartyTicket: React.FC = () => {
         />
       </div>
 
-      {/* Header: label + caught badge */}
+      {/* Header: label + refuse button + caught badge */}
       <div className="flex items-center justify-between shrink-0 pt-0.5">
         <div className="flex items-center gap-1.5">
           <Users size={12} />
           <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">Party Ticket</span>
         </div>
-        {currentClient.isCaught && (
-          <div className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-red-200 flex items-center gap-1">
-            <AlertCircle size={10} />
-            CAUGHT
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+          {currentClient.isCaught && (
+            <div className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-red-200 flex items-center gap-1">
+              <AlertCircle size={10} />
+              CAUGHT
+            </div>
+          )}
+          <button
+            onClick={() => handleDecision()}
+            className="bg-red-600 text-white px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 hover:bg-red-700 text-[10px] shadow-[2px_2px_0_0_#141414] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_0_#141414] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          >
+            <X size={11} />
+            REFUSE
+          </button>
+        </div>
       </div>
 
       {/* Ticket fields */}
-      <div className="flex flex-col gap-2 flex-1">
+      <div className="flex flex-col gap-2 flex-1 overflow-y-auto min-h-0">
         <TicketField
           label="First Name"
           accuseLabel="No Reservation"
@@ -97,16 +106,6 @@ export const PartyTicket: React.FC = () => {
         </div>
       </div>
 
-      {/* Refuse button */}
-      <div className="pt-2 border-t border-[#141414]/10">
-        <button
-          onClick={() => handleDecision()}
-          className="w-full bg-red-600 text-white py-2 rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-red-700 text-xs shadow-[4px_4px_0_0_#141414] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#141414] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
-        >
-          <X size={14} />
-          REFUSE
-        </button>
-      </div>
     </div>
   );
 };

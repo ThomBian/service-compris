@@ -217,9 +217,6 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
           animState={maitreDAnimState}
           onAnimationComplete={() => setMaitreDAnimState(null)}
         />
-        <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
-          Maitre D'
-        </span>
       </div>
 
       {/* Current party at desk */}
