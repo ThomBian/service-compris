@@ -10,7 +10,7 @@ interface ScenePanelProps {
 
 export const ScenePanel: React.FC<ScenePanelProps> = ({ view, onSeatParty }) => {
   return (
-    <div className="h-[35vh] shrink-0 overflow-x-hidden">
+    <div className="h-[50vh] shrink-0 overflow-x-hidden">
       <AnimatePresence mode="wait">
         {view === 'desk' ? (
           <motion.div

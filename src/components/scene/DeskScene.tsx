@@ -198,7 +198,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             title="Seat party — choose tables on the floorplan"
-            className="absolute bottom-[18%] left-[7%] z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow"
+            className="absolute top-[30%] left-[1%] z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow"
           >
             <DoorOpen size={28} className="text-[#f0c040]" />
             <span className="text-[8px] font-bold uppercase tracking-widest text-[#f0c040] text-center leading-tight">
