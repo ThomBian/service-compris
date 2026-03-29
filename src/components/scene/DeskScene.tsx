@@ -6,6 +6,7 @@ import { PhysicalState } from "../../types";
 import { seedTraits } from "../../logic/gameLogic";
 import { ClientAvatar } from "./ClientAvatar";
 import { MaitreDAvatar } from "./MaitreDAvatar";
+import { StreetSceneBackground } from "./StreetSceneBackground";
 
 const STORM_OUT_LINES = [
   "This is outrageous!",
@@ -183,7 +184,8 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
   };
 
   return (
-    <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] bg-stone-50 overflow-visible" data-tour="queue">
+    <StreetSceneBackground>
+      <div className="h-full flex items-end gap-6 px-8 pb-4 border-b border-[#141414] overflow-visible" data-tour="queue">
       {/* Seat party — door opens on hover when a party is at the desk */}
       <button
         type="button"
@@ -380,6 +382,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </StreetSceneBackground>
   );
 };
