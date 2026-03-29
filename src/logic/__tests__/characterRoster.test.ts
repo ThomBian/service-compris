@@ -132,4 +132,11 @@ describe('OversizeVip', () => {
     expect(result.rating).toBe(0);
     expect(result.morale).toBe(0);
   });
+
+  it('onSeated returns unchanged cash when cashBonus is undefined', () => {
+    const noBonusDef: Partial<CharacterDefinition> = { id: 'x', behaviorType: 'OVERSIZE_VIP' };
+    const v = new OversizeVip(noBonusDef as CharacterDefinition);
+    const result = v.onSeated({ cash: 100 } as GameState);
+    expect(result.cash).toBe(100);
+  });
 });
