@@ -8,8 +8,9 @@ import {
 import { BypassQueueVip } from '../characters/BypassQueueVip';
 import { AuraDrainVip } from '../characters/AuraDrainVip';
 import { OversizeVip } from '../characters/OversizeVip';
-import { START_TIME } from '../../constants';
+import { START_TIME, FACTION_BOOST, MAX_PATH_SCORE, SPAWN_PROBABILITY } from '../../constants';
 import type { CharacterDefinition, GameState } from '../../types';
+import type { PathScores } from '../../types/campaign';
 
 describe('createCharacter factory', () => {
   it('creates BypassQueueVip for BYPASS_QUEUE behaviorType', () => {
@@ -112,6 +113,46 @@ describe('generateDailyCharacters', () => {
   it('never returns more characters than roster size', () => {
     for (let i = 0; i < 20; i++) {
       const result = generateDailyCharacters(3, CHARACTER_ROSTER);
+      expect(result.length).toBeLessThanOrEqual(CHARACTER_ROSTER.length);
+    }
+  });
+});
+
+describe('generateDailyCharacters — faction spawn bias', () => {
+  it('behaves identically to current when pathScores is omitted', () => {
+    for (let i = 0; i < 50; i++) {
+      const result = generateDailyCharacters(2, CHARACTER_ROSTER);
+      expect(result.length).toBeLessThanOrEqual(CHARACTER_ROSTER.length);
+      const ids = result.map(c => c.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+  });
+
+  it('at max path score, faction characters spawn more often than base probability', () => {
+    const maxScores: PathScores = { underworld: MAX_PATH_SCORE, michelin: 0, viral: 0 };
+    const underworldChars = CHARACTER_ROSTER.filter(c => c.factionPath === 'underworld');
+    const base = SPAWN_PROBABILITY[2]; // 0.7 at difficulty 2
+
+    let totalSpawned = 0;
+    const runs = 200;
+    for (let i = 0; i < runs; i++) {
+      const result = generateDailyCharacters(2, underworldChars, maxScores);
+      totalSpawned += result.length;
+    }
+    const avgRate = totalSpawned / (runs * underworldChars.length);
+    // At max score: p = min(0.95, 0.7 + 0.4) = 0.95 — expect average > base
+    expect(avgRate).toBeGreaterThan(base);
+  });
+
+  it('returns empty array at difficulty 0 even with pathScores', () => {
+    const scores: PathScores = { underworld: 10, michelin: 10, viral: 10 };
+    expect(generateDailyCharacters(0, CHARACTER_ROSTER, scores)).toEqual([]);
+  });
+
+  it('never returns more characters than roster size with pathScores', () => {
+    const scores: PathScores = { underworld: 10, michelin: 10, viral: 10 };
+    for (let i = 0; i < 20; i++) {
+      const result = generateDailyCharacters(3, CHARACTER_ROSTER, scores);
       expect(result.length).toBeLessThanOrEqual(CHARACTER_ROSTER.length);
     }
   });

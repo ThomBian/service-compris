@@ -1,5 +1,6 @@
 import type { CharacterDefinition, Reservation } from '../types';
-import { START_TIME, SPAWN_PROBABILITY } from '../constants';
+import { START_TIME, SPAWN_PROBABILITY, FACTION_BOOST, MAX_PATH_SCORE } from '../constants';
+import type { PathScores } from '../types/campaign';
 
 export const CHARACTER_ROSTER: CharacterDefinition[] = [
   // ── Lore VIPs ──────────────────────────────────────────────────────────────
@@ -248,10 +249,17 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
 export function generateDailyCharacters(
   difficulty: number,
   roster: CharacterDefinition[],
+  pathScores?: PathScores,
 ): CharacterDefinition[] {
   if (difficulty === 0 || roster.length === 0) return [];
   const p = SPAWN_PROBABILITY[Math.min(difficulty, 3)];
-  return [...roster].sort(() => Math.random() - 0.5).filter(() => Math.random() < p);
+  return [...roster].sort(() => Math.random() - 0.5).filter(char => {
+    const boost =
+      char.factionPath && pathScores
+        ? (pathScores[char.factionPath] / MAX_PATH_SCORE) * FACTION_BOOST
+        : 0;
+    return Math.random() < Math.min(0.95, p + boost);
+  });
 }
 
 export function injectCharacterReservations(
