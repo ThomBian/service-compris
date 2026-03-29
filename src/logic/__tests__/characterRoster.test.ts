@@ -54,6 +54,34 @@ describe('CHARACTER_ROSTER', () => {
     const ids = CHARACTER_ROSTER.map(c => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it('contains all 6 new lore characters', () => {
+    const ids = CHARACTER_ROSTER.map(c => c.id);
+    expect(ids).toContain('donny-tromp');
+    expect(ids).toContain('gordon-angry');
+    expect(ids).toContain('mr-feast');
+    expect(ids).toContain('the-phantom-eater');
+    expect(ids).toContain('chef-balzac');
+    expect(ids).toContain('sodium-bae');
+  });
+
+  it('all faction-aligned characters have valid factionPath', () => {
+    const factionChars = CHARACTER_ROSTER.filter(c => c.factionPath !== undefined);
+    factionChars.forEach(c => {
+      expect(['underworld', 'michelin', 'viral']).toContain(c.factionPath);
+    });
+  });
+
+  it('the-syndicate and manu-macaroon are underworld', () => {
+    expect(CHARACTER_ROSTER.find(c => c.id === 'the-syndicate')?.factionPath).toBe('underworld');
+    expect(CHARACTER_ROSTER.find(c => c.id === 'manu-macaroon')?.factionPath).toBe('underworld');
+  });
+
+  it('gordon-angry is michelin, mr-feast and sodium-bae are viral', () => {
+    expect(CHARACTER_ROSTER.find(c => c.id === 'gordon-angry')?.factionPath).toBe('michelin');
+    expect(CHARACTER_ROSTER.find(c => c.id === 'mr-feast')?.factionPath).toBe('viral');
+    expect(CHARACTER_ROSTER.find(c => c.id === 'sodium-bae')?.factionPath).toBe('viral');
+  });
 });
 
 describe('generateDailyCharacters', () => {
