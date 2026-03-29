@@ -5,10 +5,13 @@ import { ClientAvatar } from "../scene/ClientAvatar";
 import { ActivityLog } from "../ActivityLog";
 import { CHARACTER_ROSTER } from '../../logic/characterRoster';
 import type { CharacterDefinition } from '../../types';
+import type { CampaignPath, PathScores } from '../../types/campaign';
+import { MAX_PATH_SCORE } from '../../constants';
 
 const TABS = [
   "VIPs",
   "Banned",
+  "Factions",
   // "Menu" ,
   "Log",
 ] as const;
@@ -174,9 +177,64 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
   );
 };
 
+const FACTION_DISPLAY: Array<{
+  path: CampaignPath;
+  name: string;
+  icon: string;
+  markerText: string;
+  accentColor: string;
+  borderColor: string;
+  bgColor: string;
+}> = [
+  {
+    path: 'underworld',
+    name: 'The Syndicate',
+    icon: '🤵',
+    markerText: 'Matching pinstripe suits. Walk-in, party of 4. No reservation.',
+    accentColor: 'text-yellow-700',
+    borderColor: 'border-yellow-400',
+    bgColor: 'bg-yellow-50',
+  },
+  {
+    path: 'michelin',
+    name: 'The Culinary Inquisition',
+    icon: '🎩',
+    markerText: 'Hyper-formal wear. Crimson ascot. Parties of 1–2.',
+    accentColor: 'text-red-700',
+    borderColor: 'border-red-400',
+    bgColor: 'bg-red-50',
+  },
+  {
+    path: 'viral',
+    name: 'The Hype Train',
+    icon: '📱',
+    markerText: 'Neon gear. Large groups. Zero patience.',
+    accentColor: 'text-blue-700',
+    borderColor: 'border-blue-400',
+    bgColor: 'bg-blue-50',
+  },
+];
+
+function factionIntensity(score: number): 0 | 1 | 2 | 3 {
+  if (score <= 0)                       return 0;
+  if (score < MAX_PATH_SCORE * 0.33)    return 1;
+  if (score < MAX_PATH_SCORE * 0.66)    return 2;
+  return 3;
+}
+
+function intensityLabel(level: 0 | 1 | 2 | 3): string {
+  switch (level) {
+    case 0: return 'QUIET ○○○';
+    case 1: return 'WEAK ●○○';
+    case 2: return 'ACTIVE ●●○';
+    case 3: return 'DOMINANT ●●●';
+    default: return 'QUIET ○○○';
+  }
+}
+
 export const Clipboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("VIPs");
-  const { gameState } = useGame();
+  const { gameState, pathScores } = useGame();
 
   const seenLogCountRef = useRef(gameState.logs.length);
   const [hasUnseenLogs, setHasUnseenLogs] = useState(false);
@@ -240,6 +298,37 @@ export const Clipboard: React.FC = () => {
                 />
               ))
             )}
+          </div>
+        ) : activeTab === "Factions" ? (
+          <div className="flex flex-col gap-2 p-1">
+            {FACTION_DISPLAY.map(faction => {
+              const score = pathScores?.[faction.path] ?? 0;
+              const level = factionIntensity(score);
+              const isActive = level >= 2;
+              return (
+                <div
+                  key={faction.path}
+                  className={`rounded-md border p-2 transition-opacity ${
+                    isActive
+                      ? `${faction.borderColor} ${faction.bgColor}`
+                      : 'border-[#141414]/10 bg-white/60'
+                  }`}
+                  style={{ opacity: level === 0 ? 0.45 : 1 }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold text-[#141414]">
+                      {faction.icon} {faction.name}
+                    </span>
+                    <span className={`text-[8px] font-bold uppercase tracking-wide ${isActive ? faction.accentColor : 'text-[#999]'}`}>
+                      {intensityLabel(level)}
+                    </span>
+                  </div>
+                  <p className="text-[8px] text-[#555] leading-tight">
+                    <span className="font-semibold">Spot them:</span> {faction.markerText}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         ) : activeTab === "Log" ? (
           <ActivityLog logs={gameState.logs} />
