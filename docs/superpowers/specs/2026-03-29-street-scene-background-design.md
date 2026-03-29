@@ -1,7 +1,9 @@
 # Street Scene Background — Design Spec
 
 **Date:** 2026-03-29
-**Status:** Approved
+**Status:** Partial — remaining items cancelled 2026-03-29
+
+> The `StreetSceneBackground` component and neon overlays are implemented. The `h-[35vh]` scene height change and queue/party width adjustments are cancelled — not needed given the current layout.
 
 ## Summary
 

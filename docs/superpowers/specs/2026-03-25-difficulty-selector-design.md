@@ -1,8 +1,11 @@
 ---
 title: TopBar Difficulty Selector
 date: 2026-03-25
-status: approved
+status: cancelled
 ---
+
+> **Status: CANCELLED — 2026-03-29**
+> The in-TopBar difficulty reset UI is removed from scope. Difficulty is set on the Landing page and the VIP/character logic already respects it correctly. No further work planned.
 
 # TopBar Difficulty Selector
 

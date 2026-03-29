@@ -1,8 +1,11 @@
 # Tablet Responsiveness Design
 
 **Date:** 2026-03-21
+**Status:** CANCELLED — 2026-03-29
 **Project:** service-compris
 **Scope:** Tablet breakpoint (768px–1024px) responsive layout
+
+> **CANCELLED.** The game has moved to a full-screen single-column layout that works well enough on tablets. The RightPanel two-column approach is no longer aligned with the current design. No further work planned.
 
 ---
 
