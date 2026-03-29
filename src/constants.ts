@@ -368,6 +368,10 @@ export const MEAL_DURATION_PER_EXTRA_GUEST_MINUTES = 20;
 export const TABLE_TURNING_SOON_THRESHOLD = 10;
 
 export const SPAWN_PROBABILITY: readonly number[] = [0, 0.5, 0.7, 0.9];
+/** Maximum additive probability increase from faction path score at MAX_PATH_SCORE. */
+export const FACTION_BOOST = 0.4;
+/** Path score value treated as fully committed to a faction (spawn probability capped at 0.95). */
+export const MAX_PATH_SCORE = 10;
 
 export const SALARY_COST = 200;
 export const ELECTRICITY_COST = 40;
@@ -381,11 +385,6 @@ export const BASE_REVENUE_PER_SEAT = 40;
 export const PARTY_SIZE_TIP_PER_SEAT_PARTY = 5;
 export const OVERTIME_MORALE_DRAIN_PER_MINUTE = 1;
 export const LAST_CALL_RATING_PENALTY = 0.1;
-
-/** Maximum additive probability increase from faction path score at MAX_PATH_SCORE. */
-export const FACTION_BOOST = 0.4;
-/** Path score value treated as fully committed to a faction (spawn probability capped at 0.95). */
-export const MAX_PATH_SCORE = 10;
 
 export function mealDurationForPartySize(partySize: number): number {
   const n = Math.max(0, Math.floor(partySize) - 1);
