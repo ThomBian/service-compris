@@ -209,7 +209,7 @@ function NewspaperPaper({
           <div className="w-96 bg-white rounded-xl border-2 border-[#141414] shadow-[6px_6px_0_0_#141414] overflow-hidden">
             <div className="border-b-2 border-[#141414] px-5 py-3 text-center">
               <p
-                className="text-2xl font-black uppercase tracking-[0.1em] text-[#141414]"
+                className="text-2xl font-black uppercase tracking-0.1em text-[#141414]"
                 style={{ fontFamily: "Georgia, serif" }}
               >
                 {t("corkboard.newspaper.masthead")}

@@ -189,24 +189,43 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
       {/* Maitre d' column — stacked: button → fixed speech zone → avatar */}
       <div className="flex flex-col items-center w-[160px] shrink-0">
         {/* Seat Party button — sits just above the speech bubble zone */}
+        <style>{`
+          @keyframes seatBorderSpin { to { transform: rotate(1turn); } }
+        `}</style>
         <AnimatePresence>
           {canSeat && (
-            <motion.button
-              type="button"
-              data-tour="seat-party"
-              onClick={onSeatParty}
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              title="Seat party — choose tables on the floorplan"
-              className="z-20 flex flex-col items-center gap-1 rounded-xl border-2 border-[#f0c040] bg-[#1a1a2a]/80 backdrop-blur-sm px-3 py-2 cursor-pointer hover:bg-[#1a1a2a] shadow-[0_0_16px_rgba(240,192,64,0.4)] hover:shadow-[0_0_28px_rgba(240,192,64,0.7)] transition-shadow mb-1"
+              whileHover={{ scale: 1.06 }}
+              transition={{ duration: 0.2 }}
+              className="relative group mb-1 p-[2px] rounded-[14px]" style={{ background: '#8b3a0a' }}
             >
-              <DoorOpen size={28} className="text-[#f0c040]" />
-              <span className="text-[8px] font-bold uppercase tracking-widest text-[#f0c040] text-center leading-tight">
-                Seat Party
-              </span>
-            </motion.button>
+              {/* Spinning conic gradient — shown on hover, sits in the 2px gap */}
+              <div className="absolute inset-0 rounded-[14px] overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <div style={{
+                  position: 'absolute',
+                  inset: '-100%',
+                  background: 'conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)',
+                  animation: 'seatBorderSpin 0.6s linear infinite',
+                }} />
+              </div>
+              {/* Button face */}
+              <button
+                type="button"
+                data-tour="seat-party"
+                onClick={onSeatParty}
+                title="Seat party — choose tables on the floorplan"
+                className="relative z-10 flex flex-col items-center gap-1 rounded-xl px-3 py-2 cursor-pointer w-full active:translate-x-[1px] active:translate-y-[1px] transition-colors"
+                style={{ background: '#1a0800' }}
+              >
+                <DoorOpen size={22} className="text-[#f0c040]" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-[#f0c040] text-center leading-tight">
+                  Seat Party
+                </span>
+              </button>
+            </motion.div>
           )}
         </AnimatePresence>
 
