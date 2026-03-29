@@ -287,22 +287,18 @@ export const DeskScene: React.FC<DeskSceneProps> = ({ onSeatParty }) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className="flex gap-1 items-end">
-                {Array.from({ length: currentClient.truePartySize }).map(
-                  (_, i) => (
-                    <ClientAvatar
-                      key={i}
-                      traits={
-                        i === 0
-                          ? currentClient.visualTraits
-                          : seedTraits(currentClient.id, i)
-                      }
-                      animState={i === 0 ? guestAnimState : null}
-                      onAnimationComplete={
-                        i === 0 ? () => setGuestAnimState(null) : undefined
-                      }
-                    />
-                  ),
+              <div className="flex gap-2 items-end">
+                {/* Lead avatar — the spokesperson */}
+                <ClientAvatar
+                  traits={currentClient.visualTraits}
+                  animState={guestAnimState}
+                  onAnimationComplete={() => setGuestAnimState(null)}
+                />
+                {/* Count pill — shown only for parties larger than 1 */}
+                {currentClient.truePartySize > 1 && (
+                  <div className="self-center mb-2 inline-flex items-center justify-center rounded-full border border-[#141414] bg-white px-2 py-0.5 text-[10px] font-bold leading-none shadow-[1px_1px_0px_0px_rgba(20,20,20,1)]">
+                    +{currentClient.truePartySize - 1}
+                  </div>
                 )}
               </div>
             </motion.div>
