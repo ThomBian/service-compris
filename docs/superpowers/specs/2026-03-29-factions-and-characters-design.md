@@ -294,7 +294,76 @@ These rules define the long-term feel of each faction path. Each requires new ga
 
 ---
 
-## 5. Migration Checklist
+## 5. Clipboard — Factions Tab
+
+A new **Factions** tab is added to the Clipboard between Banned and Log: `["VIPs", "Banned", "Factions", "Log"]`.
+
+### 5.1 Content
+
+Each of the three factions (Syndicate, Culinary Inquisition, Hype Train) gets a card showing:
+
+1. **Faction name + icon**
+2. **Visual marker** — what to look for in the queue ("Matching pinstripe suits, party of 4")
+3. **Intensity indicator** — derived from `pathScores` in `CampaignState`
+
+Rule text is **hidden** until faction macro rules are implemented. The rule slot is reserved in the component but renders nothing this cycle.
+
+### 5.2 Intensity Indicator
+
+Intensity is a 0–3 dot display computed from the relevant path score:
+
+```ts
+function factionIntensity(score: number, max: number): 0 | 1 | 2 | 3 {
+  if (score === 0)              return 0;  // ○○○ — quiet
+  if (score < max * 0.33)       return 1;  // ●○○ — weak
+  if (score < max * 0.66)       return 2;  // ●●○ — active
+  return 3;                                // ●●● — dominant
+}
+```
+
+- Intensity 0: card rendered at ~45% opacity, label "QUIET ○○○"
+- Intensity 1: normal card, label "WEAK ●○○"
+- Intensity 2: highlighted card (faction accent colour border), label "ACTIVE ●●○"
+- Intensity 3: highlighted + bold border, label "DOMINANT ●●●"
+
+`MAX_PATH_SCORE` (from `src/constants.ts`) is used as `max`.
+
+### 5.3 Static Faction Registry
+
+Faction display data lives in a small static array in the Clipboard component (not in `GameState` — this is pure UI metadata):
+
+```ts
+const FACTION_DISPLAY = [
+  {
+    path: 'underworld' as CampaignPath,
+    name: 'The Syndicate',
+    icon: '🤵',
+    markerText: 'Matching pinstripe suits. Party of 4. No reservation.',
+  },
+  {
+    path: 'michelin' as CampaignPath,
+    name: 'The Culinary Inquisition',
+    icon: '🎩',
+    markerText: 'Hyper-formal wear. Crimson ascot. Parties of 1–2.',
+  },
+  {
+    path: 'viral' as CampaignPath,
+    name: 'The Hype Train',
+    icon: '📱',
+    markerText: 'Neon gear. Large groups. Zero patience.',
+  },
+];
+```
+
+### 5.4 Data Source
+
+The Clipboard component already receives `gameState` via `useGame()`. `pathScores` is on `campaignState` which lives in `useCampaign` / `GameProvider`. It must be threaded into `GameContext` (or passed as a prop to Clipboard) so the Factions tab can read the current scores.
+
+If `campaignState` is unavailable (e.g. outside a campaign run), all three factions render at intensity 0.
+
+---
+
+## 6. Migration Checklist
 
 1. Add `factionPath?: CampaignPath` to `CharacterDefinition` in `src/types.ts`
 2. Add `FACTION_BOOST` and `MAX_PATH_SCORE` to `src/constants.ts`
@@ -307,10 +376,11 @@ These rules define the long-term feel of each faction path. Each requires new ga
 5. Update `generateDailyCharacters` signature and logic in `src/logic/characterRoster.ts`
 6. Pass `pathScores` to `generateDailyCharacters` in `useGameEngine.ts`
 7. Add `neckwear: 3` variant to `ClientAvatar` SVG (Donny Tromp's red tie) — or defer to avatar follow-on spec
+8. Add Factions tab to `Clipboard.tsx`; thread `pathScores` from `campaignState` into the component
 
 ---
 
-## 6. Out of Scope (This Spec)
+## 7. Out of Scope (This Spec)
 
 - Gordon Angry's Daily Menu mechanic
 - Mr. Feast's "kick out seated guest" action
