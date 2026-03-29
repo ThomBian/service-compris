@@ -22,17 +22,30 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   const isSeating = currentClient?.physicalState === PhysicalState.SEATING;
   const blockedCells = getRule<[number, number][]>(activeRules, 'BLOCKED_GRID_CELLS', []);
 
-  const selectedCells = grid
-    .flat()
-    .filter((c) => c.state === CellState.SELECTED);
+  const selectedCells = grid.flat().filter((c) => c.state === CellState.SELECTED);
   const partySize = currentClient?.truePartySize || 0;
-  const isCropping =
-    isSeating && selectedCells.length > 0 && selectedCells.length < partySize;
+  const isCropping = isSeating && selectedCells.length > 0 && selectedCells.length < partySize;
   const canConfirm = isSeating && selectedCells.length > 0;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { width, height } = useContainerSize(wrapperRef);
   const gridSize = Math.min(width, height);
+
+  const occupiedPartyIds = [...new Set<string>(
+    gameState.grid.flat()
+      .filter(c => c.state === CellState.OCCUPIED && c.partyId)
+      .map(c => c.partyId!)
+  )];
+
+  // Auto-confirm when party size is reached
+  useEffect(() => {
+    if (isSeating && selectedCells.length === partySize && partySize > 0) {
+      const timer = setTimeout(() => {
+        confirmSeating();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedCells.length, partySize, isSeating, confirmSeating]);
 
   const handleCellClick = useCallback((x: number, y: number) => {
     if (!isSeating) return;
@@ -48,59 +61,49 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
     toggleCellSelection(x, y);
   }, [isSeating, grid, selectedCells, toggleCellSelection, showToast]);
 
-  // Auto-confirm when party size is reached
-  useEffect(() => {
-    if (isSeating && selectedCells.length === partySize && partySize > 0) {
-      const timer = setTimeout(() => {
-        confirmSeating();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedCells.length, partySize, isSeating, confirmSeating]);
-
-  const occupiedPartyIds = [...new Set<string>(
-    gameState.grid.flat()
-      .filter(c => c.state === CellState.OCCUPIED && c.partyId)
-      .map(c => c.partyId!)
-  )];
-
   return (
-    <div className="flex flex-col gap-4 bg-[#E4E3E0] p-6 h-full overflow-hidden" data-tour="floorplan">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#141414]/20 pb-4 shrink-0">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-[#141414] flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Floorplan
-          </h2>
-          {isSeating ? (
-            <p
-              className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isCropping ? "text-amber-500" : "text-emerald-600 animate-pulse"}`}
-            >
-              {isCropping && (
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-              )}
-              Seating: {currentClient?.trueFirstName} ({selectedCells.length}/
-              {partySize})
-            </p>
-          ) : (
-            <p className="text-xs text-[#141414]/40 font-medium uppercase tracking-wider">
-              Viewing mode — numbers are in-game minutes left at the table
-            </p>
-          )}
-        </div>
-        {/* Action buttons — right side, only in seating mode */}
-        {isSeating && (
-          <div className="flex gap-2 shrink-0">
+    <div className="flex flex-col bg-[#E4E3E0] h-full overflow-hidden" data-tour="floorplan">
+
+      {/* 1. Title header — always present, no subtitle */}
+      <div className="flex items-center px-6 py-3 border-b border-[#141414]/20 shrink-0">
+        <h2 className="text-xl font-bold text-[#141414] flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          Floorplan
+        </h2>
+      </div>
+
+      {/* 2. Party strip — seating mode only */}
+      {isSeating && (
+        <div className="flex items-center gap-3 px-6 py-3 bg-[#D6D5D2] border-b border-[#141414]/15 shrink-0">
+          {/* Maitre D' silhouette */}
+          <div className="w-8 h-11 bg-[#141414] rounded-t-full flex items-end justify-center text-white text-[8px] pb-1 shrink-0">
+            MD
+          </div>
+          {/* Party member icons */}
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-1">
+              {Array.from({ length: partySize }).map((_, i) => (
+                <Users
+                  key={i}
+                  size={16}
+                  className={i < selectedCells.length ? 'text-emerald-600' : 'text-[#141414] opacity-30'}
+                />
+              ))}
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-widest">
+              {currentClient?.trueFirstName} ({selectedCells.length}/{partySize})
+            </span>
+          </div>
+          {/* Action buttons */}
+          <div className="flex gap-2 ml-auto shrink-0">
             <button
               onClick={confirmSeating}
               disabled={!canConfirm}
               className={`
                 px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all
-                ${
-                  canConfirm
-                    ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[2px_2px_0_0_#141414] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_0_#141414] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-                    : "bg-[#141414]/10 text-[#141414]/30 cursor-not-allowed"
+                ${canConfirm
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[2px_2px_0_0_#141414] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_0_#141414] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                  : "bg-[#141414]/10 text-[#141414]/30 cursor-not-allowed"
                 }
               `}
               id="confirm-seating-btn"
@@ -117,13 +120,14 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
               Refuse Party
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {isOvertime && occupiedPartyIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 shrink-0 border-b border-amber-400/40 pb-3">
-          <span className="text-xs font-bold uppercase tracking-wide text-amber-700 w-full">
-            Last Call — rush a table
+      {/* 3. Rush row — overtime + not seating only */}
+      {isOvertime && !isSeating && occupiedPartyIds.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-center shrink-0 px-6 py-2 border-b border-amber-400/40 bg-amber-50/30">
+          <span className="text-xs font-bold uppercase tracking-wide text-amber-700">
+            Last Call —
           </span>
           {occupiedPartyIds.map((partyId, index) => (
             <button
@@ -131,18 +135,16 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
               onClick={() => lastCallTable(partyId)}
               className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-colors"
             >
-              {occupiedPartyIds.length === 1
-                ? 'Rush table'
-                : `Rush table ${index + 1}`}
+              {occupiedPartyIds.length === 1 ? 'Rush table' : `Rush table ${index + 1}`}
             </button>
           ))}
         </div>
       )}
 
-      {/* Grid wrapper — flex-1 gives it all remaining height; hook measures it */}
+      {/* 4. Grid — fills remaining height */}
       <div
         ref={wrapperRef}
-        className="flex-1 min-h-0 flex items-center justify-center"
+        className="flex-1 min-h-0 flex items-center justify-center p-6"
       >
         <div
           className={`
