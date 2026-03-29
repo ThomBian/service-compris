@@ -135,7 +135,7 @@ function GameContent({
   return (
     <div className="h-screen relative bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       {/* Scene + bottom panel fill full viewport height */}
-      <div className="absolute inset-0 flex flex-col overflow-hidden">
+      <div className={`absolute inset-0 flex flex-col overflow-hidden ${view === 'floorplan' ? 'pt-14' : ''}`}>
         <ScenePanel view={view} onSeatParty={handleSeatParty} />
         <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
           <BottomPanel view={view} isOvertime={isOvertime} />
