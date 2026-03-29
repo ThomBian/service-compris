@@ -55,7 +55,7 @@ export interface VisualTraits {
   // VIP-only accessories — undefined on regular clients
   hat?:        0 | 1 | 2;  // 0=top hat, 1=beret, 2=chef's toque
   facialHair?: 0 | 1;       // 0=curled moustache, 1=full beard
-  neckwear?:   0 | 1 | 2;  // 0=red tie, 1=gold cravat, 2=red scarf
+  neckwear?:   0 | 1 | 2 | 3;  // 0=red tie, 1=gold cravat, 2=red scarf, 3=long red tie
   // Banned-only accessories — undefined on regular clients and VIPs
   glasses?:  0 | 1;  // 0=round wire-frame, 1=oversized sunglasses
   eyebrows?: 0 | 1;  // 0=heavy furrowed brow, 1=droopy half-closed lids (drunk)
@@ -81,6 +81,7 @@ export interface CharacterDefinition {
   gameOver?:          boolean;
   consequenceDescription: string;   // shown when seated (bad outcome for BANNED, good outcome for VIP)
   refusalDescription?: string;      // shown when refused (good outcome for BANNED, bad outcome for VIP)
+  factionPath?: 'underworld' | 'michelin' | 'viral';
 }
 
 export interface Reservation {
