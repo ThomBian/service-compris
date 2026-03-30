@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { useGame } from "../../context/GameContext";
 import { PhysicalState } from "../../types";
 import { seedTraits } from "../../logic/gameLogic";
-import { ClientAvatar } from "./ClientAvatar";
-import { MaitreDAvatar } from "./MaitreDAvatar";
+import { PixelAvatar } from "./PixelAvatar";
+import { PixelMaitreD } from "./PixelMaitreD";
 import { StreetSceneBackground } from "./StreetSceneBackground";
 
 const STORM_OUT_LINES = [
@@ -264,9 +264,10 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
         </div>
 
         {/* Maitre D' avatar */}
-        <MaitreDAvatar
+        <PixelMaitreD
           animState={maitreDAnimState}
           onAnimationComplete={() => setMaitreDAnimState(null)}
+          scale={3}
         />
       </div>
 
@@ -321,10 +322,11 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
               <div className="flex items-end">
                 {Array.from({ length: currentClient.truePartySize }).map((_, i) => (
                   <div key={i} className={i > 0 ? "-ml-4" : ""}>
-                    <ClientAvatar
+                    <PixelAvatar
                       traits={i === 0 ? currentClient.visualTraits : seedTraits(currentClient.id, i)}
                       animState={i === 0 ? guestAnimState : null}
                       onAnimationComplete={i === 0 ? () => setGuestAnimState(null) : undefined}
+                      scale={3}
                     />
                   </div>
                 ))}
@@ -368,7 +370,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
               className="h-1 rounded-full bg-emerald-400"
               style={{ width: Math.max(2, (c.patience / 100) * 20) }}
             />
-            <ClientAvatar traits={c.visualTraits} />
+            <PixelAvatar traits={c.visualTraits} scale={1.5} />
             {/* Spacer matching desk-character label height so items-end aligns avatar feet */}
             <span className="invisible text-[9px] font-bold uppercase tracking-widest leading-none">x</span>
           </div>
@@ -389,7 +391,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
               <SpeechBubble text={stormedOut.message} variant="storm" />
             </div>
             <div className="opacity-70 grayscale">
-              <ClientAvatar traits={seedTraits("storm", 0)} />
+              <PixelAvatar traits={seedTraits("storm", 0)} scale={1.5} />
             </div>
             <div className="w-1 h-0.5 rounded-full bg-red-400" />
           </motion.div>

@@ -53,9 +53,14 @@ describe('buildCustomerLayers', () => {
     for (let skinTone = 0; skinTone < 5; skinTone++) {
       for (let hairStyle = 0; hairStyle < 5; hairStyle++) {
         for (let clothingStyle = 0; clothingStyle < 4; clothingStyle++) {
-          expect(() => buildCustomerLayers({
-            ...baseTrait, skinTone, hairStyle, clothingStyle,
-          })).not.toThrow()
+          expect(() =>
+            buildCustomerLayers({
+              ...baseTrait,
+              skinTone: skinTone as VisualTraits["skinTone"],
+              hairStyle: hairStyle as VisualTraits["hairStyle"],
+              clothingStyle: clothingStyle as VisualTraits["clothingStyle"],
+            }),
+          ).not.toThrow()
         }
       }
     }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Clipboard as ClipboardIcon } from "lucide-react";
 import { useGame } from "../../context/GameContext";
-import { ClientAvatar } from "../scene/ClientAvatar";
+import { PixelAvatar } from "../scene/PixelAvatar";
 import { ActivityLog } from "../ActivityLog";
 import { CHARACTER_ROSTER } from '../../logic/characterRoster';
 import type { CharacterDefinition } from '../../types';
@@ -67,9 +67,7 @@ const VipDossierEntry: React.FC<VipDossierEntryProps> = ({ char, isSeated }) => 
         className="shrink-0 w-10 flex items-end justify-center"
         style={{ opacity: isSeated ? 0.6 : 1 }}
       >
-        <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
-          <ClientAvatar traits={char.visualTraits} />
-        </div>
+        <PixelAvatar traits={char.visualTraits} scale={1} />
       </div>
       <div
         className={`flex flex-col gap-1 flex-1 ${isSeated ? "opacity-70" : ""}`}
@@ -156,9 +154,7 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
         className="shrink-0 w-10 flex items-end justify-center"
         style={{ opacity: isSeated ? 0.6 : 1 }}
       >
-        <div className="w-full [&_svg]:w-full [&_svg]:h-auto">
-          <ClientAvatar traits={char.visualTraits} />
-        </div>
+        <PixelAvatar traits={char.visualTraits} scale={1} />
       </div>
       <div
         className={`flex flex-col gap-1 flex-1 ${isSeated ? "opacity-70" : ""}`}

@@ -1,8 +1,10 @@
 # Pixel Art Character Renderer Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]` / `- [x]`) syntax for tracking.
 
 **Goal:** Replace the SVG-based `ClientAvatar` and `MaitreDAvatar` with a canvas-based 24×48 pixel art renderer used in the desk scene, queue, and Clipboard panel.
+
+**Completion:** Implemented in the repo. Checkboxes below are marked done. **`PixelMaitreD`:** `onAnimationComplete` fires after **500ms** (bow), **300ms** (stop), **400ms** (shrug) via `setTimeout`, matching the former `MaitreDAvatar` motion durations; the plan text that used `md-pulse` + `onAnimationEnd` was superseded for behavioral parity. **`PixelAvatar`:** guest CSS keyframes unchanged; keyframe injection runs once in `useEffect`. Both canvases use `aria-hidden` as decorative portraits.
 
 **Architecture:** A pure data layer (`pixelSprites.ts`) defines pixel rects per trait; a pure renderer (`pixelRenderer.ts`) composites them onto a canvas context; two React components (`PixelAvatar`, `PixelMaitreD`) wrap a `<canvas>` element and apply CSS animations. Drop-in replacements for existing components with identical prop APIs.
 
@@ -51,7 +53,7 @@ Scale by context: desk `scale=3` (72×144px), queue `scale=1.5` (36×72px), clip
 - Create: `src/components/scene/pixelSprites.ts`
 - Create: `src/components/scene/__tests__/pixelSprites.test.ts`
 
-- [ ] **Step 1: Write failing tests for base types and layers**
+- [x] **Step 1: Write failing tests for base types and layers**
 
 ```typescript
 // src/components/scene/__tests__/pixelSprites.test.ts
@@ -98,7 +100,7 @@ describe('pixelSprites base layers', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -106,7 +108,7 @@ npm run test -- pixelSprites --run
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement base types and layers**
+- [x] **Step 3: Implement base types and layers**
 
 ```typescript
 // src/components/scene/pixelSprites.ts
@@ -147,7 +149,7 @@ export function neckLayer(skin: string): PixelLayer {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -155,7 +157,7 @@ npm run test -- pixelSprites --run
 
 Expected: PASS (7 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/scene/pixelSprites.ts src/components/scene/__tests__/pixelSprites.test.ts
@@ -170,7 +172,7 @@ git commit -m "feat: pixel art sprite types, palette constants, and base layers"
 - Modify: `src/components/scene/pixelSprites.ts`
 - Modify: `src/components/scene/__tests__/pixelSprites.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Append to the `describe` block in `pixelSprites.test.ts`:
 
@@ -201,7 +203,7 @@ it('hairLayer style 3 (bald) returns empty layer', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -209,7 +211,7 @@ npm run test -- pixelSprites --run
 
 Expected: FAIL — `headLayer` and `hairLayer` not exported.
 
-- [ ] **Step 3: Implement head and hair layers**
+- [x] **Step 3: Implement head and hair layers**
 
 Append to `pixelSprites.ts`:
 
@@ -267,7 +269,7 @@ export function hairLayer(style: number, color: string): PixelLayer {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -275,7 +277,7 @@ npm run test -- pixelSprites --run
 
 Expected: PASS (all tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/scene/pixelSprites.ts src/components/scene/__tests__/pixelSprites.test.ts
@@ -290,7 +292,7 @@ git commit -m "feat: pixel art head and hair layers"
 - Modify: `src/components/scene/pixelSprites.ts`
 - Modify: `src/components/scene/__tests__/pixelSprites.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Append to the `describe` block:
 
@@ -313,7 +315,7 @@ it('clothingLayer style 2 (dress) produces more rects than style 1 (shirt)', () 
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -321,7 +323,7 @@ npm run test -- pixelSprites --run
 
 Expected: FAIL — `clothingLayer` not exported.
 
-- [ ] **Step 3: Implement clothing layer**
+- [x] **Step 3: Implement clothing layer**
 
 Append to `pixelSprites.ts`:
 
@@ -372,7 +374,7 @@ export function clothingLayer(style: number, color: string): PixelLayer {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -380,7 +382,7 @@ npm run test -- pixelSprites --run
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/scene/pixelSprites.ts src/components/scene/__tests__/pixelSprites.test.ts
@@ -395,7 +397,7 @@ git commit -m "feat: pixel art clothing layers (jacket, casual, dress, blazer)"
 - Modify: `src/components/scene/pixelSprites.ts`
 - Modify: `src/components/scene/__tests__/pixelSprites.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Append to the `describe` block:
 
@@ -426,7 +428,7 @@ it('eyebrowsLayer returns in-bounds rects for both styles', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -434,7 +436,7 @@ npm run test -- pixelSprites --run
 
 Expected: FAIL — accessory functions not exported.
 
-- [ ] **Step 3: Implement accessory layers**
+- [x] **Step 3: Implement accessory layers**
 
 Append to `pixelSprites.ts`:
 
@@ -587,7 +589,7 @@ export function eyebrowsLayer(style: number, skinColor: string): PixelLayer {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- pixelSprites --run
@@ -595,7 +597,7 @@ npm run test -- pixelSprites --run
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/scene/pixelSprites.ts src/components/scene/__tests__/pixelSprites.test.ts
@@ -610,7 +612,7 @@ git commit -m "feat: pixel art accessory layers — hats, facial hair, neckwear,
 - Create: `src/components/scene/pixelRenderer.ts`
 - Create: `src/components/scene/__tests__/pixelRenderer.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```typescript
 // src/components/scene/__tests__/pixelRenderer.test.ts
@@ -679,7 +681,7 @@ describe('buildCustomerLayers', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- pixelRenderer --run
@@ -687,7 +689,7 @@ npm run test -- pixelRenderer --run
 
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement pixelRenderer.ts**
+- [x] **Step 3: Implement pixelRenderer.ts**
 
 ```typescript
 // src/components/scene/pixelRenderer.ts
@@ -739,7 +741,7 @@ export function buildCustomerLayers(traits: VisualTraits): PixelLayer[] {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- pixelRenderer --run
@@ -747,7 +749,7 @@ npm run test -- pixelRenderer --run
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/scene/pixelRenderer.ts src/components/scene/__tests__/pixelRenderer.test.ts
@@ -761,7 +763,7 @@ git commit -m "feat: pixel art renderer and buildCustomerLayers"
 **Files:**
 - Create: `src/components/scene/PixelAvatar.tsx`
 
-- [ ] **Step 1: Create PixelAvatar.tsx**
+- [x] **Step 1: Create PixelAvatar.tsx**
 
 ```tsx
 // src/components/scene/PixelAvatar.tsx
@@ -853,7 +855,7 @@ export const PixelAvatar: React.FC<PixelAvatarProps> = ({
 }
 ```
 
-- [ ] **Step 2: Start dev server and visually confirm the component renders**
+- [x] **Step 2: Start dev server and visually confirm the component renders**
 
 ```bash
 npm run dev
@@ -861,7 +863,7 @@ npm run dev
 
 Open http://localhost:3000. Navigate to the game's desk scene. If `ClientAvatar` is still in use, the visual change won't be visible yet — that's expected. Confirm dev server starts without errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/scene/PixelAvatar.tsx
@@ -875,7 +877,7 @@ git commit -m "feat: PixelAvatar canvas component with entrance/accused/refused 
 **Files:**
 - Create: `src/components/scene/PixelMaitreD.tsx`
 
-- [ ] **Step 1: Create PixelMaitreD.tsx**
+- [x] **Step 1: Create PixelMaitreD.tsx**
 
 ```tsx
 // src/components/scene/PixelMaitreD.tsx
@@ -1108,7 +1110,7 @@ export const PixelMaitreD: React.FC<PixelMaitreDProps> = ({
 }
 ```
 
-- [ ] **Step 2: Run full test suite**
+- [x] **Step 2: Run full test suite**
 
 ```bash
 npm run test --run
@@ -1116,7 +1118,7 @@ npm run test --run
 
 Expected: All existing tests pass. No new failures.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/scene/PixelMaitreD.tsx src/components/scene/pixelSprites.ts
@@ -1130,7 +1132,7 @@ git commit -m "feat: PixelMaitreD canvas component with idle/bow/stop/shrug stat
 **Files:**
 - Modify: `src/components/scene/DeskScene.tsx`
 
-- [ ] **Step 1: Update imports in DeskScene.tsx**
+- [x] **Step 1: Update imports in DeskScene.tsx**
 
 Find and replace the two avatar imports at the top of `DeskScene.tsx`:
 
@@ -1144,7 +1146,7 @@ import { PixelAvatar } from "./PixelAvatar";
 import { PixelMaitreD } from "./PixelMaitreD";
 ```
 
-- [ ] **Step 2: Replace MaitreDAvatar usage**
+- [x] **Step 2: Replace MaitreDAvatar usage**
 
 Find `<MaitreDAvatar` in `DeskScene.tsx` (line ~239) and replace:
 
@@ -1163,7 +1165,7 @@ Find `<MaitreDAvatar` in `DeskScene.tsx` (line ~239) and replace:
 />
 ```
 
-- [ ] **Step 3: Replace ClientAvatar usage — desk client (line ~295)**
+- [x] **Step 3: Replace ClientAvatar usage — desk client (line ~295)**
 
 ```tsx
 // Before:
@@ -1182,7 +1184,7 @@ Find `<MaitreDAvatar` in `DeskScene.tsx` (line ~239) and replace:
 />
 ```
 
-- [ ] **Step 4: Replace ClientAvatar usage — queue (line ~342)**
+- [x] **Step 4: Replace ClientAvatar usage — queue (line ~342)**
 
 ```tsx
 // Before:
@@ -1192,7 +1194,7 @@ Find `<MaitreDAvatar` in `DeskScene.tsx` (line ~239) and replace:
 <PixelAvatar traits={c.visualTraits} scale={1.5} />
 ```
 
-- [ ] **Step 5: Replace ClientAvatar usage — storm-out ghost (line ~363)**
+- [x] **Step 5: Replace ClientAvatar usage — storm-out ghost (line ~363)**
 
 ```tsx
 // Before:
@@ -1202,7 +1204,7 @@ Find `<MaitreDAvatar` in `DeskScene.tsx` (line ~239) and replace:
 <PixelAvatar traits={seedTraits("storm", 0)} scale={1.5} />
 ```
 
-- [ ] **Step 6: Start dev server and visually verify**
+- [x] **Step 6: Start dev server and visually verify**
 
 ```bash
 npm run dev
@@ -1215,7 +1217,7 @@ Open http://localhost:3000 and start a game. Confirm:
 - Entrance animation plays on desk client arrival
 - Storm-out ghost appears in queue
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/components/scene/DeskScene.tsx
@@ -1229,7 +1231,7 @@ git commit -m "feat: migrate DeskScene to PixelAvatar and PixelMaitreD"
 **Files:**
 - Modify: `src/components/desk/Clipboard.tsx`
 
-- [ ] **Step 1: Update import in Clipboard.tsx**
+- [x] **Step 1: Update import in Clipboard.tsx**
 
 ```typescript
 // Remove:
@@ -1239,7 +1241,7 @@ import { ClientAvatar } from "../scene/ClientAvatar";
 import { PixelAvatar } from "../scene/PixelAvatar";
 ```
 
-- [ ] **Step 2: Replace ClientAvatar in VipDossierEntry (~line 71)**
+- [x] **Step 2: Replace ClientAvatar in VipDossierEntry (~line 71)**
 
 ```tsx
 // Before:
@@ -1251,7 +1253,7 @@ import { PixelAvatar } from "../scene/PixelAvatar";
 <PixelAvatar traits={char.visualTraits} scale={1} />
 ```
 
-- [ ] **Step 3: Replace ClientAvatar in BannedDossierEntry (~line 159)**
+- [x] **Step 3: Replace ClientAvatar in BannedDossierEntry (~line 159)**
 
 ```tsx
 // Before:
@@ -1263,11 +1265,11 @@ import { PixelAvatar } from "../scene/PixelAvatar";
 <PixelAvatar traits={char.visualTraits} scale={1} />
 ```
 
-- [ ] **Step 4: Visually verify Clipboard**
+- [x] **Step 4: Visually verify Clipboard**
 
 Open the Clipboard panel (VIPs tab and Banned tab) during a game. Confirm pixel art portraits render correctly at 1× scale.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/desk/Clipboard.tsx
@@ -1282,7 +1284,7 @@ git commit -m "feat: migrate Clipboard dossiers to PixelAvatar"
 - Delete: `src/components/scene/ClientAvatar.tsx`
 - Delete: `src/components/scene/MaitreDAvatar.tsx`
 
-- [ ] **Step 1: Confirm no remaining usages of old components**
+- [x] **Step 1: Confirm no remaining usages of old components**
 
 ```bash
 grep -r "ClientAvatar\|MaitreDAvatar" src/ --include="*.tsx" --include="*.ts"
@@ -1290,14 +1292,14 @@ grep -r "ClientAvatar\|MaitreDAvatar" src/ --include="*.tsx" --include="*.ts"
 
 Expected: Only the component definition files themselves appear. If any other files still import them, fix those imports before deleting.
 
-- [ ] **Step 2: Delete old components**
+- [x] **Step 2: Delete old components**
 
 ```bash
 rm src/components/scene/ClientAvatar.tsx
 rm src/components/scene/MaitreDAvatar.tsx
 ```
 
-- [ ] **Step 3: Run full test suite**
+- [x] **Step 3: Run full test suite**
 
 ```bash
 npm run test --run
@@ -1305,7 +1307,7 @@ npm run test --run
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Run type check**
+- [x] **Step 4: Run type check**
 
 ```bash
 npm run lint
@@ -1313,7 +1315,7 @@ npm run lint
 
 Expected: No errors.
 
-- [ ] **Step 5: Final visual check in dev**
+- [x] **Step 5: Final visual check in dev**
 
 ```bash
 npm run dev
@@ -1327,7 +1329,7 @@ Walk through a full game session:
 - Maître D' bows on seating, raises hand on stop/shrug
 - Clipboard VIP and Banned tabs show pixel art dossier portraits at `scale=1`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
