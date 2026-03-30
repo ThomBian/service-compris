@@ -15,18 +15,27 @@ export function useTour(totalSteps: number): TourControls {
   const [currentStep, setCurrentStep] = useState(0);
 
   const startTour = useCallback(() => {
-    localStorage.setItem(TOUR_SEEN_KEY, 'true');
     setCurrentStep(0);
     setIsTourActive(true);
   }, []);
 
   const skipTour = useCallback(() => {
+    try {
+      localStorage.setItem(TOUR_SEEN_KEY, 'true');
+    } catch {
+      /* ignore */
+    }
     setIsTourActive(false);
   }, []);
 
   const nextStep = useCallback(() => {
     setCurrentStep((s) => {
       if (s >= totalSteps - 1) {
+        try {
+          localStorage.setItem(TOUR_SEEN_KEY, 'true');
+        } catch {
+          /* ignore */
+        }
         setIsTourActive(false);
         return s;
       }

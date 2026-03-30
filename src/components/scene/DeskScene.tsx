@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { DoorOpen } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useGame } from "../../context/GameContext";
-import { PhysicalState } from "../../types";
+import { PhysicalState, type VisualTraits } from "../../types";
 import { seedTraits } from "../../logic/gameLogic";
 import { PixelAvatar } from "./PixelAvatar";
 import { PixelMaitreD } from "./PixelMaitreD";
@@ -75,11 +75,14 @@ interface DeskSceneProps {
   onSeatParty: () => void;
   /** When true, keep a `data-tour="seat-party"` anchor visible even with no guest at desk (onboarding). */
   tourSeatPartySpotlight?: boolean;
+  /** Intro identity — podium avatar matches player pick; otherwise default `PixelMaitreD`. */
+  playerIdentity?: { name: string; traits: VisualTraits } | null;
 }
 
 export const DeskScene: React.FC<DeskSceneProps> = ({
   onSeatParty,
   tourSeatPartySpotlight = false,
+  playerIdentity = null,
 }) => {
   const { t } = useTranslation("ui");
   const {
@@ -263,12 +266,21 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           <SpeechBubble text={maitreDMessage} />
         </div>
 
-        {/* Maitre D' avatar */}
-        <PixelMaitreD
-          animState={maitreDAnimState}
-          onAnimationComplete={() => setMaitreDAnimState(null)}
-          scale={3}
-        />
+        {/* Maitre D' avatar — player from intro, or default sprite */}
+        {playerIdentity ? (
+          <PixelAvatar
+            traits={playerIdentity.traits}
+            animState={maitreDAnimState}
+            onAnimationComplete={() => setMaitreDAnimState(null)}
+            scale={3}
+          />
+        ) : (
+          <PixelMaitreD
+            animState={maitreDAnimState}
+            onAnimationComplete={() => setMaitreDAnimState(null)}
+            scale={3}
+          />
+        )}
       </div>
 
       {/* Current party at desk — fixed width slot so queue never shifts */}

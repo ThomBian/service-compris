@@ -9,6 +9,8 @@ import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { getRule } from "../../logic/nightRules";
 import { FloorplanBackground } from './FloorplanBackground';
+import { PixelAvatar } from '../scene/PixelAvatar';
+import type { VisualTraits } from '../../types';
 
 interface CandleGlowProps {
   mealDuration: number;
@@ -43,9 +45,13 @@ const CandleGlow: React.FC<CandleGlowProps> = ({ mealDuration, isCritical }) => 
 
 interface FloorplanGridProps {
   isOvertime?: boolean;
+  playerIdentity?: { name: string; traits: VisualTraits } | null;
 }
 
-export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false }) => {
+export const FloorplanGrid: React.FC<FloorplanGridProps> = ({
+  isOvertime = false,
+  playerIdentity = null,
+}) => {
   const { gameState, toggleCellSelection, confirmSeating, refuseSeatedParty, lastCallTable } =
     useGame();
   const { showToast } = useToast();
@@ -168,18 +174,33 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
           className="flex items-center gap-3 px-5 py-3 shrink-0"
           style={{ background: 'rgba(12,6,2,0.88)', borderBottom: '1px solid #4a2e14' }}
         >
-          {/* Maitre D' silhouette */}
-          <div
-            className="flex items-end justify-center pb-1 shrink-0"
-            style={{
-              width: 26, height: 36,
-              background: 'rgba(20,8,4,0.9)',
-              border: '1px solid #c9a227',
-              borderRadius: '13px 13px 2px 2px',
-            }}
-          >
-            <span style={{ color: '#c9a227', fontSize: 7 }}>◆</span>
-          </div>
+          {/* Maître d' — player avatar from intro, or placeholder */}
+          {playerIdentity ? (
+            <div
+              className="flex shrink-0 items-end justify-center overflow-hidden rounded-[13px] border border-[#c9a227] pb-0.5 pt-1"
+              style={{
+                width: 28,
+                height: 36,
+                background: 'rgba(20,8,4,0.9)',
+              }}
+              title={playerIdentity.name}
+            >
+              <PixelAvatar traits={playerIdentity.traits} scale={0.55} />
+            </div>
+          ) : (
+            <div
+              className="flex shrink-0 items-end justify-center pb-1"
+              style={{
+                width: 26,
+                height: 36,
+                background: 'rgba(20,8,4,0.9)',
+                border: '1px solid #c9a227',
+                borderRadius: '13px 13px 2px 2px',
+              }}
+            >
+              <span style={{ color: '#c9a227', fontSize: 7 }}>◆</span>
+            </div>
+          )}
           {/* Party member icons */}
           <div className="flex flex-col gap-1">
             <div className="flex gap-1">

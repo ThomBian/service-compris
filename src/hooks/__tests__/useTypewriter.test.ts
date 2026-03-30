@@ -75,4 +75,49 @@ describe('useTypewriter', () => {
     expect(onChar).toHaveBeenCalledTimes(2);
     expect(result.current.done).toBe(true);
   });
+
+  it('invokes onTypingStart once per typing run, not for empty text', () => {
+    const onTypingStart = vi.fn();
+    const { rerender } = renderHook(
+      ({ text }) => useTypewriter(text, 10, undefined, 0, onTypingStart),
+      { initialProps: { text: '' as string } },
+    );
+    expect(onTypingStart).not.toHaveBeenCalled();
+
+    rerender({ text: 'ab' });
+    expect(onTypingStart).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(10);
+    });
+    expect(onTypingStart).toHaveBeenCalledTimes(1);
+
+    rerender({ text: 'xy' });
+    expect(onTypingStart).toHaveBeenCalledTimes(2);
+  });
+
+  it('skipToEnd reveals full text immediately and marks done', () => {
+    const { result } = renderHook(() => useTypewriter('abc', 100));
+
+    act(() => {
+      result.current.skipToEnd();
+    });
+    expect(result.current.displayed).toBe('abc');
+    expect(result.current.done).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(result.current.displayed).toBe('abc');
+  });
+
+  it('skipToEnd is a no-op for empty text', () => {
+    const { result } = renderHook(() => useTypewriter('', 10));
+    expect(result.current.done).toBe(true);
+    act(() => {
+      result.current.skipToEnd();
+    });
+    expect(result.current.displayed).toBe('');
+    expect(result.current.done).toBe(true);
+  });
 });

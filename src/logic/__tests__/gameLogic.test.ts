@@ -28,7 +28,7 @@ import {
   type GameState,
   type VisualTraits,
 } from '../../types';
-import { GRID_SIZE } from '../../constants';
+import { GRID_SIZE, QUEUE_PATIENCE_DRAIN_PER_TICK } from '../../constants';
 
 // --- Fixtures ---
 
@@ -661,8 +661,8 @@ describe('processQueueTick', () => {
       currentClient: occupant,
     });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(78);
-    expect(next.queue[1].patience).toBe(48);
+    expect(next.queue[0].patience).toBe(80 - QUEUE_PATIENCE_DRAIN_PER_TICK);
+    expect(next.queue[1].patience).toBe(50 - QUEUE_PATIENCE_DRAIN_PER_TICK);
   });
 
   it('removes clients with zero patience (storm out)', () => {
@@ -844,14 +844,14 @@ describe('processQueueTick — strikeActive', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
     const state = makeGameState({ strikeActive: false, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(48);
+    expect(next.queue[0].patience).toBe(50 - QUEUE_PATIENCE_DRAIN_PER_TICK);
   });
 
   it('drains queue patience at ×2 when strikeActive is true', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
     const state = makeGameState({ strikeActive: true, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(46);
+    expect(next.queue[0].patience).toBe(50 - QUEUE_PATIENCE_DRAIN_PER_TICK * 2);
   });
 });
 

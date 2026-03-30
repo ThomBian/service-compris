@@ -1,5 +1,11 @@
 {
   "appTitle": "Service Compris",
+  "audio": {
+    "mute": "Couper le son",
+    "unmute": "Réactiver le son",
+    "muteAria": "Couper tous les sons",
+    "unmuteAria": "Réactiver le son"
+  },
   "language": {
     "en": "EN",
     "fr": "FR"

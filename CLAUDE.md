@@ -32,6 +32,7 @@ Namespaces (keep keys grouped; mirror structure across locales):
 | `game`     | In-game copy, log lines, dialogue-adjacent strings    |
 | `tour`     | Onboarding / tour steps                             |
 | `campaign` | Corkboard, landing, meta-progression copy             |
+| `intro`    | Cinematic intro / character creation copy              |
 
 Entry point: `src/i18n/index.ts`. The app entry should import it **once** (side effect) so initialization runs before render, e.g. `import '@/src/i18n'` in `main.tsx`.
 
@@ -41,17 +42,18 @@ Browser-based restaurant management game: **React 19** + **Vite** + **TypeScript
 
 ### App phases (`src/App.tsx`)
 
-High-level flow, not the old single-screen layout:
+High-level flow:
 
-1. **LANDING** — `LandingPage` (difficulty, start).
-2. **CORKBOARD** — `CorkboardScreen` after a shift: ledger summary, campaign path, or “fired” variant from `FIRED_CONFIG` / `useCampaign`.
-3. **PLAYING** — `GameContent` inside `GameProvider`: live shift with tour overlay, toasts, pause overlay.
+1. **LANDING** — `LandingPage` (language, start new game).
+2. **INTRO** — `IntroSequence`: cinematic setup, ID card (name, avatar, difficulty), stakes, clock-in; writes `service-compris-intro-seen` when finished.
+3. **CORKBOARD** — `CorkboardScreen` after a shift: ledger summary, campaign path, or “fired” variant from `FIRED_CONFIG` / `useCampaign`.
+4. **PLAYING** — `GameContent` inside `GameProvider`: live shift with tour overlay, toasts, pause overlay.
 
-`GameProvider` wraps **CORKBOARD** and **PLAYING** so campaign hooks can feed the engine (e.g. `incrementPathScore`).
+`GameProvider` wraps **PLAYING** only. Corkboard and intro sit outside it; campaign hooks (`incrementPathScore`, `pathScores`) are passed into `GameProvider` from `App`.
 
 ### In-shift UI (`GameContent`)
 
-- **Top:** `TopBar` — time, rating, cash, morale, speed, difficulty, tour entry, night/rules hints.
+- **Top:** `TopBar` — time, rating, cash, morale, speed, difficulty, tour entry, night/rules hints; optional **player identity** (pixel avatar + name from intro) when set in `App` state.
 - **Center column:** `ScenePanel` toggles **`DeskScene` | `FloorplanScene`** (desk vs floorplan view); `BottomPanel` holds queue, bookings, podium-style actions below the scene.
 - **Overlays:** `TourOverlay`, `ToastContainer`, full-screen pause when time multiplier is 0.
 

@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { playToastSound } from '@/src/audio/gameSfx';
 
 export interface Toast {
   id: string;
@@ -26,6 +27,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     duration = 2500
   ) => {
     const id = Math.random().toString(36).substring(2, 11);
+    playToastSound(variant);
     setToasts(prev => [...prev, { id, title, detail, variant, duration }]);
     const timer = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));

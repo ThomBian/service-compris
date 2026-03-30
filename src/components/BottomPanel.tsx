@@ -2,13 +2,19 @@ import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { DeskTools } from './desk/DeskTools';
 import { FloorplanGrid } from './floorplan/FloorplanGrid';
+import type { VisualTraits } from '../types';
 
 interface BottomPanelProps {
   view: 'desk' | 'floorplan';
   isOvertime: boolean;
+  playerIdentity?: { name: string; traits: VisualTraits } | null;
 }
 
-export const BottomPanel: React.FC<BottomPanelProps> = ({ view, isOvertime }) => {
+export const BottomPanel: React.FC<BottomPanelProps> = ({
+  view,
+  isOvertime,
+  playerIdentity = null,
+}) => {
   return (
     <div className="flex-1 min-h-0 overflow-hidden">
       <AnimatePresence mode="wait">
@@ -32,7 +38,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({ view, isOvertime }) =>
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <FloorplanGrid isOvertime={isOvertime} />
+            <FloorplanGrid isOvertime={isOvertime} playerIdentity={playerIdentity} />
           </motion.div>
         )}
       </AnimatePresence>

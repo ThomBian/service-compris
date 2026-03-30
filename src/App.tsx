@@ -9,15 +9,20 @@ import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
+import { AudioMuteButton } from './components/AudioMuteButton';
+import { LandingPage } from './components/LandingPage';
 import { IntroSequence } from './components/intro/IntroSequence';
+import { INTRO_AVATARS } from './components/intro/introAvatars';
 import { CorkboardScreen } from './components/CorkboardScreen';
 import { TourOverlay } from './components/TourOverlay';
 import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
 import { TOUR_STEPS, TOUR_STEP_INDEX_SEAT_PARTY } from './tour/tourSteps';
 import { useCampaign } from './hooks/useCampaign';
+import { useGameAmbience } from './hooks/useGameAmbience';
 import type { LedgerData } from './types/campaign';
+import type { VisualTraits } from './types';
 
-type GamePhase = 'INTRO' | 'CORKBOARD' | 'PLAYING';
+type GamePhase = 'LANDING' | 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
 interface GameContentProps {
   initialDifficulty: number;
@@ -28,6 +33,7 @@ interface GameContentProps {
   onTourNext: () => void;
   onTourSkip: () => void;
   startTour: () => void;
+  playerIdentity: { name: string; traits: VisualTraits } | null;
 }
 
 function GameContent({
@@ -39,6 +45,7 @@ function GameContent({
   onTourNext,
   onTourSkip,
   startTour,
+  playerIdentity,
 }: GameContentProps) {
   const { t } = useTranslation('ui');
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
@@ -52,17 +59,35 @@ function GameContent({
     gameState.gameOver ||
     (isOvertime && !hasOccupiedCells && !summaryBlockedByDesk);
 
+  useGameAmbience({
+    shiftEnded,
+    timeMultiplier: gameState.timeMultiplier,
+    isTourActive,
+  });
+
   React.useEffect(() => {
     resetGame(initialDifficulty, persist);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-launch tour on first play
+  /** First time per install: start tour when the first guest reaches the desk (not at shift start). */
+  const tourAutoStartedRef = React.useRef(false);
   React.useEffect(() => {
-    if (!localStorage.getItem(TOUR_SEEN_KEY)) {
-      startTour();
+    try {
+      if (localStorage.getItem(TOUR_SEEN_KEY)) return;
+    } catch {
+      return;
     }
-  }, [startTour]);
+    if (isTourActive || tourAutoStartedRef.current) return;
+    if (gameState.currentClient?.physicalState !== PhysicalState.AT_DESK) return;
+    tourAutoStartedRef.current = true;
+    startTour();
+  }, [
+    gameState.currentClient?.physicalState,
+    gameState.currentClient?.id,
+    isTourActive,
+    startTour,
+  ]);
 
   // Freeze clock during tour; unfreeze when tour ends
   const tourWasActiveRef = React.useRef(false);
@@ -142,9 +167,10 @@ function GameContent({
           tourSeatPartySpotlight={
             isTourActive && currentStep === TOUR_STEP_INDEX_SEAT_PARTY
           }
+          playerIdentity={playerIdentity}
         />
         <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
-          <BottomPanel view={view} isOvertime={isOvertime} />
+          <BottomPanel view={view} isOvertime={isOvertime} playerIdentity={playerIdentity} />
           {gameState.timeMultiplier === 0 && !shiftEnded && !isTourActive && (
             <button
               type="button"
@@ -185,6 +211,7 @@ function GameContent({
           nightNumber={gameState.nightNumber}
           isOvertime={isOvertime}
           activeRules={gameState.activeRules}
+          playerIdentity={playerIdentity}
         />
       </div>
       {isTourActive && (
@@ -202,10 +229,19 @@ function GameContent({
 export default function App() {
   const { t } = useTranslation('common');
   React.useEffect(() => { document.title = t('appTitle'); }, [t]);
-  const [phase, setPhase] = React.useState<GamePhase>('INTRO');
+  const [phase, setPhase] = React.useState<GamePhase>('LANDING');
   const [difficulty, setDifficulty] = React.useState(1);
-  const [_playerName, setPlayerName] = React.useState('');
-  const [_avatarIndex, setAvatarIndex] = React.useState(0);
+  const [playerName, setPlayerName] = React.useState('');
+  const [playerAvatarIndex, setPlayerAvatarIndex] = React.useState(0);
+
+  const playerIdentity = React.useMemo((): {
+    name: string;
+    traits: VisualTraits;
+  } | null => {
+    if (!playerName.trim()) return null;
+    const traits = INTRO_AVATARS[playerAvatarIndex] ?? INTRO_AVATARS[0];
+    return { name: playerName, traits };
+  }, [playerName, playerAvatarIndex]);
   const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
   const campaign = useCampaign();
   const tour = useTour(TOUR_STEPS.length);
@@ -233,6 +269,14 @@ export default function App() {
   const handleLeave = React.useCallback(() => {
     campaign.resetCampaign();
     setPersist(undefined);
+    setPlayerName('');
+    setPlayerAvatarIndex(0);
+    setPhase('LANDING');
+  }, [campaign]);
+
+  const handleStartFromLanding = React.useCallback(() => {
+    campaign.resetCampaign();
+    setPersist(undefined);
     setPhase('INTRO');
   }, [campaign]);
 
@@ -242,7 +286,7 @@ export default function App() {
       setPersist(undefined);
       setDifficulty(d);
       setPlayerName(name);
-      setAvatarIndex(avatar);
+      setPlayerAvatarIndex(avatar);
       setPhase('PLAYING');
     },
     [campaign],
@@ -283,6 +327,10 @@ export default function App() {
 
   return (
     <>
+      <AudioMuteButton />
+      {phase === 'LANDING' && (
+        <LandingPage onStartGame={handleStartFromLanding} />
+      )}
       {phase === 'INTRO' && (
         <IntroSequence onComplete={handleIntroComplete} />
       )}
@@ -311,6 +359,7 @@ export default function App() {
             onTourNext={tour.nextStep}
             onTourSkip={tour.skipTour}
             startTour={tour.startTour}
+            playerIdentity={playerIdentity}
           />
         </GameProvider>
       )}

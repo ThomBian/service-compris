@@ -5,9 +5,19 @@ import { buildCustomerLayers, renderSprite } from "./pixelRenderer";
 const SPRITE_W = 24;
 const SPRITE_H = 48;
 
+/** Guest desk reactions + Maître d' podium reactions (bow / stop / shrug). */
+export type PixelAvatarAnimState =
+  | "entrance"
+  | "accused"
+  | "refused"
+  | "bow"
+  | "stop"
+  | "shrug"
+  | null;
+
 interface PixelAvatarProps {
   traits: VisualTraits;
-  animState?: "entrance" | "accused" | "refused" | null;
+  animState?: PixelAvatarAnimState;
   onAnimationComplete?: () => void;
   scale?: number;
 }
@@ -29,6 +39,22 @@ const KEYFRAMES = `
 @keyframes pa-refused {
   from { transform: translateY(0);    opacity: 1;   }
   to   { transform: translateY(10px); opacity: 0.4; }
+}
+@keyframes pa-bow {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(10px) scale(0.92, 0.96); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes pa-stop {
+  0% { transform: translateX(0) scaleX(1); }
+  35% { transform: translateX(0) scaleX(1.14); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+@keyframes pa-shrug {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-4deg); }
+  50% { transform: translateY(-4px) rotate(4deg); }
+  75% { transform: translateY(-3px) rotate(-2deg); }
 }
 `;
 
@@ -62,14 +88,24 @@ export const PixelAvatar: React.FC<PixelAvatarProps> = ({
     renderSprite(buildCustomerLayers(traits), ctx);
   }, [traits]);
 
-  const animStyle: React.CSSProperties =
-    animState === "entrance"
-      ? { animation: "pa-entrance 0.3s ease-out forwards" }
-      : animState === "accused"
-        ? { animation: "pa-accused 0.4s ease-in-out forwards" }
-        : animState === "refused"
-          ? { animation: "pa-refused 0.3s ease-in forwards" }
-          : {};
+  const animStyle: React.CSSProperties = (() => {
+    switch (animState) {
+      case "entrance":
+        return { animation: "pa-entrance 0.3s ease-out forwards" };
+      case "accused":
+        return { animation: "pa-accused 0.4s ease-in-out forwards" };
+      case "refused":
+        return { animation: "pa-refused 0.3s ease-in forwards" };
+      case "bow":
+        return { animation: "pa-bow 0.5s ease-in-out forwards" };
+      case "stop":
+        return { animation: "pa-stop 0.3s ease-out forwards" };
+      case "shrug":
+        return { animation: "pa-shrug 0.4s ease-in-out forwards" };
+      default:
+        return {};
+    }
+  })();
 
   return (
     <canvas

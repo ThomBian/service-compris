@@ -1,15 +1,26 @@
-# Intro sequence audio (placeholders)
+# Intro sequence audio
 
-These files are **temporary placeholders**: the same short silent clip (~250 ms) copied five times so the app can load URLs without 404s while real assets are produced.
+WAV files in this folder are loaded by Howler from `src/audio/introAudio.ts` (URLs `/audio/intro/...`).
 
-Replace with final mixes per `docs/superpowers/specs/2026-03-30-intro-sequence-design.md`.
+## Bundled tracks
 
-## Required filenames
+| File | Use |
+|------|-----|
+| `rain-loop.wav` | Screen 0 — rain ambience (loop) |
+| `jazz-loop.wav` | Screen 0 — jazz bed, 2s fade-in after first gesture (loop) |
+| `typewriter-click.wav` | Typewriter SFX while intro copy reveals (screens 0, 2 clipboard lines, 3 M. V. line) |
+| `door-open.wav` | CLOCK IN door hit (one-shot) |
 
-| File | Intended use |
-|------|----------------|
-| `rain-loop.mp3` | Screen 0 ambient rain (loop) |
-| `jazz-loop.mp3` | Screen 0 jazz bed, fades in after user gesture (loop) |
-| `typewriter-click.mp3` | Typewriter SFX on Screen 0 |
-| `clipboard-thud.mp3` | Paper / clipboard impact on Screen 1 |
-| `door-open.mp3` | Door transition SFX |
+## Optional
+
+| File | Use |
+|------|-----|
+| `clipboard-thud.wav` | Screen 2 — clipboard landing. **Not in repo yet:** `clipboardThud` reuses `door-open.wav` at lower volume until you add this file. After adding it, in `introAudio.ts` point `clipboardThud` at `['/audio/intro/clipboard-thud.wav']` instead of `PATH.door`. |
+
+Volumes are tuned in `createIntroSounds()`; adjust there if mixes are too loud or quiet.
+
+## Troubleshooting (no sound)
+
+- **Click or tap** the opening screen once: browsers often unlock audio only after pointer input, not only **Enter**.
+- Ensure the tab is **not muted** and system volume is up.
+- In devtools, if you see `[introAudio] load failed`, the WAV may be an unsupported codec for Web Audio (try 16-bit PCM WAV) or the file path 404s.

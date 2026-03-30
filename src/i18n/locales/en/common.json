@@ -1,5 +1,11 @@
 {
   "appTitle": "Service Compris",
+  "audio": {
+    "mute": "Mute sound",
+    "unmute": "Unmute sound",
+    "muteAria": "Mute all sound",
+    "unmuteAria": "Unmute sound"
+  },
   "language": {
     "en": "EN",
     "fr": "FR"

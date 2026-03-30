@@ -1,6 +1,12 @@
 {
+  "pressEnterToContinue": "▸ Press Enter to continue",
+  "pressEnterToFinishLine": "▸ Press Enter to show full text",
+  "monsieurVUi": {
+    "name": "Monsieur V.",
+    "role": "Owner — Le Solstice"
+  },
   "screen0": {
-    "p1": "> Nouveau Paris. 192X.",
+    "p1": "> Nouveau Paris. 2048.",
     "p2": "In this city, cooking at home is a crime against high society. Your worth is measured by where you eat, who you eat with, and who you are seen ignoring.",
     "p3": "At the center of it all is LE SOLSTICE. The most exclusive, impossible-to-book restaurant in the world.",
     "p4": "Last night, the Maître D' seated a Duke next to the kitchen doors. He has not been seen since.",
@@ -18,13 +24,13 @@
     "signContract": "[ Sign Contract ]"
   },
   "screen2": {
-    "p1": "Listen closely, {{name}}. Running the door at Le Solstice is not about hospitality. It is about survival.",
-    "p2": "Outside that door is a city of vipers. Politicians, Influencers, and the Syndicate. They all want a table, and none of them care about our rules. But I care about the rules.",
-    "p3": "If you let a scoundrel in, we lose our reputation. If you insult a VIP, we lose our windows. Protect the Michelin Stars, keep the cash flowing, and for the love of God, enforce the dress code."
+    "p1": "{{name}}. Look at me. That door isn't charm—it's what keeps this room from the street. You hold it, or we all pay for it.",
+    "p2": "Past the glass you've got teeth everywhere—politicians, influencers, Syndicate. They want in; they don't care about our house rules. I do. You're the one who makes them stick.",
+    "p3": "Wave the wrong person through and we're a punchline. Snub the wrong name and we're sweeping up glass. Keep the stars, keep the till honest, and for God's sake don't let anyone humiliate me at that podium."
   },
   "screen3": {
-    "monsieurV": "The queue is forming. Unlock the doors. Do not disappoint me.",
+    "monsieurV": "They're already out there, waiting. Open the doors—for me. I need you on that floor. Please don't waste my trust.",
     "clockIn": "[ Clock In ]"
   },
-  "skip": "Skip intro"
+  "skip": "Skip to paperwork"
 }

@@ -13,7 +13,8 @@
     "speed1": "1× speed",
     "speed2": "2× speed",
     "speed3": "3× speed",
-    "tourTitle": "Quick Tour"
+    "tourTitle": "Quick Tour",
+    "playerIdentityAria": "Your maître d': {{name}}"
   },
   "app": {
     "resume3xAria": "Resume game at 3× speed",

@@ -1,6 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Clock, DollarSign, Star } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  DollarSign,
+  Star,
+} from "lucide-react";
+import { Howler } from "howler";
 import { createIntroSounds, type IntroSounds } from "@/src/audio/introAudio";
 import { useTypewriter } from "@/src/hooks/useTypewriter";
 import { INTRO_AVATARS } from "@/src/components/intro/introAvatars";
@@ -10,6 +17,91 @@ import { START_TIME } from "@/src/constants";
 import { formatTime } from "@/src/utils";
 
 export const INTRO_SEEN_KEY = "service-compris-intro-seen";
+
+const SERIF = "Georgia, 'Times New Roman', serif";
+
+/** Shared “he’s talking to you” layout: face chip + name + dialogue column. */
+function MonsieurVSpeech({
+  variant,
+  speakerName,
+  speakerRole,
+  children,
+}: {
+  variant: "parchment" | "dark";
+  speakerName: string;
+  speakerRole: string;
+  children: React.ReactNode;
+}) {
+  const parchment = variant === "parchment";
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 text-lg font-semibold ${
+            parchment
+              ? "border-[#3d3428]/35 bg-[#3d3428] text-[#e8dcc8]"
+              : "border-[#c8a84b]/45 bg-transparent text-[#f5e6bc]"
+          }`}
+          style={{ fontFamily: SERIF }}
+          aria-hidden
+        >
+          V
+        </div>
+        <div className="min-w-0 pt-0.5">
+          <p
+            className={`text-base font-semibold leading-tight ${
+              parchment ? "text-[#2a241c]" : "text-[#f5e6bc]"
+            }`}
+            style={{ fontFamily: SERIF }}
+          >
+            {speakerName}
+          </p>
+          <p
+            className={`mt-1 text-xs italic leading-snug ${
+              parchment ? "text-[#3d3428]/72" : "text-[#e8e4dc]/55"
+            }`}
+            style={{ fontFamily: SERIF }}
+          >
+            {speakerRole}
+          </p>
+        </div>
+      </div>
+      <div
+        className={`relative rounded-r-lg rounded-bl-lg border-l-[3px] py-1 pl-4 ${
+          parchment
+            ? "border-[#7b1c2e]/60 bg-[#c9b896]/40"
+            : "border-[#c8a84b]/50"
+        }`}
+      >
+        <div
+          className={`whitespace-pre-wrap text-[0.9375rem] leading-[1.65] ${
+            parchment ? "text-[#2a241c]" : "text-[#e8e4dc]/93"
+          }`}
+          style={{ fontFamily: SERIF }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Full-width of parent + dark scrim so serif copy stays legible on bright scene art. */
+function MonsieurVDialogueBlock({
+  className = "",
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`w-full rounded-xl border border-black/25 bg-black/50 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-sm ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 const SCREEN0_KEYS = [
   "screen0.p1",
@@ -21,8 +113,17 @@ const SCREEN0_KEYS = [
 
 const DIFFICULTY_VALUES = [0, 1, 2, 3] as const;
 
+/** Fast intro typing + throttled typewriter SFX (see `INTRO_CHAR_DELAY_MS`). */
+const INTRO_CHAR_DELAY_MS = 12;
+const INTRO_JITTER_MS = 5;
+const TYPEWRITER_SOUND_MIN_MS = 85;
+
 export interface IntroSequenceProps {
-  onComplete: (difficulty: number, playerName: string, avatarIndex: number) => void;
+  onComplete: (
+    difficulty: number,
+    playerName: string,
+    avatarIndex: number,
+  ) => void;
 }
 
 function readIntroSeen(): boolean {
@@ -76,9 +177,14 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   const [difficulty, setDifficulty] = useState(1);
 
   const [screen0Para, setScreen0Para] = useState(0);
-  const [screen0ShowContinue, setScreen0ShowContinue] = useState(false);
+  const [screen1SkipDialogue, setScreen1SkipDialogue] = useState(false);
+  const [screen1PaperworkUnlocked, setScreen1PaperworkUnlocked] =
+    useState(false);
+  const [screen1CardExiting, setScreen1CardExiting] = useState(false);
+  const introScreenRef = useRef(screen);
   const audioStartedRef = useRef(false);
   const soundsRef = useRef<IntroSounds | null>(null);
+  const typewriterSoundLastRef = useRef(0);
 
   const [showSkip] = useState(readIntroSeen);
 
@@ -99,48 +205,114 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   }, []);
 
   const playTypeChar = useCallback(() => {
-    soundsRef.current?.typewriterClick.play();
+    const now = performance.now();
+    if (now - typewriterSoundLastRef.current < TYPEWRITER_SOUND_MIN_MS) {
+      return;
+    }
+    typewriterSoundLastRef.current = now;
+    const s = soundsRef.current;
+    if (!s) return;
+    s.typewriterClick.stop();
+    s.typewriterClick.play();
   }, []);
 
   const screen0Text = t(SCREEN0_KEYS[screen0Para]);
-  const { displayed: screen0Displayed, done: screen0LineDone } = useTypewriter(
+  const {
+    displayed: screen0Displayed,
+    done: screen0LineDone,
+    skipToEnd: skipScreen0Line,
+  } = useTypewriter(
     screen0Text,
-    40,
+    INTRO_CHAR_DELAY_MS,
     playTypeChar,
+    INTRO_JITTER_MS,
   );
 
+  const screen1LineText =
+    screen === 1 && !screen1SkipDialogue ? t("screen1.monsieurV") : "";
+  const {
+    displayed: screen1MvDisplayed,
+    done: screen1MvDone,
+    skipToEnd: skipScreen1Mv,
+  } = useTypewriter(
+    screen1LineText,
+    INTRO_CHAR_DELAY_MS,
+    playTypeChar,
+    INTRO_JITTER_MS,
+  );
+
+  const screen1ShowPaperwork =
+    screen === 1 && (screen1SkipDialogue || screen1PaperworkUnlocked);
+
   useEffect(() => {
-    if (screen !== 0 || !screen0LineDone) return;
-    if (screen0Para < SCREEN0_KEYS.length - 1) {
-      setScreen0Para((p) => p + 1);
-    } else {
-      setScreen0ShowContinue(true);
+    if (screen === 1 && introScreenRef.current !== 1 && !screen1SkipDialogue) {
+      setScreen1PaperworkUnlocked(false);
     }
-  }, [screen, screen0LineDone, screen0Para]);
+    introScreenRef.current = screen;
+  }, [screen, screen1SkipDialogue]);
 
   const startAmbience = useCallback(() => {
     if (audioStartedRef.current) return;
     const s = ensureSounds();
     audioStartedRef.current = true;
+    void Howler.ctx?.resume?.();
     s.rainLoop.play();
     s.jazzLoop.volume(0);
     s.jazzLoop.play();
     s.jazzLoop.fade(0, 0.2, 2000);
   }, [ensureSounds]);
 
-  const handleScreen0PointerDown = useCallback(() => {
-    startAmbience();
-    if (screen0ShowContinue) {
-      setScreen(1);
-    }
-  }, [screen0ShowContinue, startAmbience]);
+  useEffect(() => {
+    if (screen !== 0) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      startAmbience();
+      if (!screen0LineDone) {
+        skipScreen0Line();
+        return;
+      }
+      if (screen0Para < SCREEN0_KEYS.length - 1) {
+        setScreen0Para((p) => p + 1);
+      } else {
+        setScreen(1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [screen, screen0LineDone, screen0Para, skipScreen0Line, startAmbience]);
 
-  const resolvedName =
-    playerNameInput.trim() || t("screen1.namePlaceholder");
+  useEffect(() => {
+    if (screen !== 1) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      if (screen1ShowPaperwork) return;
+      e.preventDefault();
+      startAmbience();
+      if (!screen1MvDone) {
+        skipScreen1Mv();
+        return;
+      }
+      setScreen1PaperworkUnlocked(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [
+    screen,
+    screen1ShowPaperwork,
+    screen1MvDone,
+    skipScreen1Mv,
+    startAmbience,
+  ]);
 
-  const skip = useCallback(() => {
-    onComplete(difficulty, resolvedName, avatarIndex);
-  }, [avatarIndex, difficulty, onComplete, resolvedName]);
+  const resolvedName = playerNameInput.trim() || t("screen1.namePlaceholder");
+
+  /** Returning players only on screen 0: jump to paperwork (skip M. V. line). No skip on screen 1+ (must sign, then no skip after). */
+  const skipToSignContract = useCallback(() => {
+    setScreen1SkipDialogue(true);
+    setScreen1CardExiting(false);
+    setScreen(1);
+  }, []);
 
   const finishIntro = useCallback(() => {
     try {
@@ -150,6 +322,7 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
     }
     const s = soundsRef.current;
     if (s) {
+      void Howler.ctx?.resume?.();
       s.doorOpen.play();
       s.rainLoop.fade(0.4, 0, 1500);
       s.jazzLoop.fade(0.2, 0, 1500);
@@ -166,11 +339,11 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
       <div className="pointer-events-auto absolute left-4 top-4 z-50">
         <LanguageToggle />
       </div>
-      {showSkip && (
+      {showSkip && screen === 0 && (
         <div className="pointer-events-auto absolute right-4 top-4 z-50">
           <button
             type="button"
-            onClick={skip}
+            onClick={skipToSignContract}
             className="rounded-lg border border-white/20 bg-black/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[#e8e4dc]/80 backdrop-blur-sm hover:bg-black/70"
           >
             {t("skip")}
@@ -183,8 +356,12 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   if (screen === 0) {
     return (
       <div
-        className="fixed inset-0 z-[100] cursor-pointer bg-black select-none"
-        onPointerDown={handleScreen0PointerDown}
+        className="fixed inset-0 z-[100] bg-black select-none outline-none"
+        tabIndex={-1}
+        onPointerDown={() => {
+          /* Click/touch unlocks audio in Chrome/Safari; Enter alone often does not. */
+          startAmbience();
+        }}
         role="presentation"
       >
         {chrome}
@@ -195,9 +372,14 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
               <span className="ml-0.5 inline-block w-2 animate-pulse">▍</span>
             )}
           </p>
-          {screen0ShowContinue && (
-            <p className="mt-10 font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/50 motion-safe:animate-pulse">
-              {t("screen0.clickToContinue")}
+          {!screen0LineDone && (
+            <p className="mt-10 font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/50">
+              {t("pressEnterToFinishLine")}
+            </p>
+          )}
+          {screen0LineDone && (
+            <p className="mt-10 font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/60">
+              {t("pressEnterToContinue")}
             </p>
           )}
         </div>
@@ -216,125 +398,169 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
             55% { opacity: 0.45; }
             70% { opacity: 0.75; }
           }
+          @keyframes intro-paperwork-reveal {
+            from { opacity: 0; transform: translateY(0.5rem); }
+            to { opacity: 1; transform: translateY(0); }
+          }
         `}</style>
         <div className="relative min-h-[45vh] flex-1 overflow-hidden">
           <div
             className="pointer-events-none absolute left-1/2 top-0 z-20 h-24 w-40 -translate-x-1/2 rounded-b-[40%] bg-amber-400/25 blur-xl"
-            style={{ animation: "intro-lamp-flicker 2.8s ease-in-out infinite" }}
+            style={{
+              animation: "intro-lamp-flicker 2.8s ease-in-out infinite",
+            }}
           />
           <div className="absolute inset-0 z-0 bg-black/65" />
           <div className="relative z-10 h-full min-h-[280px]">
             <StreetSceneBackground>
-              <div className="flex h-full flex-col items-center justify-start gap-4 overflow-y-auto px-4 py-8 pb-12">
-                <div className="max-w-lg text-center">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#e8e4dc]/50">
-                    Monsieur V.
-                  </p>
-                  <p className="mt-1 text-sm italic leading-relaxed text-[#e8e4dc]/90">
-                    {t("screen1.monsieurV")}
-                  </p>
-                </div>
-                <div
-                  className="w-full max-w-xl rounded-lg border-2 p-4 shadow-lg md:p-6"
-                  style={{
-                    backgroundColor: "#f5f0e4",
-                    borderColor: "#c8a84b",
-                  }}
-                >
-                  <p className="border-b border-[#c8a84b]/40 pb-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#3d3428]">
-                    {t("screen1.cardHeader")}
-                  </p>
-                  <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-stretch">
-                    <div className="flex flex-col items-center gap-2 md:w-[140px]">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          aria-label="Previous avatar"
-                          className="rounded border border-[#3d3428]/30 p-1 text-[#3d3428] hover:bg-black/5"
-                          onClick={() =>
-                            setAvatarIndex((i) => (i + 4) % 5)
-                          }
-                        >
-                          <ChevronLeft size={18} />
-                        </button>
-                        <div className="h-[72px] w-[72px] overflow-hidden rounded border border-[#3d3428]/20 bg-[#ebe6dc]">
-                          <PixelAvatar
-                            traits={INTRO_AVATARS[avatarIndex]}
-                            scale={3}
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          aria-label="Next avatar"
-                          className="rounded border border-[#3d3428]/30 p-1 text-[#3d3428] hover:bg-black/5"
-                          onClick={() =>
-                            setAvatarIndex((i) => (i + 1) % 5)
-                          }
-                        >
-                          <ChevronRight size={18} />
-                        </button>
-                      </div>
-                      <span className="font-mono text-[10px] text-[#3d3428]/70">
-                        {avatarIndex + 1} / 5
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-3 font-mono text-xs text-[#3d3428]">
-                      <label className="block">
-                        <span className="text-[10px] font-bold uppercase tracking-wider">
-                          {t("screen1.nameLabel")}
-                        </span>
-                        <input
-                          type="text"
-                          maxLength={24}
-                          value={playerNameInput}
-                          onChange={(e) => setPlayerNameInput(e.target.value)}
-                          placeholder={t("screen1.namePlaceholder")}
-                          className="mt-1 w-full border-b border-[#3d3428]/25 bg-transparent py-1 text-sm outline-none placeholder:text-[#3d3428]/35"
-                        />
-                      </label>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">
-                          {t("screen1.difficultyLabel")}
-                        </span>
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {DIFFICULTY_VALUES.map((value) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => setDifficulty(value)}
-                              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
-                                difficulty === value
-                                  ? "bg-[#3d3428] text-[#f5f0e4]"
-                                  : "bg-black/5 hover:bg-black/10"
-                              }`}
-                            >
-                              {tCommon(`difficulty.${value}`)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">
-                          {t("screen1.positionLabel")}
-                        </span>
-                        <p className="mt-1 text-sm">{t("screen1.position")}</p>
-                      </div>
-                    </div>
+              <div className="flex h-full min-h-[320px] flex-col items-center overflow-y-auto px-4 py-8 pb-12">
+                {!screen1ShowPaperwork && (
+                  <div className="flex min-h-[min(70vh,520px)] w-full max-w-md flex-col items-center justify-center gap-8">
+                    <MonsieurVDialogueBlock>
+                      <MonsieurVSpeech
+                        variant="dark"
+                        speakerName={t("monsieurVUi.name")}
+                        speakerRole={t("monsieurVUi.role")}
+                      >
+                        {screen1MvDisplayed}
+                        {!screen1MvDone && screen1LineText && (
+                          <span className="animate-pulse">▍</span>
+                        )}
+                      </MonsieurVSpeech>
+                    </MonsieurVDialogueBlock>
+                    {!screen1MvDone && screen1LineText && (
+                      <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/50">
+                        {t("pressEnterToFinishLine")}
+                      </p>
+                    )}
+                    {screen1MvDone &&
+                      !screen1SkipDialogue &&
+                      !screen1PaperworkUnlocked && (
+                        <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/60">
+                          {t("pressEnterToContinue")}
+                        </p>
+                      )}
                   </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setScreen(2)}
-                  className="group mt-2 w-full max-w-xl py-3 font-mono text-sm font-bold uppercase tracking-[0.25em] text-[#f5f0e4] transition-transform active:translate-y-0.5"
-                  style={{
-                    backgroundColor: "#7b1c2e",
-                    boxShadow: "0 4px 0 0 #3d0f18",
-                  }}
-                >
-                  <span className="transition-transform group-active:scale-y-95 inline-block">
-                    {t("screen1.signContract")}
-                  </span>
-                </button>
+                )}
+                {screen1ShowPaperwork && (
+                  <div
+                    className="mt-4 flex w-full max-w-xl flex-col items-center gap-4"
+                    style={{
+                      animation:
+                        "intro-paperwork-reveal 0.5s ease-out forwards",
+                    }}
+                  >
+                    <div
+                      className={`w-full rounded-lg border-2 p-4 shadow-lg transition-all duration-300 ease-in md:p-6 ${
+                        screen1CardExiting
+                          ? "pointer-events-none scale-95 opacity-0"
+                          : "opacity-100"
+                      }`}
+                      style={{
+                        backgroundColor: "#f5f0e4",
+                        borderColor: "#c8a84b",
+                      }}
+                    >
+                      <p className="border-b border-[#c8a84b]/40 pb-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#3d3428]">
+                        {t("screen1.cardHeader")}
+                      </p>
+                      <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-stretch">
+                        <div className="flex flex-col items-center gap-2 md:w-[140px]">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              aria-label="Previous avatar"
+                              className="rounded border border-[#3d3428]/30 p-1 text-[#3d3428] hover:bg-black/5"
+                              onClick={() => setAvatarIndex((i) => (i + 4) % 5)}
+                            >
+                              <ChevronLeft size={18} />
+                            </button>
+                            <div className="h-[72px] w-[72px] overflow-hidden rounded border border-[#3d3428]/20 bg-[#ebe6dc]">
+                              <PixelAvatar
+                                traits={INTRO_AVATARS[avatarIndex]}
+                                scale={3}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              aria-label="Next avatar"
+                              className="rounded border border-[#3d3428]/30 p-1 text-[#3d3428] hover:bg-black/5"
+                              onClick={() => setAvatarIndex((i) => (i + 1) % 5)}
+                            >
+                              <ChevronRight size={18} />
+                            </button>
+                          </div>
+                          <span className="font-mono text-[10px] text-[#3d3428]/70">
+                            {avatarIndex + 1} / 5
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-3 font-mono text-xs text-[#3d3428]">
+                          <label className="block">
+                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                              {t("screen1.nameLabel")}
+                            </span>
+                            <input
+                              type="text"
+                              maxLength={24}
+                              value={playerNameInput}
+                              onChange={(e) => setPlayerNameInput(e.target.value)}
+                              placeholder={t("screen1.namePlaceholder")}
+                              className="mt-1 w-full border-b border-[#3d3428]/25 bg-transparent py-1 text-sm outline-none placeholder:text-[#3d3428]/35"
+                            />
+                          </label>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                              {t("screen1.difficultyLabel")}
+                            </span>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {DIFFICULTY_VALUES.map((value) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  onClick={() => setDifficulty(value)}
+                                  className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                                    difficulty === value
+                                      ? "bg-[#3d3428] text-[#f5f0e4]"
+                                      : "bg-black/5 hover:bg-black/10"
+                                  }`}
+                                >
+                                  {tCommon(`difficulty.${value}`)}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                              {t("screen1.positionLabel")}
+                            </span>
+                            <p className="mt-1 text-sm">{t("screen1.position")}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={screen1CardExiting}
+                      onClick={() => {
+                        setScreen1CardExiting(true);
+                        window.setTimeout(() => setScreen(2), 320);
+                      }}
+                      className={`group w-full py-3 font-mono text-sm font-bold uppercase tracking-[0.25em] text-[#f5f0e4] transition-all duration-300 active:translate-y-0.5 ${
+                        screen1CardExiting
+                          ? "pointer-events-none opacity-0"
+                          : "opacity-100"
+                      }`}
+                      style={{
+                        backgroundColor: "#7b1c2e",
+                        boxShadow: "0 4px 0 0 #3d0f18",
+                      }}
+                    >
+                      <span className="transition-transform group-active:scale-y-95 inline-block">
+                        {t("screen1.signContract")}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
             </StreetSceneBackground>
           </div>
@@ -353,6 +579,8 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
       startAmbience={startAmbience}
       finishIntro={finishIntro}
       playTypeChar={playTypeChar}
+      introCharDelayMs={INTRO_CHAR_DELAY_MS}
+      introJitterMs={INTRO_JITTER_MS}
     />
   );
 };
@@ -366,6 +594,8 @@ interface IntroScreens23Props {
   startAmbience: () => void;
   finishIntro: () => void;
   playTypeChar: () => void;
+  introCharDelayMs: number;
+  introJitterMs: number;
 }
 
 const IntroScreens23: React.FC<IntroScreens23Props> = ({
@@ -377,32 +607,32 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
   startAmbience,
   finishIntro,
   playTypeChar,
+  introCharDelayMs,
+  introJitterMs,
 }) => {
   const { t } = useTranslation("intro");
 
-  const [s2CardOut, setS2CardOut] = useState(false);
   const [s2ClipboardIn, setS2ClipboardIn] = useState(false);
   const [s2Dialogue, setS2Dialogue] = useState(false);
   const [s2Block, setS2Block] = useState(0);
-  const [s2ShowContinue, setS2ShowContinue] = useState(false);
 
   const [s3Panned, setS3Panned] = useState(false);
   const [s3BootStep, setS3BootStep] = useState(0);
-  const [s3LineDone, setS3LineDone] = useState(false);
+  const s3ClockInConsumedRef = useRef(false);
 
   useEffect(() => {
     if (screen !== 2) return;
     startAmbience();
-    const t0 = window.setTimeout(() => setS2CardOut(true), 80);
-    const t1 = window.setTimeout(() => setS2ClipboardIn(true), 380);
-    const t2 = window.setTimeout(() => {
+    setS2ClipboardIn(false);
+    setS2Dialogue(false);
+    const t0 = window.setTimeout(() => setS2ClipboardIn(true), 60);
+    const t1 = window.setTimeout(() => {
       ensureSounds().clipboardThud.play();
       setS2Dialogue(true);
-    }, 820);
+    }, 60 + 400);
     return () => {
       window.clearTimeout(t0);
       window.clearTimeout(t1);
-      window.clearTimeout(t2);
     };
   }, [screen, ensureSounds, startAmbience]);
 
@@ -412,27 +642,43 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
     t("screen2.p3"),
   ];
   const s2Current = s2Dialogue ? s2Texts[s2Block] : "";
-  const { displayed: s2Displayed, done: s2LineDone } = useTypewriter(
+  const {
+    displayed: s2Displayed,
+    done: s2LineDone,
+    skipToEnd: skipS2Line,
+  } = useTypewriter(
     s2Current,
-    40,
+    introCharDelayMs,
     playTypeChar,
+    introJitterMs,
   );
 
   useEffect(() => {
-    if (!s2Dialogue || !s2LineDone) return;
-    if (s2Block < 2) {
-      const id = window.setTimeout(() => setS2Block((b) => b + 1), 600);
-      return () => window.clearTimeout(id);
-    }
-    setS2ShowContinue(true);
-  }, [s2Dialogue, s2LineDone, s2Block]);
+    if (screen !== 2) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      if (!s2Dialogue) return;
+      e.preventDefault();
+      if (!s2LineDone) {
+        skipS2Line();
+        return;
+      }
+      if (s2Block < 2) {
+        setS2Block((b) => b + 1);
+      } else {
+        setScreen(3);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [screen, s2Dialogue, s2LineDone, s2Block, skipS2Line, setScreen]);
 
   useEffect(() => {
     if (screen !== 3) return;
     startAmbience();
+    s3ClockInConsumedRef.current = false;
     setS3Panned(false);
     setS3BootStep(0);
-    setS3LineDone(false);
     const rafId = window.requestAnimationFrame(() => {
       setS3Panned(true);
     });
@@ -450,31 +696,42 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
   }, [screen, startAmbience]);
 
   const screen3LineText = s3BootStep >= 4 ? t("screen3.monsieurV") : "";
-  const { displayed: s3Displayed, done: s3TypeDone } = useTypewriter(
+  const {
+    displayed: s3Displayed,
+    done: s3TypeDone,
+    skipToEnd: skipS3Line,
+  } = useTypewriter(
     screen3LineText,
-    40,
+    introCharDelayMs,
     playTypeChar,
+    introJitterMs,
   );
 
+  const triggerClockIn = useCallback(() => {
+    if (s3ClockInConsumedRef.current) return;
+    s3ClockInConsumedRef.current = true;
+    finishIntro();
+  }, [finishIntro]);
+
   useEffect(() => {
-    if (
-      s3BootStep >= 4 &&
-      screen3LineText.length > 0 &&
-      s3TypeDone
-    ) {
-      setS3LineDone(true);
-    }
-  }, [s3BootStep, s3TypeDone, screen3LineText.length]);
+    if (screen !== 3) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      if (s3BootStep < 4) return;
+      e.preventDefault();
+      if (!s3TypeDone) {
+        skipS3Line();
+        return;
+      }
+      triggerClockIn();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [screen, s3BootStep, s3TypeDone, skipS3Line, triggerClockIn]);
 
   if (screen === 2) {
     return (
-      <div
-        className="fixed inset-0 z-[100] flex flex-col bg-[#0a0806]"
-        onPointerDown={() => {
-          if (s2ShowContinue) setScreen(3);
-        }}
-        role="presentation"
-      >
+      <div className="fixed inset-0 z-[100] flex flex-col bg-[#0a0806]">
         {chrome}
         <div className="relative flex-1 overflow-hidden">
           <div className="absolute inset-0 z-0 bg-black/65" />
@@ -482,27 +739,8 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
             <StreetSceneBackground>
               <div className="relative flex h-full min-h-[400px] flex-col items-center justify-center px-4 py-10">
                 <div
-                  className={`absolute left-1/2 top-1/2 z-10 w-full max-w-md -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 ease-in ${
-                    s2CardOut ? "-translate-x-[110%]" : "translate-x-0"
-                  }`}
-                >
-                  <div
-                    className="rounded-lg border-2 p-6 shadow-xl"
-                    style={{
-                      backgroundColor: "#f5f0e4",
-                      borderColor: "#c8a84b",
-                    }}
-                  >
-                    <p className="text-center font-mono text-[10px] text-[#3d3428]/60">
-                      …
-                    </p>
-                  </div>
-                </div>
-                <div
                   className={`absolute left-1/2 top-1/2 z-20 w-full max-w-lg -translate-x-1/2 transition-transform duration-[400ms] ease-out ${
-                    s2ClipboardIn
-                      ? "translate-y-[-50%]"
-                      : "translate-y-[-170%]"
+                    s2ClipboardIn ? "translate-y-[-50%]" : "translate-y-[-170%]"
                   }`}
                   style={{
                     transitionTimingFunction: s2ClipboardIn
@@ -511,22 +749,33 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
                   }}
                 >
                   <div
-                    className="mx-auto rounded border-4 border-[#5c4a32] bg-[#d4c4a8] p-6 shadow-xl"
+                    className="mx-auto w-full max-w-lg overflow-hidden rounded-lg border-4 border-[#5c4a32] bg-transparent shadow-xl"
                     style={{ boxShadow: "inset 0 0 0 2px #a89878" }}
                   >
                     {s2Dialogue && (
-                      <p className="min-h-[4rem] whitespace-pre-wrap font-mono text-sm leading-relaxed text-[#2a241c]">
-                        {s2Displayed}
-                        {!s2LineDone && s2Current && (
-                          <span className="animate-pulse">▍</span>
-                        )}
-                      </p>
+                      <MonsieurVDialogueBlock className="min-h-[5rem] rounded-none border-0 shadow-none">
+                        <MonsieurVSpeech
+                          variant="dark"
+                          speakerName={t("monsieurVUi.name")}
+                          speakerRole={t("monsieurVUi.role")}
+                        >
+                          {s2Displayed}
+                          {!s2LineDone && s2Current && (
+                            <span className="animate-pulse">▍</span>
+                          )}
+                        </MonsieurVSpeech>
+                      </MonsieurVDialogueBlock>
                     )}
                   </div>
                 </div>
-                {s2ShowContinue && (
+                {s2Dialogue && !s2LineDone && (
                   <p className="absolute bottom-16 font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/50">
-                    {t("screen0.clickToContinue")}
+                    {t("pressEnterToFinishLine")}
+                  </p>
+                )}
+                {s2Dialogue && s2LineDone && (
+                  <p className="absolute bottom-16 font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/60">
+                    {t("pressEnterToContinue")}
                   </p>
                 )}
               </div>
@@ -591,21 +840,32 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
               )}
             </div>
             {s3BootStep >= 4 && (
-              <p className="max-w-md text-center font-mono text-sm text-[#e8e4dc]/90">
-                {s3Displayed}
+              <div className="flex w-full max-w-md flex-col items-stretch gap-4">
+                <MonsieurVDialogueBlock>
+                  <MonsieurVSpeech
+                    variant="dark"
+                    speakerName={t("monsieurVUi.name")}
+                    speakerRole={t("monsieurVUi.role")}
+                  >
+                    {s3Displayed}
+                    {!s3TypeDone && <span className="animate-pulse">▍</span>}
+                  </MonsieurVSpeech>
+                </MonsieurVDialogueBlock>
                 {!s3TypeDone && (
-                  <span className="animate-pulse">▍</span>
+                  <p className="text-center font-mono text-xs uppercase tracking-[0.2em] text-[#e8e4dc]/50">
+                    {t("pressEnterToFinishLine")}
+                  </p>
                 )}
-              </p>
-            )}
-            {s3LineDone && (
-              <button
-                type="button"
-                onClick={finishIntro}
-                className="w-full max-w-md border-2 border-[#c8a84b] bg-black/60 py-4 font-mono text-sm font-bold uppercase tracking-[0.3em] text-[#f5e6bc] shadow-[0_0_24px_rgba(200,168,75,0.35)] animate-pulse"
-              >
-                {t("screen3.clockIn")}
-              </button>
+                {s3TypeDone && (
+                  <button
+                    type="button"
+                    onClick={triggerClockIn}
+                    className="w-full border-2 border-[#c8a84b] bg-black/60 py-4 font-mono text-sm font-bold uppercase tracking-[0.3em] text-[#f5e6bc] shadow-[0_0_24px_rgba(200,168,75,0.35)] animate-pulse"
+                  >
+                    {t("screen3.clockIn")}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
