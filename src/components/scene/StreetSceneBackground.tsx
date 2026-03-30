@@ -5,7 +5,7 @@ interface StreetSceneBackgroundProps {
   children: React.ReactNode;
 }
 
-// Neon glow overlays tuned to sign positions in public/street-background.png.
+// Neon glow overlays tuned to sign positions in public/img/street-background.png.
 // Each sign has a primary glow and a pavement reflection below it.
 // Positions are % of the container — adjust if the image crops differently.
 const NEONS = [
@@ -28,7 +28,7 @@ export const StreetSceneBackground: React.FC<StreetSceneBackgroundProps> = ({ ch
       <div
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: "url('/street-background.png')",
+          backgroundImage: "url('/img/street-background.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'bottom center',
           imageRendering: 'pixelated',

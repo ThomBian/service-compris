@@ -12,7 +12,7 @@ export const FloorplanBackground: React.FC<FloorplanBackgroundProps> = ({ childr
       <div
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: "url('/restaurant-inside.png')",
+          backgroundImage: "url('/img/restaurant-inside.png')",
           backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
