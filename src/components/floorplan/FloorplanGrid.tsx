@@ -4,10 +4,42 @@ import { useGame } from "../../context/GameContext";
 import { useToast } from "../../context/ToastContext";
 import { CellState, PhysicalState } from "../../types";
 import { canSelectCell } from "../../logic/gameLogic";
-import { Check, X, Users } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { getRule } from "../../logic/nightRules";
+import { FloorplanBackground } from './FloorplanBackground';
+
+interface CandleGlowProps {
+  mealDuration: number;
+  isCritical: boolean;
+}
+
+const CandleGlow: React.FC<CandleGlowProps> = ({ mealDuration, isCritical }) => (
+  <motion.div
+    className="flex flex-col items-center gap-0.5"
+    animate={{ opacity: [0.75, 1, 0.8, 0.95, 0.75], scale: [1, 1.06, 0.97, 1.03, 1] }}
+    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+  >
+    <div
+      className="w-1 h-2.5 rounded-full"
+      style={{
+        background: isCritical
+          ? 'linear-gradient(to top, #c41e1e, #ffaa44)'
+          : 'linear-gradient(to top, #e8a020, #fff8e0)',
+        boxShadow: isCritical
+          ? '0 0 8px #ff5533, 0 0 16px rgba(255,60,30,0.3)'
+          : '0 0 8px #ffcc44, 0 0 16px rgba(255,180,0,0.3)',
+      }}
+    />
+    <span
+      className="text-[7px] font-mono leading-none tabular-nums"
+      style={{ color: isCritical ? '#c41e1e' : '#c9a227' }}
+    >
+      {mealDuration}m
+    </span>
+  </motion.div>
+);
 
 interface FloorplanGridProps {
   isOvertime?: boolean;
@@ -92,35 +124,80 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   }, [selectedCells.length, partySize, isSeating, confirmSeating]);
 
   return (
-    <div className="flex flex-col bg-[#E4E3E0] h-full overflow-hidden" data-tour="floorplan">
+    <FloorplanBackground>
+    <div className="flex flex-col h-full" data-tour="floorplan">
 
-      {/* 1. Title header — always present, no subtitle */}
-      <div className="flex items-center px-6 py-3 border-b border-[#141414]/20 shrink-0">
-        <h2 className="text-xl font-bold text-[#141414] flex items-center gap-2">
-          <Users className="w-5 h-5" />
+      {/* 1. Title header — Art Deco style */}
+      <div
+        style={{
+          background: 'linear-gradient(to bottom, rgba(26,8,8,0.95), rgba(18,8,4,0.92))',
+          borderBottom: '2px solid #c9a227',
+          position: 'relative',
+        }}
+        className="flex items-center px-5 py-3 shrink-0"
+      >
+        {/* Burgundy-gold accent stripe */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+          background: 'linear-gradient(to right, #8b1a1a, #c9a227, #8b1a1a)',
+        }} />
+        {/* Floorplan icon */}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mr-2.5 mt-px shrink-0">
+          <rect x=".75" y=".75" width="12.5" height="12.5" rx="1" stroke="#c9a227" strokeWidth="1.2"/>
+          <rect x="3" y="3" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="8" y="3" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="3" y="8" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="8" y="8" width="3" height="3" fill="#c9a227" opacity="0.3"/>
+        </svg>
+        <h2 style={{
+          color: '#c9a227',
+          fontFamily: 'Georgia, serif',
+          fontSize: '13px',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          fontWeight: 'normal',
+          margin: 0,
+        }}>
           Floorplan
         </h2>
       </div>
 
       {/* 2. Party strip — seating mode only */}
       {isSeating && (
-        <div className="flex items-center gap-3 px-6 py-3 bg-[#D6D5D2] border-b border-[#141414]/15 shrink-0">
+        <div
+          className="flex items-center gap-3 px-5 py-3 shrink-0"
+          style={{ background: 'rgba(12,6,2,0.88)', borderBottom: '1px solid #4a2e14' }}
+        >
           {/* Maitre D' silhouette */}
-          <div className="w-8 h-11 bg-[#141414] rounded-t-full flex items-end justify-center text-white text-[8px] pb-1 shrink-0">
-            MD
+          <div
+            className="flex items-end justify-center pb-1 shrink-0"
+            style={{
+              width: 26, height: 36,
+              background: 'rgba(20,8,4,0.9)',
+              border: '1px solid #c9a227',
+              borderRadius: '13px 13px 2px 2px',
+            }}
+          >
+            <span style={{ color: '#c9a227', fontSize: 7 }}>◆</span>
           </div>
           {/* Party member icons */}
           <div className="flex flex-col gap-1">
             <div className="flex gap-1">
               {Array.from({ length: partySize }).map((_, i) => (
-                <Users
+                <div
                   key={i}
-                  size={16}
-                  className={i < selectedCells.length ? 'text-emerald-600' : 'text-[#141414] opacity-30'}
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{
+                    background: i < selectedCells.length ? '#c9a227' : '#4a2e14',
+                    opacity: i < selectedCells.length ? 0.9 : 0.5,
+                  }}
                 />
               ))}
             </div>
-            <span className="text-[9px] font-bold uppercase tracking-widest">
+            <span
+              className="text-[8px] uppercase tracking-widest font-mono"
+              style={{ color: '#8b6914' }}
+            >
               {currentClient?.trueFirstName} ({selectedCells.length}/{partySize})
             </span>
           </div>
@@ -155,8 +232,14 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
 
       {/* 3. Rush row — overtime + not seating only */}
       {isOvertime && !isSeating && occupiedPartyIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center shrink-0 px-6 py-2 border-b border-amber-400/40 bg-amber-50/30">
-          <span className="text-xs font-bold uppercase tracking-wide text-amber-700">
+        <div
+          className="flex flex-wrap gap-2 items-center shrink-0 px-5 py-2"
+          style={{ background: 'rgba(12,6,2,0.88)', borderBottom: '1px solid #4a2e14' }}
+        >
+          <span
+            className="text-xs font-bold uppercase tracking-wide"
+            style={{ color: '#8b6914', letterSpacing: '0.1em', fontFamily: 'Georgia, serif' }}
+          >
             Last Call —
           </span>
           {occupiedPartyIds.map((partyId, index) => (
@@ -178,23 +261,42 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
         ref={wrapperRef}
         className="flex-1 min-h-0 flex items-center justify-center p-6"
       >
+        {/* Art Deco frame */}
         <div
-          className={`
-            grid gap-1 bg-[#141414]/10 p-1 rounded-xl border-2 border-[#141414]/20
-            ${!isSeating && !hoveredPartyId ? "opacity-80 grayscale-[0.2]" : ""}
-            ${!isSeating && hoveredPartyId ? "opacity-100" : ""}
-            ${isSeating ? "ring-4 ring-emerald-500/20" : ""}
-          `}
           style={{
-            width: gridSize || "100%",
-            gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
-            touchAction: 'none',
+            padding: '9px',
+            background: 'rgba(8,4,2,0.58)',
+            border: '2px solid #c9a227',
+            boxShadow: `
+              0 0 0 1px #6b4e10,
+              0 0 0 4px rgba(8,4,2,0.5),
+              0 0 0 5px #3a2208,
+              0 0 28px rgba(201,162,39,0.18),
+              0 8px 32px rgba(0,0,0,0.5),
+              inset 0 0 20px rgba(0,0,0,0.3)
+            `,
+            position: 'relative',
           }}
-          onPointerUp={handleGridPointerUp}
-          onPointerLeave={handleGridPointerUp}
-          onPointerCancel={handleGridPointerUp}
-          id="floorplan-grid"
         >
+          {/* Corner ornaments */}
+          <div style={{ position:'absolute', top:4, left:4,   width:9, height:9, borderTop:'2px solid #c9a227', borderLeft:'2px solid #c9a227' }} />
+          <div style={{ position:'absolute', top:4, right:4,  width:9, height:9, borderTop:'2px solid #c9a227', borderRight:'2px solid #c9a227' }} />
+          <div style={{ position:'absolute', bottom:4, left:4,  width:9, height:9, borderBottom:'2px solid #c9a227', borderLeft:'2px solid #c9a227' }} />
+          <div style={{ position:'absolute', bottom:4, right:4, width:9, height:9, borderBottom:'2px solid #c9a227', borderRight:'2px solid #c9a227' }} />
+
+          {/* Grid */}
+          <div
+            className="grid gap-1"
+            style={{
+              width: gridSize ? Math.max(gridSize - 22, 0) : '100%',
+              gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
+              touchAction: 'none',
+            }}
+            onPointerUp={handleGridPointerUp}
+            onPointerLeave={handleGridPointerUp}
+            onPointerCancel={handleGridPointerUp}
+            id="floorplan-grid"
+          >
           {grid.map((row, y) =>
             row.map((cell, x) => {
               const isAboutToFree =
@@ -206,22 +308,50 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                 <button
                   key={cell.id}
                   onPointerDown={(e) => {
-                    e.preventDefault(); // prevent focus ring flicker on drag
+                    e.preventDefault();
                     !isBlocked && handleCellPointerDown(x, y);
                   }}
                   onPointerEnter={() => !isBlocked && handleCellPointerEnter(x, y)}
                   disabled={!isSeating || isBlocked}
-                  className={`
-                    aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5
-                    ${isBlocked ? "bg-[#141414]/70 cursor-not-allowed opacity-60" : ""}
-                    ${!isBlocked && cell.state === CellState.EMPTY ? "bg-white" : ""}
-                    ${!isBlocked && cell.state === CellState.EMPTY && isSeating ? "hover:bg-emerald-100 cursor-pointer" : ""}
-                    ${!isBlocked && cell.state === CellState.SELECTED ? "bg-emerald-500 shadow-inner scale-95" : ""}
-                    ${!isBlocked && cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-[#141414] cursor-not-allowed" : ""}
-                    ${!isBlocked && isAboutToFree ? "bg-amber-400 cursor-not-allowed" : ""}
-                    ${!isSeating ? "cursor-default" : ""}
-                    ${hoveredPartyId && cell.partyId === hoveredPartyId ? "ring-2 ring-amber-400 ring-inset brightness-125 scale-105" : ""}
-                  `}
+                  className={`aspect-square rounded-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5${
+                    !isBlocked && cell.state === CellState.EMPTY && isSeating ? ' hover:brightness-150' : ''
+                  }`}
+                  style={(() => {
+                    if (isBlocked) return {
+                      background: 'rgba(8,8,8,0.75)',
+                      border: '1px solid #1a1208',
+                      opacity: 0.45,
+                      cursor: 'not-allowed',
+                    };
+                    if (cell.state === CellState.SELECTED) return {
+                      background: 'rgba(38,28,0,0.92)',
+                      border: '2px solid #c9a227',
+                      boxShadow: '0 0 14px rgba(201,162,39,0.65), inset 0 0 8px rgba(201,162,39,0.12)',
+                      transform: 'scale(0.93)',
+                      cursor: 'pointer',
+                    };
+                    if (isAboutToFree) return {
+                      background: 'rgba(38,8,0,0.88)',
+                      border: '1px solid #8b1a1a',
+                      boxShadow: '0 0 10px rgba(139,26,26,0.55)',
+                      cursor: 'not-allowed',
+                    };
+                    if (cell.state === CellState.OCCUPIED) return {
+                      background: 'rgba(18,10,4,0.82)',
+                      border: '1px solid #c9a227',
+                      boxShadow: hoveredPartyId && cell.partyId === hoveredPartyId
+                        ? '0 0 16px rgba(201,162,39,0.8)'
+                        : '0 0 10px rgba(201,162,39,0.45), inset 0 0 6px rgba(201,162,39,0.06)',
+                      transform: hoveredPartyId && cell.partyId === hoveredPartyId ? 'scale(1.05)' : undefined,
+                      cursor: 'not-allowed',
+                    };
+                    // EMPTY
+                    return {
+                      background: 'rgba(18,10,4,0.82)',
+                      border: '1px solid #4a2e14',
+                      cursor: isSeating ? 'pointer' : 'default',
+                    };
+                  })()}
                   id={`cell-${x}-${y}`}
                 >
                   {cell.state === CellState.SELECTED && (
@@ -229,27 +359,17 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                       <Check className="w-3 h-3 text-white" />
                     </motion.div>
                   )}
-                  {cell.state === CellState.OCCUPIED && (
-                    <>
-                      <Users
-                        className={`w-3 h-3 shrink-0 ${isAboutToFree ? "text-amber-900" : "text-[#E4E3E0]/50"}`}
-                      />
-                      {cell.mealDuration !== undefined && (
-                        <span
-                          className={`text-[9px] font-mono font-bold leading-none tabular-nums ${isAboutToFree ? "text-stone-900" : "text-amber-400/90"}`}
-                          title={`${cell.mealDuration} in-game minutes remaining`}
-                        >
-                          {cell.mealDuration}m
-                        </span>
-                      )}
-                    </>
+                  {cell.state === CellState.OCCUPIED && cell.mealDuration !== undefined && (
+                    <CandleGlow mealDuration={cell.mealDuration} isCritical={isAboutToFree} />
                   )}
                 </button>
               );
             }),
           )}
+          </div>
         </div>
       </div>
     </div>
+    </FloorplanBackground>
   );
 };
