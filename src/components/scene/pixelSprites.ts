@@ -136,9 +136,9 @@ export function hatLayer(style: number): PixelLayer {
   switch (style) {
     case 0: { // top hat — sits at the top of the sprite canvas; head is offset down 6px when wearing
       return [
-        r(4, 1, 16, 1, '#0a0a0a'),   // brim
         r(7, 0, 10, 7, '#111111'),   // cylinder
         r(7, 5, 10, 2, '#d4af37'),   // gold band
+        r(3, 7, 18, 2, '#0a0a0a'),   // wide brim (sits on head)
       ]
     }
     case 1: { // beret
@@ -188,7 +188,7 @@ export function neckwearLayer(style: number): PixelLayer {
     case 0: { // red tie (short)
       return [
         r(10, 22, 4, 3, '#e74c3c'),  // knot
-        r(11, 25, 2, 10, '#c0392b'), // blade
+        r(11, 25, 2, 9, '#c0392b'), // blade
         r(10, 34, 4, 3, '#c0392b'),  // tip
       ]
     }

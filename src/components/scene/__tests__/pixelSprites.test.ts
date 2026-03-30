@@ -101,4 +101,10 @@ describe('pixelSprites base layers', () => {
       eyebrowsLayer(s, '#000').forEach(r => expect(inBounds(r)).toBe(true))
     }
   })
+
+  it('facialHairLayer styles 0–1 return in-bounds rects', () => {
+    for (let s = 0; s < 2; s++) {
+      facialHairLayer(s, '#000').forEach(r => expect(inBounds(r)).toBe(true))
+    }
+  })
 })
