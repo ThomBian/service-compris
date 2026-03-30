@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useGame } from "../../context/GameContext";
 import { useToast } from "../../context/ToastContext";
@@ -27,6 +27,8 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   const isCropping = isSeating && selectedCells.length > 0 && selectedCells.length < partySize;
   const canConfirm = isSeating && selectedCells.length > 0;
 
+  const [hoveredPartyId, setHoveredPartyId] = useState<string | null>(null);
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { width, height } = useContainerSize(wrapperRef);
   const gridSize = Math.min(width, height);
@@ -51,10 +53,11 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
       showToast('Must be adjacent', 'Select a cell next to an existing selection', 'info', 1500);
       return;
     }
+    if (cell.state === CellState.EMPTY && selectedCells.length >= partySize) return;
     dragDirection.current = cell.state === CellState.SELECTED ? 'deselect' : 'select';
     isDragging.current = true;
     toggleCellSelection(x, y);
-  }, [isSeating, grid, selectedCells, toggleCellSelection, showToast]);
+  }, [isSeating, grid, selectedCells, partySize, toggleCellSelection, showToast]);
 
   // Called on pointerenter on a cell during drag — continues selection silently
   const handleCellPointerEnter = useCallback((x: number, y: number) => {
@@ -64,7 +67,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
     const isBlocked = blockedCells.some(([r, c]) => r === y && c === x);
     if (isBlocked) return;
     if (dragDirection.current === 'select' && cell.state !== CellState.SELECTED) {
-      if (canSelectCell(cell, selectedCells)) {
+      if (selectedCells.length < partySize && canSelectCell(cell, selectedCells)) {
         toggleCellSelection(x, y);
       }
     } else if (dragDirection.current === 'deselect' && cell.state === CellState.SELECTED) {
@@ -160,6 +163,8 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
             <button
               key={partyId}
               onClick={() => lastCallTable(partyId)}
+              onMouseEnter={() => setHoveredPartyId(partyId)}
+              onMouseLeave={() => setHoveredPartyId(null)}
               className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-400 transition-colors"
             >
               {occupiedPartyIds.length === 1 ? 'Rush table' : `Rush table ${index + 1}`}
@@ -176,7 +181,9 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
         <div
           className={`
             grid gap-1 bg-[#141414]/10 p-1 rounded-xl border-2 border-[#141414]/20
-            ${!isSeating ? "opacity-80 grayscale-[0.2]" : "ring-4 ring-emerald-500/20"}
+            ${!isSeating && !hoveredPartyId ? "opacity-80 grayscale-[0.2]" : ""}
+            ${!isSeating && hoveredPartyId ? "opacity-100" : ""}
+            ${isSeating ? "ring-4 ring-emerald-500/20" : ""}
           `}
           style={{
             width: gridSize || "100%",
@@ -213,6 +220,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
                     ${!isBlocked && cell.state === CellState.OCCUPIED && !isAboutToFree ? "bg-[#141414] cursor-not-allowed" : ""}
                     ${!isBlocked && isAboutToFree ? "bg-amber-400 cursor-not-allowed" : ""}
                     ${!isSeating ? "cursor-default" : ""}
+                    ${hoveredPartyId && cell.partyId === hoveredPartyId ? "ring-2 ring-amber-400 ring-inset brightness-125 scale-105" : ""}
                   `}
                   id={`cell-${x}-${y}`}
                 >
