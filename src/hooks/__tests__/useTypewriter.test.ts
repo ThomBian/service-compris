@@ -58,4 +58,21 @@ describe('useTypewriter', () => {
     expect(result.current.displayed).toBe('xy');
     expect(result.current.done).toBe(true);
   });
+
+  it('invokes onChar once per revealed character', () => {
+    const onChar = vi.fn();
+    const { result } = renderHook(() => useTypewriter('ab', 10, onChar));
+
+    act(() => {
+      vi.advanceTimersByTime(10);
+    });
+    expect(onChar).toHaveBeenCalledTimes(1);
+    expect(result.current.displayed).toBe('a');
+
+    act(() => {
+      vi.advanceTimersByTime(10);
+    });
+    expect(onChar).toHaveBeenCalledTimes(2);
+    expect(result.current.done).toBe(true);
+  });
 });

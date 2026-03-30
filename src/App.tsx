@@ -9,7 +9,7 @@ import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
 import { ToastContainer } from './components/ToastContainer';
-import { LandingPage } from './components/LandingPage';
+import { IntroSequence } from './components/intro/IntroSequence';
 import { CorkboardScreen } from './components/CorkboardScreen';
 import { TourOverlay } from './components/TourOverlay';
 import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
@@ -17,7 +17,7 @@ import { TOUR_STEPS, TOUR_STEP_INDEX_SEAT_PARTY } from './tour/tourSteps';
 import { useCampaign } from './hooks/useCampaign';
 import type { LedgerData } from './types/campaign';
 
-type GamePhase = 'LANDING' | 'CORKBOARD' | 'PLAYING';
+type GamePhase = 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
 interface GameContentProps {
   initialDifficulty: number;
@@ -202,8 +202,10 @@ function GameContent({
 export default function App() {
   const { t } = useTranslation('common');
   React.useEffect(() => { document.title = t('appTitle'); }, [t]);
-  const [phase, setPhase] = React.useState<GamePhase>('LANDING');
+  const [phase, setPhase] = React.useState<GamePhase>('INTRO');
   const [difficulty, setDifficulty] = React.useState(1);
+  const [_playerName, setPlayerName] = React.useState('');
+  const [_avatarIndex, setAvatarIndex] = React.useState(0);
   const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
   const campaign = useCampaign();
   const tour = useTour(TOUR_STEPS.length);
@@ -231,8 +233,20 @@ export default function App() {
   const handleLeave = React.useCallback(() => {
     campaign.resetCampaign();
     setPersist(undefined);
-    setPhase('LANDING');
+    setPhase('INTRO');
   }, [campaign]);
+
+  const handleIntroComplete = React.useCallback(
+    (d: number, name: string, avatar: number) => {
+      campaign.resetCampaign();
+      setPersist(undefined);
+      setDifficulty(d);
+      setPlayerName(name);
+      setAvatarIndex(avatar);
+      setPhase('PLAYING');
+    },
+    [campaign],
+  );
 
   // DEV ONLY — Shift+C jumps to corkboard with mock data; Shift+F jumps to fired screen
   React.useEffect(() => {
@@ -269,16 +283,8 @@ export default function App() {
 
   return (
     <>
-      {phase === 'LANDING' && (
-        <LandingPage
-          difficulty={difficulty}
-          onDifficultyChange={setDifficulty}
-          onStartGame={() => {
-            campaign.resetCampaign();
-            setPersist(undefined);
-            setPhase('PLAYING');
-          }}
-        />
+      {phase === 'INTRO' && (
+        <IntroSequence onComplete={handleIntroComplete} />
       )}
       {phase === 'CORKBOARD' && campaign.campaignState.lastNightLedger && (
         <CorkboardScreen
