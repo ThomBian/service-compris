@@ -131,3 +131,146 @@ export function hairLayer(style: number, color: string): PixelLayer {
       return []
   }
 }
+
+export function hatLayer(style: number): PixelLayer {
+  switch (style) {
+    case 0: { // top hat — sits at the top of the sprite canvas; head is offset down 6px when wearing
+      return [
+        r(4, 1, 16, 1, '#0a0a0a'),   // brim
+        r(7, 0, 10, 7, '#111111'),   // cylinder
+        r(7, 5, 10, 2, '#d4af37'),   // gold band
+      ]
+    }
+    case 1: { // beret
+      return [
+        r(5, 2, 14, 5, '#8B0000'),
+        r(4, 4, 16, 3, '#8B0000'),
+        r(16, 3, 3, 2, '#6b0000'),   // slouch detail
+      ]
+    }
+    case 2: { // chef's toque
+      return [
+        r(7, 0, 10, 9, 'white'),     // puff
+        r(6, 7, 12, 3, '#dddddd'),   // band
+        r(5, 9, 14, 2, '#cccccc'),   // brim
+      ]
+    }
+    default:
+      return []
+  }
+}
+
+export function facialHairLayer(style: number, color: string): PixelLayer {
+  switch (style) {
+    case 0: { // curled moustache
+      return [
+        r(8, 17, 8, 2, color),
+        r(8, 16, 2, 2, color),
+        r(14, 16, 2, 2, color),
+        r(7, 18, 2, 1, color),   // left curl
+        r(15, 18, 2, 1, color),  // right curl
+      ]
+    }
+    case 1: { // full beard
+      return [
+        r(7, 17, 10, 6, color),
+        r(8, 22, 8, 4, color),
+        r(9, 25, 6, 2, color),
+      ]
+    }
+    default:
+      return []
+  }
+}
+
+export function neckwearLayer(style: number): PixelLayer {
+  switch (style) {
+    case 0: { // red tie (short)
+      return [
+        r(10, 22, 4, 3, '#e74c3c'),  // knot
+        r(11, 25, 2, 10, '#c0392b'), // blade
+        r(10, 34, 4, 3, '#c0392b'),  // tip
+      ]
+    }
+    case 1: { // gold cravat
+      return [
+        r(9, 22, 6, 5, '#d4af37'),
+        r(10, 26, 4, 2, '#b8960c'),
+        r(11, 22, 2, 6, '#b8960c'),
+      ]
+    }
+    case 2: { // red scarf
+      return [
+        r(8, 22, 8, 4, '#c0392b'),
+        r(7, 25, 3, 10, '#c0392b'),   // left tail
+        r(14, 25, 3, 8, '#c0392b'),   // right tail
+      ]
+    }
+    case 3: { // long red tie (extends to knees)
+      return [
+        r(10, 22, 4, 3, '#e74c3c'),  // knot
+        r(11, 25, 2, 16, '#c0392b'), // very long blade
+        r(10, 40, 4, 3, '#c0392b'),  // tip
+      ]
+    }
+    default:
+      return []
+  }
+}
+
+export function glassesLayer(style: number): PixelLayer {
+  switch (style) {
+    case 0: { // wire-frame round
+      return [
+        // left lens outline
+        r(7, 12, 5, 1, '#2a2a2a'), r(7, 16, 5, 1, '#2a2a2a'),
+        r(7, 13, 1, 3, '#2a2a2a'), r(11, 13, 1, 3, '#2a2a2a'),
+        // bridge
+        r(12, 14, 2, 1, '#2a2a2a'),
+        // right lens outline
+        r(14, 12, 5, 1, '#2a2a2a'), r(14, 16, 5, 1, '#2a2a2a'),
+        r(14, 13, 1, 3, '#2a2a2a'), r(18, 13, 1, 3, '#2a2a2a'),
+        // arms
+        r(6, 13, 1, 2, '#2a2a2a'),
+        r(19, 13, 1, 2, '#2a2a2a'),
+      ]
+    }
+    case 1: { // oversized sunglasses
+      return [
+        r(5, 12, 14, 6, 'rgba(0,180,200,0.35)'),  // tinted lens fill
+        r(5, 12, 14, 1, '#444'),   // top rim
+        r(5, 17, 14, 1, '#444'),   // bottom rim
+        r(5, 12, 1, 6, '#444'),    // left outer
+        r(18, 12, 1, 6, '#444'),   // right outer
+        r(11, 14, 2, 2, '#444'),   // bridge
+        r(4, 13, 1, 2, '#333'),    // left arm
+        r(19, 13, 1, 2, '#333'),   // right arm
+      ]
+    }
+    default:
+      return []
+  }
+}
+
+export function eyebrowsLayer(style: number, skinColor: string): PixelLayer {
+  switch (style) {
+    case 0: { // heavy furrowed
+      return [
+        r(7, 11, 5, 2, '#1a0f0a'),   // left brow
+        r(12, 11, 5, 2, '#1a0f0a'),  // right brow
+        r(10, 10, 2, 1, '#1a0f0a'),  // inner furrowed peak left
+        r(12, 10, 2, 1, '#1a0f0a'),  // inner furrowed peak right
+      ]
+    }
+    case 1: { // droopy half-closed (drunk)
+      return [
+        r(9, 13, 2, 2, skinColor),   // left lid drooping
+        r(13, 13, 2, 2, skinColor),  // right lid drooping
+        r(8, 12, 4, 1, '#4a2c17'),   // left brow sagging
+        r(12, 12, 4, 1, '#4a2c17'),  // right brow sagging
+      ]
+    }
+    default:
+      return []
+  }
+}

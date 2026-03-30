@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest'
 import {
   shadowLayer, shoesLayer, legsLayer, neckLayer,
   headLayer, hairLayer, clothingLayer,
+  hatLayer, facialHairLayer, neckwearLayer, glassesLayer, eyebrowsLayer,
   SKIN_TONES, HAIR_COLORS, CLOTHING_COLORS,
 } from '../pixelSprites'
-import type { PixelRect } from '../pixelSprites'
+import type { PixelRect, PixelLayer } from '../pixelSprites'
 import { inBounds } from './testHelpers'
 
 describe('pixelSprites base layers', () => {
@@ -76,5 +77,28 @@ describe('pixelSprites base layers', () => {
 
   it('clothingLayer style 2 (dress) produces more rects than style 1 (shirt)', () => {
     expect(clothingLayer(2, '#c0392b').length).toBeGreaterThan(clothingLayer(1, '#c0392b').length)
+  })
+
+  it('hatLayer styles 0–2 return in-bounds rects', () => {
+    for (let s = 0; s < 3; s++) {
+      hatLayer(s).forEach(r => expect(inBounds(r)).toBe(true))
+    }
+  })
+
+  it('neckwearLayer style 3 (long red tie) extends lower than style 0 (short tie)', () => {
+    const bottomY = (layer: PixelLayer) => Math.max(...layer.map(r => r.y + r.h))
+    expect(bottomY(neckwearLayer(3))).toBeGreaterThan(bottomY(neckwearLayer(0)))
+  })
+
+  it('glassesLayer styles 0–1 return in-bounds rects', () => {
+    for (let s = 0; s < 2; s++) {
+      glassesLayer(s).forEach(r => expect(inBounds(r)).toBe(true))
+    }
+  })
+
+  it('eyebrowsLayer returns in-bounds rects for both styles', () => {
+    for (let s = 0; s < 2; s++) {
+      eyebrowsLayer(s, '#000').forEach(r => expect(inBounds(r)).toBe(true))
+    }
   })
 })
