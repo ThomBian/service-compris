@@ -1,7 +1,8 @@
-import React from "react";
-import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "motion/react";
-import { useToast, type Toast } from "../context/ToastContext";
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'motion/react';
+import { useToast, type Toast } from '../context/ToastContext';
+import { Z_INDEX } from '@/src/zIndex';
 
 const VARIANT_CLASSES: Record<Toast["variant"], string> = {
   success:
@@ -16,7 +17,10 @@ const VARIANT_CLASSES: Record<Toast["variant"], string> = {
 export const ToastContainer: React.FC = () => {
   const { toasts } = useToast();
   return createPortal(
-    <div className="fixed top-16 left-4 z-9999 flex flex-col items-start gap-2 pointer-events-none">
+    <div
+      className="fixed top-16 left-4 flex flex-col items-start gap-2 pointer-events-none"
+      style={{ zIndex: Z_INDEX.toast }}
+    >
       {/* Top-left under the header, aligned with TopBar padding — same band as clock / rating / cash. */}
       <AnimatePresence>
         {toasts.map((toast) => (

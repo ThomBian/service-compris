@@ -16,7 +16,9 @@ import frTour from './locales/fr/tour.json';
 import frCampaign from './locales/fr/campaign.json';
 import frIntro from './locales/fr/intro.json';
 
-export const I18N_STORAGE_KEY = 'service-compris-lang';
+import { STORAGE_KEYS } from '@/src/storageKeys';
+
+export const I18N_STORAGE_KEY = STORAGE_KEYS.i18nLang;
 
 void i18n
   .use(LanguageDetector)

@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 
-export const TOUR_SEEN_KEY = 'service-compris-tour-seen';
+import { STORAGE_KEYS } from '@/src/storageKeys';
+
+export const TOUR_SEEN_KEY = STORAGE_KEYS.tourSeen;
 
 export interface TourControls {
   isTourActive: boolean;
@@ -21,7 +23,7 @@ export function useTour(totalSteps: number): TourControls {
 
   const skipTour = useCallback(() => {
     try {
-      localStorage.setItem(TOUR_SEEN_KEY, 'true');
+      localStorage.setItem(STORAGE_KEYS.tourSeen, 'true');
     } catch {
       /* ignore */
     }
@@ -32,7 +34,7 @@ export function useTour(totalSteps: number): TourControls {
     setCurrentStep((s) => {
       if (s >= totalSteps - 1) {
         try {
-          localStorage.setItem(TOUR_SEEN_KEY, 'true');
+          localStorage.setItem(STORAGE_KEYS.tourSeen, 'true');
         } catch {
           /* ignore */
         }

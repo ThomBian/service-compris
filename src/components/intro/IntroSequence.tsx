@@ -1,122 +1,41 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft,
   ChevronRight,
   Clock,
   DollarSign,
   Star,
-} from "lucide-react";
-import { Howler } from "howler";
-import { createIntroSounds, type IntroSounds } from "@/src/audio/introAudio";
-import { useTypewriter } from "@/src/hooks/useTypewriter";
-import { INTRO_AVATARS } from "@/src/components/intro/introAvatars";
-import { PixelAvatar } from "@/src/components/scene/PixelAvatar";
-import { StreetSceneBackground } from "@/src/components/scene/StreetSceneBackground";
-import { START_TIME } from "@/src/constants";
-import { formatTime } from "@/src/utils";
+} from 'lucide-react';
+import { Howler } from 'howler';
+import {
+  INTRO_EXIT_AMBIENCE_MS,
+  blockShiftAmbienceUntil,
+} from '@/src/audio/ambienceShiftGate';
+import { createIntroSounds, type IntroSounds } from '@/src/audio/introAudio';
+import { useTypewriter } from '@/src/hooks/useTypewriter';
+import { useIntroScreen0Enter, useIntroScreen1Enter } from '@/src/hooks/useIntroEnterKeys';
+import { INTRO_AVATARS } from '@/src/components/intro/introAvatars';
+import {
+  DIFFICULTY_VALUES,
+  INTRO_CHAR_DELAY_MS,
+  INTRO_JITTER_MS,
+  INTRO_SEEN_KEY,
+  readIntroSeen,
+  SCREEN0_KEYS,
+  TYPEWRITER_SOUND_MIN_MS,
+} from '@/src/components/intro/introConstants';
+import {
+  MonsieurVDialogueBlock,
+  MonsieurVSpeech,
+} from '@/src/components/intro/MonsieurVDialogue';
+import { PixelAvatar } from '@/src/components/scene/PixelAvatar';
+import { StreetSceneBackground } from '@/src/components/scene/StreetSceneBackground';
+import { START_TIME } from '@/src/constants';
+import { Z_INDEX } from '@/src/zIndex';
+import { formatTime } from '@/src/utils';
 
-export const INTRO_SEEN_KEY = "service-compris-intro-seen";
-
-const SERIF = "Georgia, 'Times New Roman', serif";
-
-/** Shared “he’s talking to you” layout: face chip + name + dialogue column. */
-function MonsieurVSpeech({
-  variant,
-  speakerName,
-  speakerRole,
-  children,
-}: {
-  variant: "parchment" | "dark";
-  speakerName: string;
-  speakerRole: string;
-  children: React.ReactNode;
-}) {
-  const parchment = variant === "parchment";
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 text-lg font-semibold ${
-            parchment
-              ? "border-[#3d3428]/35 bg-[#3d3428] text-[#e8dcc8]"
-              : "border-[#c8a84b]/45 bg-transparent text-[#f5e6bc]"
-          }`}
-          style={{ fontFamily: SERIF }}
-          aria-hidden
-        >
-          V
-        </div>
-        <div className="min-w-0 pt-0.5">
-          <p
-            className={`text-base font-semibold leading-tight ${
-              parchment ? "text-[#2a241c]" : "text-[#f5e6bc]"
-            }`}
-            style={{ fontFamily: SERIF }}
-          >
-            {speakerName}
-          </p>
-          <p
-            className={`mt-1 text-xs italic leading-snug ${
-              parchment ? "text-[#3d3428]/72" : "text-[#e8e4dc]/55"
-            }`}
-            style={{ fontFamily: SERIF }}
-          >
-            {speakerRole}
-          </p>
-        </div>
-      </div>
-      <div
-        className={`relative rounded-r-lg rounded-bl-lg border-l-[3px] py-1 pl-4 ${
-          parchment
-            ? "border-[#7b1c2e]/60 bg-[#c9b896]/40"
-            : "border-[#c8a84b]/50"
-        }`}
-      >
-        <div
-          className={`whitespace-pre-wrap text-[0.9375rem] leading-[1.65] ${
-            parchment ? "text-[#2a241c]" : "text-[#e8e4dc]/93"
-          }`}
-          style={{ fontFamily: SERIF }}
-        >
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Full-width of parent + dark scrim so serif copy stays legible on bright scene art. */
-function MonsieurVDialogueBlock({
-  className = "",
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`w-full rounded-xl border border-black/25 bg-black/50 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-sm ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-const SCREEN0_KEYS = [
-  "screen0.p1",
-  "screen0.p2",
-  "screen0.p3",
-  "screen0.p4",
-  "screen0.p5",
-] as const;
-
-const DIFFICULTY_VALUES = [0, 1, 2, 3] as const;
-
-/** Fast intro typing + throttled typewriter SFX (see `INTRO_CHAR_DELAY_MS`). */
-const INTRO_CHAR_DELAY_MS = 12;
-const INTRO_JITTER_MS = 5;
-const TYPEWRITER_SOUND_MIN_MS = 85;
+export { INTRO_SEEN_KEY };
 
 export interface IntroSequenceProps {
   onComplete: (
@@ -124,14 +43,6 @@ export interface IntroSequenceProps {
     playerName: string,
     avatarIndex: number,
   ) => void;
-}
-
-function readIntroSeen(): boolean {
-  try {
-    return !!localStorage.getItem(INTRO_SEEN_KEY);
-  } catch {
-    return false;
-  }
 }
 
 function LanguageToggle() {
@@ -199,8 +110,9 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
     return () => {
       const s = soundsRef.current;
       if (!s) return;
-      s.rainLoop.stop();
-      s.jazzLoop.stop();
+      s.typewriterClick.stop();
+      s.clipboardThud.stop();
+      s.doorOpen.stop();
     };
   }, []);
 
@@ -262,48 +174,25 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
     s.jazzLoop.fade(0, 0.2, 2000);
   }, [ensureSounds]);
 
-  useEffect(() => {
-    if (screen !== 0) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      startAmbience();
-      if (!screen0LineDone) {
-        skipScreen0Line();
-        return;
-      }
-      if (screen0Para < SCREEN0_KEYS.length - 1) {
-        setScreen0Para((p) => p + 1);
-      } else {
-        setScreen(1);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [screen, screen0LineDone, screen0Para, skipScreen0Line, startAmbience]);
+  useIntroScreen0Enter({
+    active: screen === 0,
+    screen0LineDone,
+    screen0Para,
+    setScreen0Para,
+    setScreen,
+    skipScreen0Line,
+    startAmbience,
+    lastParaIndex: SCREEN0_KEYS.length - 1,
+  });
 
-  useEffect(() => {
-    if (screen !== 1) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Enter") return;
-      if (screen1ShowPaperwork) return;
-      e.preventDefault();
-      startAmbience();
-      if (!screen1MvDone) {
-        skipScreen1Mv();
-        return;
-      }
-      setScreen1PaperworkUnlocked(true);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [
-    screen,
+  useIntroScreen1Enter({
+    active: screen === 1,
     screen1ShowPaperwork,
     screen1MvDone,
     skipScreen1Mv,
+    setScreen1PaperworkUnlocked,
     startAmbience,
-  ]);
+  });
 
   const resolvedName = playerNameInput.trim() || t("screen1.namePlaceholder");
 
@@ -316,31 +205,38 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
 
   const finishIntro = useCallback(() => {
     try {
-      localStorage.setItem(INTRO_SEEN_KEY, "true");
+      localStorage.setItem(INTRO_SEEN_KEY, 'true');
     } catch {
       /* ignore */
     }
     const s = soundsRef.current;
     if (s) {
       void Howler.ctx?.resume?.();
+      blockShiftAmbienceUntil(Date.now() + INTRO_EXIT_AMBIENCE_MS);
       s.doorOpen.play();
       s.rainLoop.fade(0.4, 0, 1500);
       s.jazzLoop.fade(0.2, 0, 1500);
       window.setTimeout(() => {
         s.rainLoop.stop();
         s.jazzLoop.stop();
-      }, 1600);
+      }, INTRO_EXIT_AMBIENCE_MS);
     }
     onComplete(difficulty, resolvedName, avatarIndex);
   }, [avatarIndex, difficulty, onComplete, resolvedName]);
 
   const chrome = (
     <>
-      <div className="pointer-events-auto absolute left-4 top-4 z-50">
+      <div
+        className="pointer-events-auto absolute left-4 top-4"
+        style={{ zIndex: Z_INDEX.introChrome }}
+      >
         <LanguageToggle />
       </div>
       {showSkip && screen === 0 && (
-        <div className="pointer-events-auto absolute right-4 top-4 z-50">
+        <div
+          className="pointer-events-auto absolute right-4 top-4"
+          style={{ zIndex: Z_INDEX.introChrome }}
+        >
           <button
             type="button"
             onClick={skipToSignContract}
@@ -356,7 +252,8 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   if (screen === 0) {
     return (
       <div
-        className="fixed inset-0 z-[100] bg-black select-none outline-none"
+        className="fixed inset-0 bg-black select-none outline-none"
+        style={{ zIndex: Z_INDEX.introBackdrop }}
         tabIndex={-1}
         onPointerDown={() => {
           /* Click/touch unlocks audio in Chrome/Safari; Enter alone often does not. */
@@ -389,7 +286,10 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
 
   if (screen === 1) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col bg-[#0a0806]">
+      <div
+        className="fixed inset-0 flex flex-col bg-[#0a0806]"
+        style={{ zIndex: Z_INDEX.introBackdrop }}
+      >
         {chrome}
         <style>{`
           @keyframes intro-lamp-flicker {
@@ -731,7 +631,10 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
 
   if (screen === 2) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col bg-[#0a0806]">
+      <div
+        className="fixed inset-0 flex flex-col bg-[#0a0806]"
+        style={{ zIndex: Z_INDEX.introBackdrop }}
+      >
         {chrome}
         <div className="relative flex-1 overflow-hidden">
           <div className="absolute inset-0 z-0 bg-black/65" />
@@ -788,7 +691,10 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
 
   if (screen === 3) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col bg-black">
+      <div
+        className="fixed inset-0 flex flex-col bg-black"
+        style={{ zIndex: Z_INDEX.introBackdrop }}
+      >
         {chrome}
         <style>{`
           @keyframes intro-flicker {

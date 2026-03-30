@@ -3,6 +3,7 @@ import React, { useEffect, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { TOUR_STEPS } from '@/src/tour/tourSteps';
+import { Z_INDEX } from '@/src/zIndex';
 
 interface TargetRect {
   x: number;
@@ -104,7 +105,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ step, onNext, onSkip }
   );
 
   return createPortal(
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0" style={{ zIndex: Z_INDEX.tour }}>
       <svg
         className="absolute inset-0 w-full h-full"
         style={{ pointerEvents: 'none' }}
