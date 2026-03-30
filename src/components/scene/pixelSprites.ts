@@ -13,16 +13,16 @@ export function shadowLayer(): PixelLayer {
   return [r(4, 46, 16, 2, 'rgba(0,0,0,0.25)')]
 }
 
-export function shoesLayer(): PixelLayer {
+export function shoesLayer(color = '#0a0a0a'): PixelLayer {
   return [
-    r(4, 43, 6, 3, '#0a0a0a'),
-    r(14, 43, 6, 3, '#0a0a0a'),
+    r(4, 43, 6, 3, color),
+    r(14, 43, 6, 3, color),
   ]
 }
 
-export function legsLayer(height: number, color: string): PixelLayer {
+export function legsLayer(height: 0 | 1 | 2, color: string): PixelLayer {
   const legHeights = [6, 8, 10]
-  const h = legHeights[height] ?? 8
+  const h = legHeights[height]
   const y = 43 - h
   return [
     r(6, y, 4, h, color),

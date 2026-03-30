@@ -4,13 +4,7 @@ import {
   SKIN_TONES, HAIR_COLORS, CLOTHING_COLORS,
 } from '../pixelSprites'
 import type { PixelRect } from '../pixelSprites'
-
-const SPRITE_W = 24
-const SPRITE_H = 48
-
-function inBounds(r: PixelRect) {
-  return r.x >= 0 && r.y >= 0 && r.x + r.w <= SPRITE_W && r.y + r.h <= SPRITE_H
-}
+import { inBounds } from './testHelpers'
 
 describe('pixelSprites base layers', () => {
   it('shadowLayer rects are in bounds', () => {
