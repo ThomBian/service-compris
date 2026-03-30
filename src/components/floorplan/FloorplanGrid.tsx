@@ -8,6 +8,7 @@ import { Check, X, Users } from "lucide-react";
 import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { getRule } from "../../logic/nightRules";
+import { FloorplanBackground } from './FloorplanBackground';
 
 interface CandleGlowProps {
   mealDuration: number;
@@ -123,7 +124,8 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   }, [selectedCells.length, partySize, isSeating, confirmSeating]);
 
   return (
-    <div className="flex flex-col bg-[#E4E3E0] h-full overflow-hidden" data-tour="floorplan">
+    <FloorplanBackground>
+    <div className="flex flex-col h-full" data-tour="floorplan">
 
       {/* 1. Title header — Art Deco style */}
       <div
@@ -162,23 +164,40 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
 
       {/* 2. Party strip — seating mode only */}
       {isSeating && (
-        <div className="flex items-center gap-3 px-6 py-3 bg-[#D6D5D2] border-b border-[#141414]/15 shrink-0">
+        <div
+          className="flex items-center gap-3 px-5 py-3 shrink-0"
+          style={{ background: 'rgba(12,6,2,0.88)', borderBottom: '1px solid #4a2e14' }}
+        >
           {/* Maitre D' silhouette */}
-          <div className="w-8 h-11 bg-[#141414] rounded-t-full flex items-end justify-center text-white text-[8px] pb-1 shrink-0">
-            MD
+          <div
+            className="flex items-end justify-center pb-1 shrink-0"
+            style={{
+              width: 26, height: 36,
+              background: 'rgba(20,8,4,0.9)',
+              border: '1px solid #c9a227',
+              borderRadius: '13px 13px 2px 2px',
+            }}
+          >
+            <span style={{ color: '#c9a227', fontSize: 7 }}>◆</span>
           </div>
           {/* Party member icons */}
           <div className="flex flex-col gap-1">
             <div className="flex gap-1">
               {Array.from({ length: partySize }).map((_, i) => (
-                <Users
+                <div
                   key={i}
-                  size={16}
-                  className={i < selectedCells.length ? 'text-emerald-600' : 'text-[#141414] opacity-30'}
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{
+                    background: i < selectedCells.length ? '#c9a227' : '#4a2e14',
+                    opacity: i < selectedCells.length ? 0.9 : 0.5,
+                  }}
                 />
               ))}
             </div>
-            <span className="text-[9px] font-bold uppercase tracking-widest">
+            <span
+              className="text-[8px] uppercase tracking-widest font-mono"
+              style={{ color: '#8b6914' }}
+            >
               {currentClient?.trueFirstName} ({selectedCells.length}/{partySize})
             </span>
           </div>
@@ -213,8 +232,14 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
 
       {/* 3. Rush row — overtime + not seating only */}
       {isOvertime && !isSeating && occupiedPartyIds.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center shrink-0 px-6 py-2 border-b border-amber-400/40 bg-amber-50/30">
-          <span className="text-xs font-bold uppercase tracking-wide text-amber-700">
+        <div
+          className="flex flex-wrap gap-2 items-center shrink-0 px-5 py-2"
+          style={{ background: 'rgba(12,6,2,0.88)', borderBottom: '1px solid #4a2e14' }}
+        >
+          <span
+            className="text-xs font-bold uppercase tracking-wide"
+            style={{ color: '#8b6914', letterSpacing: '0.1em', fontFamily: 'Georgia, serif' }}
+          >
             Last Call —
           </span>
           {occupiedPartyIds.map((partyId, index) => (
@@ -309,5 +334,6 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
         </div>
       </div>
     </div>
+    </FloorplanBackground>
   );
 };
