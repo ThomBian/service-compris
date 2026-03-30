@@ -288,7 +288,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
           <div
             className="grid gap-1"
             style={{
-              width: gridSize ? gridSize - 22 : '100%',
+              width: gridSize ? Math.max(gridSize - 22, 0) : '100%',
               gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))`,
               touchAction: 'none',
             }}
