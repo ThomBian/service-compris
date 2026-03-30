@@ -9,6 +9,37 @@ import { GRID_SIZE, TABLE_TURNING_SOON_THRESHOLD } from "../../constants";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { getRule } from "../../logic/nightRules";
 
+interface CandleGlowProps {
+  mealDuration: number;
+  isCritical: boolean;
+}
+
+const CandleGlow: React.FC<CandleGlowProps> = ({ mealDuration, isCritical }) => (
+  <motion.div
+    className="flex flex-col items-center gap-0.5"
+    animate={{ opacity: [0.75, 1, 0.8, 0.95, 0.75], scale: [1, 1.06, 0.97, 1.03, 1] }}
+    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+  >
+    <div
+      className="w-1 h-2.5 rounded-full"
+      style={{
+        background: isCritical
+          ? 'linear-gradient(to top, #c41e1e, #ffaa44)'
+          : 'linear-gradient(to top, #e8a020, #fff8e0)',
+        boxShadow: isCritical
+          ? '0 0 8px #ff5533, 0 0 16px rgba(255,60,30,0.3)'
+          : '0 0 8px #ffcc44, 0 0 16px rgba(255,180,0,0.3)',
+      }}
+    />
+    <span
+      className="text-[7px] font-mono leading-none tabular-nums"
+      style={{ color: isCritical ? '#c41e1e' : '#c9a227' }}
+    >
+      {mealDuration}m
+    </span>
+  </motion.div>
+);
+
 interface FloorplanGridProps {
   isOvertime?: boolean;
 }
@@ -94,10 +125,37 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({ isOvertime = false
   return (
     <div className="flex flex-col bg-[#E4E3E0] h-full overflow-hidden" data-tour="floorplan">
 
-      {/* 1. Title header — always present, no subtitle */}
-      <div className="flex items-center px-6 py-3 border-b border-[#141414]/20 shrink-0">
-        <h2 className="text-xl font-bold text-[#141414] flex items-center gap-2">
-          <Users className="w-5 h-5" />
+      {/* 1. Title header — Art Deco style */}
+      <div
+        style={{
+          background: 'linear-gradient(to bottom, rgba(26,8,8,0.95), rgba(18,8,4,0.92))',
+          borderBottom: '2px solid #c9a227',
+          position: 'relative',
+        }}
+        className="flex items-center px-5 py-3 shrink-0"
+      >
+        {/* Burgundy-gold accent stripe */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+          background: 'linear-gradient(to right, #8b1a1a, #c9a227, #8b1a1a)',
+        }} />
+        {/* Floorplan icon */}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mr-2.5 mt-px shrink-0">
+          <rect x=".75" y=".75" width="12.5" height="12.5" rx="1" stroke="#c9a227" strokeWidth="1.2"/>
+          <rect x="3" y="3" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="8" y="3" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="3" y="8" width="3" height="3" fill="#c9a227" opacity="0.7"/>
+          <rect x="8" y="8" width="3" height="3" fill="#c9a227" opacity="0.3"/>
+        </svg>
+        <h2 style={{
+          color: '#c9a227',
+          fontFamily: 'Georgia, serif',
+          fontSize: '13px',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          fontWeight: 'normal',
+          margin: 0,
+        }}>
           Floorplan
         </h2>
       </div>
