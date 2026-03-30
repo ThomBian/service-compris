@@ -55,7 +55,7 @@ export function headLayer(skin: string): PixelLayer {
 
 export function clothingLayer(style: number, color: string): PixelLayer {
   switch (style) {
-    case 0: { // formal jacket (black, white shirt front, gold buttons)
+    case 0: { // formal jacket — always black; `color` param is intentionally unused
       return [
         r(4, 22, 16, 14, '#141414'),    // jacket body
         r(10, 22, 4, 14, '#f0f0f0'),    // shirt front
