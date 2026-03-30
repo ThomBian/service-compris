@@ -653,7 +653,7 @@ describe('handleSeatingRefusal', () => {
 });
 
 describe('processQueueTick', () => {
-  it('drains patience by 1 for each queue client', () => {
+  it('drains patience per tick for each queue client', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
     // Occupant prevents desk-promotion from removing this client before assertion
     const state = makeGameState({
@@ -661,8 +661,8 @@ describe('processQueueTick', () => {
       currentClient: occupant,
     });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(79);
-    expect(next.queue[1].patience).toBe(49);
+    expect(next.queue[0].patience).toBe(78);
+    expect(next.queue[1].patience).toBe(48);
   });
 
   it('removes clients with zero patience (storm out)', () => {
@@ -844,14 +844,14 @@ describe('processQueueTick — strikeActive', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
     const state = makeGameState({ strikeActive: false, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(49);
+    expect(next.queue[0].patience).toBe(48);
   });
 
   it('drains queue patience at ×2 when strikeActive is true', () => {
     const occupant = makeClient({ id: 'occupant', physicalState: PhysicalState.AT_DESK });
     const state = makeGameState({ strikeActive: true, queue: [makeClient({ patience: 50, physicalState: PhysicalState.IN_QUEUE })], currentClient: occupant });
     const { state: next } = processQueueTick(state);
-    expect(next.queue[0].patience).toBe(48);
+    expect(next.queue[0].patience).toBe(46);
   });
 });
 

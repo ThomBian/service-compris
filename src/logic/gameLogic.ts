@@ -12,7 +12,11 @@ import {
   VisualTraits,
 } from "../types";
 import type { ActiveRule, PathScores } from "../types/campaign";
-import { START_TIME, INITIAL_RESERVATIONS } from "../constants";
+import {
+  START_TIME,
+  INITIAL_RESERVATIONS,
+  QUEUE_PATIENCE_DRAIN_PER_TICK,
+} from "../constants";
 import { generateDailyCharacters, injectCharacterReservations, CHARACTER_ROSTER } from "./characterRoster";
 import { generateReservations } from "./reservationGenerator";
 import {
@@ -284,9 +288,10 @@ export function prepareClientForDesk(client: Client): Client {
 }
 
 function updateQueuePatience(queue: Client[], strikeMultiplier = 1): Client[] {
+  const drain = QUEUE_PATIENCE_DRAIN_PER_TICK * strikeMultiplier;
   return queue.map((c) => ({
     ...c,
-    patience: Math.max(0, c.patience - 1 * strikeMultiplier),
+    patience: Math.max(0, c.patience - drain),
   }));
 }
 
