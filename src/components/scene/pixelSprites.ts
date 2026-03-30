@@ -33,3 +33,55 @@ export function legsLayer(height: 0 | 1 | 2, color: string): PixelLayer {
 export function neckLayer(skin: string): PixelLayer {
   return [r(10, 19, 4, 4, skin)]
 }
+
+export function headLayer(skin: string): PixelLayer {
+  return [
+    // head shape
+    r(7, 9, 10, 11, skin),
+    // eyes
+    r(9, 13, 2, 2, '#1a0f0a'),
+    r(13, 13, 2, 2, '#1a0f0a'),
+    // eye highlights
+    r(10, 13, 1, 1, 'white'),
+    r(14, 13, 1, 1, 'white'),
+    // nose
+    r(11, 16, 2, 1, '#c07040'),
+    // mouth
+    r(9, 18, 2, 1, '#8b4513'),
+    r(11, 19, 2, 1, '#8b4513'),
+    r(13, 18, 2, 1, '#8b4513'),
+  ]
+}
+
+export function hairLayer(style: number, color: string): PixelLayer {
+  switch (style) {
+    case 0: // short
+      return [
+        r(6, 5, 12, 5, color),  // top
+        r(5, 8, 2, 3, color),   // left side
+        r(17, 8, 2, 3, color),  // right side
+      ]
+    case 1: // long
+      return [
+        r(6, 5, 12, 5, color),
+        r(5, 8, 2, 14, color),
+        r(17, 8, 2, 14, color),
+      ]
+    case 2: // curly
+      return [
+        r(5, 4, 14, 7, color),
+        r(4, 6, 2, 5, color),
+        r(18, 6, 2, 5, color),
+        r(7, 3, 10, 3, color),
+      ]
+    case 3: // bald
+      return []
+    case 4: // bun
+      return [
+        r(6, 6, 12, 5, color),
+        r(9, 2, 6, 5, color),   // bun top
+      ]
+    default:
+      return []
+  }
+}
