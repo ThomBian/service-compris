@@ -7,12 +7,14 @@ import enUi from './locales/en/ui.json';
 import enGame from './locales/en/game.json';
 import enTour from './locales/en/tour.json';
 import enCampaign from './locales/en/campaign.json';
+import enIntro from './locales/en/intro.json';
 
 import frCommon from './locales/fr/common.json';
 import frUi from './locales/fr/ui.json';
 import frGame from './locales/fr/game.json';
 import frTour from './locales/fr/tour.json';
 import frCampaign from './locales/fr/campaign.json';
+import frIntro from './locales/fr/intro.json';
 
 export const I18N_STORAGE_KEY = 'service-compris-lang';
 
@@ -27,6 +29,7 @@ void i18n
         game: enGame,
         tour: enTour,
         campaign: enCampaign,
+        intro: enIntro,
       },
       fr: {
         common: frCommon,
@@ -34,12 +37,13 @@ void i18n
         game: frGame,
         tour: frTour,
         campaign: frCampaign,
+        intro: frIntro,
       },
     },
     fallbackLng: 'en',
     supportedLngs: ['en', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'ui', 'game', 'tour', 'campaign'],
+    ns: ['common', 'ui', 'game', 'tour', 'campaign', 'intro'],
     interpolation: { escapeValue: false },
     detection: {
       order: ['localStorage', 'navigator'],

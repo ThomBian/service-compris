@@ -1,0 +1,30 @@
+{
+  "screen0": {
+    "p1": "> Nouveau Paris. 192X.",
+    "p2": "Dans cette ville, cuisiner chez soi est un crime contre la haute société. On juge votre valeur à l'endroit où vous mangez, avec qui vous dînez, et qui vous feignez d'ignorer.",
+    "p3": "Au cœur de tout cela se trouve LE SOLSTICE. Le restaurant le plus exclusif et le plus impossible à réserver au monde.",
+    "p4": "La nuit dernière, le maître d'hôtel a placé un duc près des portes des cuisines. Personne ne l'a revu depuis.",
+    "p5": "Aujourd'hui, ils auditionnent son remplaçant.",
+    "clickToContinue": "▸ cliquez pour continuer"
+  },
+  "screen1": {
+    "monsieurV": "Ah. Le nouveau postulant. Vous semblez parfaitement incompétent. Parfait. Remplissez les formalités avant que je change d'avis.",
+    "cardHeader": "LE SOLSTICE — Carte d'identification employé",
+    "namePlaceholder": "La Recrue",
+    "nameLabel": "Nom",
+    "difficultyLabel": "Difficulté",
+    "position": "Maître D' — Le Solstice",
+    "positionLabel": "Poste",
+    "signContract": "[ Signer le Contrat ]"
+  },
+  "screen2": {
+    "p1": "Écoutez bien, {{name}}. Tenir la porte au Solstice n'a rien à voir avec l'hospitalité. C'est une question de survie.",
+    "p2": "Derrière cette porte, une ville de vipères. Politiciens, influenceurs et le Syndicat. Tous veulent une table, et aucun ne se soucie de nos règles. Moi, si.",
+    "p3": "Si vous laissez entrer un fripon, nous perdons notre réputation. Si vous insultez un VIP, nous perdons nos vitres. Protégez les étoiles Michelin, maintenez la trésorerie, et pour l'amour du ciel, faites respecter le code vestimentaire."
+  },
+  "screen3": {
+    "monsieurV": "La file se forme. Ouvrez les portes. Ne me décevez pas.",
+    "clockIn": "[ Prendre son Poste ]"
+  },
+  "skip": "Passer l'intro"
+}

@@ -1,0 +1,30 @@
+{
+  "screen0": {
+    "p1": "> Nouveau Paris. 192X.",
+    "p2": "In this city, cooking at home is a crime against high society. Your worth is measured by where you eat, who you eat with, and who you are seen ignoring.",
+    "p3": "At the center of it all is LE SOLSTICE. The most exclusive, impossible-to-book restaurant in the world.",
+    "p4": "Last night, the Maître D' seated a Duke next to the kitchen doors. He has not been seen since.",
+    "p5": "Today, they are interviewing his replacement.",
+    "clickToContinue": "▸ click to continue"
+  },
+  "screen1": {
+    "monsieurV": "Ah. The new applicant. You look entirely unqualified. Perfect. Fill out the paperwork before I change my mind.",
+    "cardHeader": "LE SOLSTICE — Employee Identification Card",
+    "namePlaceholder": "The Rookie",
+    "nameLabel": "Name",
+    "difficultyLabel": "Difficulty",
+    "position": "Maître D' — Le Solstice",
+    "positionLabel": "Position",
+    "signContract": "[ Sign Contract ]"
+  },
+  "screen2": {
+    "p1": "Listen closely, {{name}}. Running the door at Le Solstice is not about hospitality. It is about survival.",
+    "p2": "Outside that door is a city of vipers. Politicians, Influencers, and the Syndicate. They all want a table, and none of them care about our rules. But I care about the rules.",
+    "p3": "If you let a scoundrel in, we lose our reputation. If you insult a VIP, we lose our windows. Protect the Michelin Stars, keep the cash flowing, and for the love of God, enforce the dress code."
+  },
+  "screen3": {
+    "monsieurV": "The queue is forming. Unlock the doors. Do not disappoint me.",
+    "clockIn": "[ Clock In ]"
+  },
+  "skip": "Skip intro"
+}
