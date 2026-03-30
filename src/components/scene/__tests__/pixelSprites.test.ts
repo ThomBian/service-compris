@@ -51,4 +51,15 @@ describe('pixelSprites base layers', () => {
   it('hairLayer style 3 (bald) returns empty layer', () => {
     expect(hairLayer(3, '#000')).toHaveLength(0)
   })
+
+  it('headLayer has at least one skin-colored rect', () => {
+    const rects = headLayer('#ff0000')
+    expect(rects.some(r => r.color === '#ff0000')).toBe(true)
+  })
+
+  it('hairLayer non-bald styles return at least one rect', () => {
+    for (const s of [0, 1, 2, 4]) {
+      expect(hairLayer(s, '#000').length).toBeGreaterThan(0)
+    }
+  })
 })
