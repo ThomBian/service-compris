@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   shadowLayer, shoesLayer, legsLayer, neckLayer,
-  headLayer, hairLayer,
+  headLayer, hairLayer, clothingLayer,
   SKIN_TONES, HAIR_COLORS, CLOTHING_COLORS,
 } from '../pixelSprites'
 import type { PixelRect } from '../pixelSprites'
@@ -61,5 +61,20 @@ describe('pixelSprites base layers', () => {
     for (const s of [0, 1, 2, 4]) {
       expect(hairLayer(s, '#000').length).toBeGreaterThan(0)
     }
+  })
+
+  it('clothingLayer styles 0–3 return in-bounds rects', () => {
+    for (let s = 0; s < 4; s++) {
+      clothingLayer(s, '#c0392b').forEach(r => expect(inBounds(r)).toBe(true))
+    }
+  })
+
+  it('clothingLayer style 0 includes gold buttons (#d4af37)', () => {
+    const layer = clothingLayer(0, '#141414')
+    expect(layer.some(r => r.color === '#d4af37')).toBe(true)
+  })
+
+  it('clothingLayer style 2 (dress) produces more rects than style 1 (shirt)', () => {
+    expect(clothingLayer(2, '#c0392b').length).toBeGreaterThan(clothingLayer(1, '#c0392b').length)
   })
 })

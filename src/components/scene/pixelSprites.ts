@@ -53,6 +53,52 @@ export function headLayer(skin: string): PixelLayer {
   ]
 }
 
+export function clothingLayer(style: number, color: string): PixelLayer {
+  switch (style) {
+    case 0: { // formal jacket (black, white shirt front, gold buttons)
+      return [
+        r(4, 22, 16, 14, '#141414'),    // jacket body
+        r(10, 22, 4, 14, '#f0f0f0'),    // shirt front
+        r(4, 22, 5, 9, '#141414'),      // left lapel shadow
+        r(15, 22, 5, 9, '#141414'),     // right lapel shadow
+        r(11, 26, 2, 2, '#d4af37'),     // button 1
+        r(11, 30, 2, 2, '#d4af37'),     // button 2
+        r(4, 22, 3, 22, '#141414'),     // left arm
+        r(17, 22, 3, 22, '#141414'),    // right arm
+      ]
+    }
+    case 1: { // casual shirt
+      return [
+        r(4, 22, 16, 14, color),
+        r(10, 22, 4, 14, '#f8f8f8'),
+        r(4, 22, 3, 20, color),
+        r(17, 22, 3, 20, color),
+      ]
+    }
+    case 2: { // dress (no separate legs)
+      return [
+        r(5, 22, 14, 10, color),        // bodice
+        r(3, 30, 18, 14, color),        // skirt flares out
+        r(4, 22, 3, 10, color),         // left sleeve
+        r(17, 22, 3, 10, color),        // right sleeve
+        r(8, 22, 8, 2, color),          // neckline trim
+      ]
+    }
+    case 3: { // smart-casual blazer
+      return [
+        r(4, 22, 16, 14, color),
+        r(10, 22, 4, 14, '#f0f0f0'),
+        r(4, 22, 4, 8, color),
+        r(16, 22, 4, 8, color),
+        r(4, 22, 3, 20, color),
+        r(17, 22, 3, 20, color),
+      ]
+    }
+    default:
+      return []
+  }
+}
+
 export function hairLayer(style: number, color: string): PixelLayer {
   switch (style) {
     case 0: // short
