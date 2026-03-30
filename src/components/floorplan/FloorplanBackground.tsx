@@ -15,6 +15,7 @@ export const FloorplanBackground: React.FC<FloorplanBackgroundProps> = ({ childr
           backgroundImage: "url('/restaurant-inside.png')",
           backgroundSize: 'contain',
           backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           backgroundColor: '#0d0a06',
           imageRendering: 'pixelated',
         }}
