@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TOUR_STEPS } from '../tourSteps';
+import { TOUR_STEPS, TOUR_STEP_INDEX_SEAT_PARTY } from '../tourSteps';
 
 describe('TOUR_STEPS', () => {
   it('has exactly 7 steps', () => {
@@ -28,6 +28,11 @@ describe('TOUR_STEPS', () => {
 
   it('last step targets floorplan view', () => {
     expect(TOUR_STEPS[TOUR_STEPS.length - 1].view).toBe('floorplan');
+  });
+
+  it('TOUR_STEP_INDEX_SEAT_PARTY matches the seat-party step', () => {
+    expect(TOUR_STEP_INDEX_SEAT_PARTY).toBeGreaterThanOrEqual(0);
+    expect(TOUR_STEPS[TOUR_STEP_INDEX_SEAT_PARTY].target).toBe('seat-party');
   });
 
   it('all steps except the last target desk view', () => {

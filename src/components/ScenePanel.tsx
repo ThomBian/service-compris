@@ -5,9 +5,14 @@ import { DeskScene } from './scene/DeskScene';
 interface ScenePanelProps {
   view: 'desk' | 'floorplan';
   onSeatParty: () => void;
+  tourSeatPartySpotlight?: boolean;
 }
 
-export const ScenePanel: React.FC<ScenePanelProps> = ({ view, onSeatParty }) => {
+export const ScenePanel: React.FC<ScenePanelProps> = ({
+  view,
+  onSeatParty,
+  tourSeatPartySpotlight = false,
+}) => {
   if (view === 'floorplan') return null;
 
   return (
@@ -21,7 +26,10 @@ export const ScenePanel: React.FC<ScenePanelProps> = ({ view, onSeatParty }) => 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <DeskScene onSeatParty={onSeatParty} />
+          <DeskScene
+            onSeatParty={onSeatParty}
+            tourSeatPartySpotlight={tourSeatPartySpotlight}
+          />
         </motion.div>
       </AnimatePresence>
     </div>

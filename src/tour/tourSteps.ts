@@ -32,3 +32,8 @@ export const TOUR_STEPS: TourStep[] = [
   { target: "seat-party", copyKey: "seatParty", view: "desk" },
   { target: "floorplan", copyKey: "floorplan", view: "floorplan" },
 ];
+
+/** Index in `TOUR_STEPS` for the desk “Seat Party” step (tour runs with no guest at desk). */
+export const TOUR_STEP_INDEX_SEAT_PARTY = TOUR_STEPS.findIndex(
+  (s) => s.target === "seat-party",
+);

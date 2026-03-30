@@ -13,7 +13,7 @@ import { LandingPage } from './components/LandingPage';
 import { CorkboardScreen } from './components/CorkboardScreen';
 import { TourOverlay } from './components/TourOverlay';
 import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
-import { TOUR_STEPS } from './tour/tourSteps';
+import { TOUR_STEPS, TOUR_STEP_INDEX_SEAT_PARTY } from './tour/tourSteps';
 import { useCampaign } from './hooks/useCampaign';
 import type { LedgerData } from './types/campaign';
 
@@ -136,7 +136,13 @@ function GameContent({
     <div className="h-screen relative bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       {/* Scene + bottom panel fill full viewport height */}
       <div className={`absolute inset-0 flex flex-col overflow-hidden ${view === 'floorplan' ? 'pt-14' : ''}`}>
-        <ScenePanel view={view} onSeatParty={handleSeatParty} />
+        <ScenePanel
+          view={view}
+          onSeatParty={handleSeatParty}
+          tourSeatPartySpotlight={
+            isTourActive && currentStep === TOUR_STEP_INDEX_SEAT_PARTY
+          }
+        />
         <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
           <BottomPanel view={view} isOvertime={isOvertime} />
           {gameState.timeMultiplier === 0 && !shiftEnded && !isTourActive && (
