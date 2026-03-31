@@ -1,3 +1,5 @@
+import type { ScriptedEvent } from '../types';
+
 export type CampaignPath = 'default' | 'underworld' | 'michelin' | 'viral';
 export type CorkboardVariant = 'next_night' | 'fired';
 
@@ -18,6 +20,7 @@ export interface ActiveRule {
 export interface NightConfig {
   characterIds: string[];
   rules: ActiveRule[];
+  scriptedEvents?: ScriptedEvent[];
 }
 
 export interface LedgerData {
