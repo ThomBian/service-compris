@@ -8,7 +8,6 @@ import {
   Pause,
   FastForward,
   Heart,
-  HelpCircle,
 } from "lucide-react";
 import type { VisualTraits } from "../types";
 import type { ActiveRule } from "../types/campaign";
@@ -24,7 +23,6 @@ interface TopBarProps {
   setTimeMultiplier: (m: number) => void;
   formatTime: (minutes: number) => string;
   difficulty: number;
-  onTourClick: () => void;
   nightNumber: number;
   isOvertime: boolean;
   activeRules?: ActiveRule[];
@@ -41,7 +39,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   setTimeMultiplier,
   formatTime,
   difficulty,
-  onTourClick,
   nightNumber,
   isOvertime,
   activeRules = [],
@@ -51,7 +48,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const pauseDisabled = getRule<boolean>(activeRules, 'PAUSE_DISABLED', false);
   return (
     <header className="border-b border-[#141414]/10 p-4 flex items-center justify-between bg-[#E4E3E0]/15 backdrop-blur-md z-20 shrink-0">
-      <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8" data-tour="topbar">
+      <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
         <div className="flex items-center gap-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">{t('topbar.night')}</span>
           <span className="font-mono text-xl font-bold">{nightNumber}</span>
@@ -149,14 +146,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           ))
         )}
       </div>
-      <button
-        type="button"
-        onClick={onTourClick}
-        title={t('topbar.tourTitle')}
-        className="rounded-xl p-1.5 transition-colors hover:bg-[#141414]/10"
-      >
-        <HelpCircle size={20} />
-      </button>
       </div>
     </header>
   );

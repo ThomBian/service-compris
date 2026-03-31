@@ -14,9 +14,6 @@ import { LandingPage } from './components/LandingPage';
 import { IntroSequence } from './components/intro/IntroSequence';
 import { INTRO_AVATARS } from './components/intro/introAvatars';
 import { CorkboardScreen } from './components/CorkboardScreen';
-import { TourOverlay } from './components/TourOverlay';
-import { useTour, TOUR_SEEN_KEY } from './hooks/useTour';
-import { TOUR_STEPS, TOUR_STEP_INDEX_SEAT_PARTY } from './tour/tourSteps';
 import { useCampaign } from './hooks/useCampaign';
 import { useGameAmbience } from './hooks/useGameAmbience';
 import type { LedgerData } from './types/campaign';
@@ -28,11 +25,6 @@ interface GameContentProps {
   initialDifficulty: number;
   persist?: { cash: number; rating: number; morale: number; nightNumber: number };
   onShiftEnd: (ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => void;
-  isTourActive: boolean;
-  currentStep: number;
-  onTourNext: () => void;
-  onTourSkip: () => void;
-  startTour: () => void;
   playerIdentity: { name: string; traits: VisualTraits } | null;
 }
 
@@ -40,11 +32,6 @@ function GameContent({
   initialDifficulty,
   persist,
   onShiftEnd,
-  isTourActive,
-  currentStep,
-  onTourNext,
-  onTourSkip,
-  startTour,
   playerIdentity,
 }: GameContentProps) {
   const { t } = useTranslation('ui');
@@ -62,7 +49,6 @@ function GameContent({
   useGameAmbience({
     shiftEnded,
     timeMultiplier: gameState.timeMultiplier,
-    isTourActive,
   });
 
   React.useEffect(() => {
@@ -70,45 +56,7 @@ function GameContent({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** First time per install: start tour when the first guest reaches the desk (not at shift start). */
-  const tourAutoStartedRef = React.useRef(false);
   React.useEffect(() => {
-    try {
-      if (localStorage.getItem(TOUR_SEEN_KEY)) return;
-    } catch {
-      return;
-    }
-    if (isTourActive || tourAutoStartedRef.current) return;
-    if (gameState.currentClient?.physicalState !== PhysicalState.AT_DESK) return;
-    tourAutoStartedRef.current = true;
-    startTour();
-  }, [
-    gameState.currentClient?.physicalState,
-    gameState.currentClient?.id,
-    isTourActive,
-    startTour,
-  ]);
-
-  // Freeze clock during tour; unfreeze when tour ends
-  const tourWasActiveRef = React.useRef(false);
-  React.useEffect(() => {
-    if (isTourActive) {
-      tourWasActiveRef.current = true;
-      setTimeMultiplier(0);
-    } else if (tourWasActiveRef.current) {
-      tourWasActiveRef.current = false;
-      setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1);
-    }
-  }, [isTourActive, setTimeMultiplier, gameState.difficulty]);
-
-  // Switch view to match the current tour step
-  React.useEffect(() => {
-    if (!isTourActive) return;
-    setView(TOUR_STEPS[currentStep].view);
-  }, [isTourActive, currentStep, setView]);
-
-  React.useEffect(() => {
-    if (isTourActive) return;
     if (isOvertime && !shiftEnded) {
       setView('floorplan');
       return;
@@ -116,7 +64,7 @@ function GameContent({
     if (view === 'floorplan' && gameState.currentClient?.physicalState !== PhysicalState.SEATING) {
       setView('desk');
     }
-  }, [view, gameState.currentClient?.physicalState, isOvertime, shiftEnded, isTourActive]);
+  }, [view, gameState.currentClient?.physicalState, isOvertime, shiftEnded]);
 
   // Fire onShiftEnd exactly once when shift ends
   const shiftEndFiredRef = React.useRef(false);
@@ -164,14 +112,11 @@ function GameContent({
         <ScenePanel
           view={view}
           onSeatParty={handleSeatParty}
-          tourSeatPartySpotlight={
-            isTourActive && currentStep === TOUR_STEP_INDEX_SEAT_PARTY
-          }
           playerIdentity={playerIdentity}
         />
         <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
           <BottomPanel view={view} isOvertime={isOvertime} playerIdentity={playerIdentity} />
-          {gameState.timeMultiplier === 0 && !shiftEnded && !isTourActive && (
+          {gameState.timeMultiplier === 0 && !shiftEnded && (
             <button
               type="button"
               className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
@@ -207,20 +152,12 @@ function GameContent({
           setTimeMultiplier={setTimeMultiplier}
           formatTime={formatTime}
           difficulty={gameState.difficulty}
-          onTourClick={startTour}
           nightNumber={gameState.nightNumber}
           isOvertime={isOvertime}
           activeRules={gameState.activeRules}
           playerIdentity={playerIdentity}
         />
       </div>
-      {isTourActive && (
-        <TourOverlay
-          step={currentStep}
-          onNext={onTourNext}
-          onSkip={onTourSkip}
-        />
-      )}
       <ToastContainer />
     </div>
   );
@@ -244,7 +181,6 @@ export default function App() {
   }, [playerName, playerAvatarIndex]);
   const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
   const campaign = useCampaign();
-  const tour = useTour(TOUR_STEPS.length);
 
   const handleShiftEnd = React.useCallback((ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => {
     if (lossReason) {
@@ -354,11 +290,6 @@ export default function App() {
             initialDifficulty={difficulty}
             persist={persist}
             onShiftEnd={handleShiftEnd}
-            isTourActive={tour.isTourActive}
-            currentStep={tour.currentStep}
-            onTourNext={tour.nextStep}
-            onTourSkip={tour.skipTour}
-            startTour={tour.startTour}
             playerIdentity={playerIdentity}
           />
         </GameProvider>
