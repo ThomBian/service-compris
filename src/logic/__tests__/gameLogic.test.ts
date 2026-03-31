@@ -109,6 +109,8 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   coversSeated: 0,
   shiftRevenue: 0,
   activeRules: [],
+  firedEventIds: [],
+  revealedTools: [],
   ...overrides,
 });
 

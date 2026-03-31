@@ -844,5 +844,7 @@ export function buildInitialState(
     coversSeated: 0,
     shiftRevenue: 0,
     activeRules: rules,
+    firedEventIds: [],
+    revealedTools: [],
   };
 }

@@ -1,5 +1,7 @@
-import { describe, it, expectTypeOf } from 'vitest';
+import { describe, it, expect, expectTypeOf } from 'vitest';
 import type { ActiveRule, RuleKey, NightConfig, CampaignState, LedgerData } from '../campaign';
+import type { ScriptedEvent } from '../../types';
+import { ClientType } from '../../types';
 
 describe('campaign types', () => {
   it('ActiveRule value covers all rule key shapes', () => {
@@ -19,5 +21,31 @@ describe('campaign types', () => {
       lossReason: null,
     };
     expectTypeOf(s).toMatchTypeOf<CampaignState>();
+  });
+
+  it('NightConfig accepts scriptedEvents', () => {
+    const event: ScriptedEvent = {
+      id: 'test-event',
+      trigger: { kind: 'TIME', minute: 1172 },
+      actions: [
+        { kind: 'SHOW_DIALOGUE', lines: ['Hello.'] },
+        { kind: 'REVEAL_TOOL', tool: 'LEDGER' },
+      ],
+    };
+    const config: NightConfig = {
+      characterIds: [],
+      rules: [],
+      scriptedEvents: [event],
+    };
+    expect(config.scriptedEvents).toHaveLength(1);
+  });
+
+  it('ScriptedEvent CHARACTER_AT_DESK trigger compiles', () => {
+    const event: ScriptedEvent = {
+      id: 'at-desk',
+      trigger: { kind: 'CHARACTER_AT_DESK', characterId: 'the-phantom-eater' },
+      actions: [{ kind: 'SHOW_DIALOGUE', lines: ['Check the list.'] }],
+    };
+    expect(event.trigger.kind).toBe('CHARACTER_AT_DESK');
   });
 });

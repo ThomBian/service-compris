@@ -136,6 +136,28 @@ export interface Client {
 
 export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | 'COVERS_TARGET' | null;
 
+// --- Scripted Events ---
+
+export type ToolReveal = 'LEDGER' | 'PARTY_TICKET' | 'CLIPBOARD_VIP' | 'CLIPBOARD_BANNED';
+
+export type ScriptedTrigger =
+  | { kind: 'TIME'; minute: number }
+  | { kind: 'CHARACTER_AT_DESK'; characterId: string }
+  | { kind: 'CHARACTER_TYPE_AT_DESK'; type: ClientType };
+
+export type ScriptedAction =
+  | { kind: 'SHOW_DIALOGUE'; lines: string[] }
+  | { kind: 'REVEAL_TOOL'; tool: ToolReveal }
+  | { kind: 'SPAWN_CHARACTER'; characterId: string; delayMinutes?: number };
+
+export interface ScriptedEvent {
+  id: string;
+  trigger: ScriptedTrigger;
+  actions: ScriptedAction[];
+  /** Default true — fire once and record in firedEventIds. Set false for repeating commentary. */
+  once?: boolean;
+}
+
 export interface GameState {
   inGameMinutes: number;
   timeMultiplier: number;
@@ -162,4 +184,6 @@ export interface GameState {
   coversSeated: number;
   shiftRevenue: number;
   activeRules: ActiveRule[];
+  firedEventIds: string[];
+  revealedTools: ToolReveal[];
 }
