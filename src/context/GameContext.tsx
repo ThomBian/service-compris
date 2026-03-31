@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { GameState } from '../types';
-import type { CampaignPath, PathScores } from '../types/campaign';
+import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
 
 interface GameContextType {
   gameState: GameState;
@@ -24,12 +24,20 @@ interface GameProviderProps {
   children: ReactNode;
   incrementPathScore?: (path: CampaignPath, delta: number) => void;
   pathScores?: PathScores;
+  nightConfig?: NightConfig;
+  onShowDialogue?: (lines: string[]) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-export function GameProvider({ children, incrementPathScore, pathScores }: GameProviderProps) {
-  const engine = useGameEngine(incrementPathScore, pathScores);
+export function GameProvider({
+  children,
+  incrementPathScore,
+  pathScores,
+  nightConfig,
+  onShowDialogue,
+}: GameProviderProps) {
+  const engine = useGameEngine(incrementPathScore, pathScores, nightConfig, onShowDialogue);
 
   return (
     <GameContext.Provider value={engine}>

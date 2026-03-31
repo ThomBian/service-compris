@@ -14,6 +14,7 @@ import { LandingPage } from './components/LandingPage';
 import { IntroSequence } from './components/intro/IntroSequence';
 import { INTRO_AVATARS } from './components/intro/introAvatars';
 import { CorkboardScreen } from './components/CorkboardScreen';
+import { MrVDialogue } from './components/MrVDialogue';
 import { useCampaign } from './hooks/useCampaign';
 import { useGameAmbience } from './hooks/useGameAmbience';
 import type { LedgerData } from './types/campaign';
@@ -26,6 +27,8 @@ interface GameContentProps {
   persist?: { cash: number; rating: number; morale: number; nightNumber: number };
   onShiftEnd: (ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => void;
   playerIdentity: { name: string; traits: VisualTraits } | null;
+  activeDialogue: string[] | null;
+  onDialogueDismiss: () => void;
 }
 
 function GameContent({
@@ -33,6 +36,8 @@ function GameContent({
   persist,
   onShiftEnd,
   playerIdentity,
+  activeDialogue,
+  onDialogueDismiss,
 }: GameContentProps) {
   const { t } = useTranslation('ui');
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
@@ -159,6 +164,9 @@ function GameContent({
         />
       </div>
       <ToastContainer />
+      {activeDialogue && (
+        <MrVDialogue lines={activeDialogue} onDismiss={onDialogueDismiss} />
+      )}
     </div>
   );
 }
@@ -181,6 +189,31 @@ export default function App() {
   }, [playerName, playerAvatarIndex]);
   const [persist, setPersist] = React.useState<{ cash: number; rating: number; morale: number; nightNumber: number } | undefined>(undefined);
   const campaign = useCampaign();
+
+  const [dialogueQueue, setDialogueQueue] = React.useState<string[][]>([]);
+  const [activeDialogue, setActiveDialogue] = React.useState<string[] | null>(null);
+
+  const onShowDialogue = React.useCallback((lines: string[]) => {
+    setDialogueQueue(prev => [...prev, lines]);
+  }, []);
+
+  const onDialogueDismiss = React.useCallback(() => {
+    setActiveDialogue(null);
+  }, []);
+
+  React.useEffect(() => {
+    if (activeDialogue !== null) return;
+    if (dialogueQueue.length === 0) return;
+    const [next, ...rest] = dialogueQueue;
+    setActiveDialogue(next ?? null);
+    setDialogueQueue(rest);
+  }, [activeDialogue, dialogueQueue]);
+
+  React.useEffect(() => {
+    setDialogueQueue([]);
+    setActiveDialogue(null);
+  }, [phase]);
+
   const handleShiftEnd = React.useCallback((ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => {
     if (lossReason) {
       campaign.fireCorkboard(lossReason, ledger);
@@ -284,12 +317,16 @@ export default function App() {
         <GameProvider
           incrementPathScore={campaign.incrementPathScore}
           pathScores={campaign.campaignState.pathScores}
+          nightConfig={campaign.activeNightConfig}
+          onShowDialogue={onShowDialogue}
         >
           <GameContent
             initialDifficulty={difficulty}
             persist={persist}
             onShiftEnd={handleShiftEnd}
             playerIdentity={playerIdentity}
+            activeDialogue={activeDialogue}
+            onDialogueDismiss={onDialogueDismiss}
           />
         </GameProvider>
       )}

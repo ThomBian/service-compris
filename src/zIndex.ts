@@ -5,6 +5,8 @@
 export const Z_INDEX = {
   introBackdrop: 100,
   introChrome: 50,
+  /** In-game Monsieur V. scripted dialogue overlay. */
+  gameDialogue: 55,
   gameHeader: 20,
   /** Toasts (portal); content is pointer-events-none. */
   toast: 5000,

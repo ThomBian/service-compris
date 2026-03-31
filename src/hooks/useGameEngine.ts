@@ -2,11 +2,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { GameState } from "../types";
 import { buildInitialState, PersistState } from "../logic/gameLogic";
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
-import type { CampaignPath, PathScores } from '../types/campaign';
+import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
 import { createCharacter } from '../logic/characters/factory';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { useGameClock } from "./useGameClock";
 import { useClientSpawner } from "./useClientSpawner";
+import { useScriptedEvents } from "./useScriptedEvents";
 import { useQueueManager } from "./useQueueManager";
 import { useQuestionActions } from "./useQuestionActions";
 import { useAccusationActions } from "./useAccusationActions";
@@ -17,12 +18,25 @@ import { useToast } from "../context/ToastContext";
 export function useGameEngine(
   incrementPathScore?: (path: CampaignPath, delta: number) => void,
   pathScores?: PathScores,
+  nightConfig?: NightConfig,
+  onShowDialogue?: (lines: string[]) => void,
 ) {
   const [gameState, setGameState] = useState<GameState>(() => buildInitialState(0));
 
-  const resetGame = useCallback((difficulty: number, persist?: PersistState) => {
-    setGameState(buildInitialState(difficulty, persist, [], undefined, pathScores));
-  }, [pathScores]);
+  const resetGame = useCallback(
+    (difficulty: number, persist?: PersistState) => {
+      setGameState(
+        buildInitialState(
+          difficulty,
+          persist,
+          nightConfig?.rules ?? [],
+          nightConfig?.characterIds,
+          pathScores,
+        ),
+      );
+    },
+    [pathScores, nightConfig],
+  );
 
   // Runtime character instances — never serialized, rebuilt on each session start
   const characters = useRef<Map<string, SpecialCharacter>>(new Map());
@@ -39,8 +53,16 @@ export function useGameEngine(
 
   const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
-  useClientSpawner(gameState, setGameState, characters);
+  const { spawnScriptedCharacter } = useClientSpawner(gameState, setGameState, characters);
   useQueueManager(gameState, setGameState, showToast, characters);
+
+  useScriptedEvents(
+    gameState,
+    setGameState,
+    nightConfig,
+    onShowDialogue ?? (() => {}),
+    spawnScriptedCharacter,
+  );
 
   const { askQuestion } = useQuestionActions(setGameState, showToast);
   const { callOutLie } = useAccusationActions(setGameState, showToast, characters);
