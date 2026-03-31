@@ -140,6 +140,165 @@ export function useClientSpawner(
     });
   }, [setGameState, characters]);
 
+  const spawnScriptedCharacter = useCallback(
+    (characterId: string) => {
+      const charDef = CHARACTER_ROSTER.find(c => c.id === characterId);
+      if (charDef) {
+        spawnCharacterWalkIn(charDef);
+        return;
+      }
+
+      if (characterId === 'n1-walkIn-couple') {
+        setGameState(prev => {
+          const spawnKey = 'scripted-' + characterId;
+          if (prev.spawnedReservationIds.includes(spawnKey)) return prev;
+          const newClient: Client = {
+            id: Math.random().toString(36).slice(2, 11),
+            type: ClientType.WALK_IN,
+            patience: 100,
+            physicalState: PhysicalState.IN_QUEUE,
+            dialogueState: DialogueState.AWAITING_GREETING,
+            spawnTime: prev.inGameMinutes,
+            trueFirstName: 'Marie',
+            trueLastName: 'Leblanc',
+            truePartySize: 2,
+            isLate: false,
+            lieType: LieType.NONE,
+            hasLied: false,
+            visualTraits: {
+              skinTone: 2,
+              hairStyle: 1,
+              hairColor: 2,
+              clothingStyle: 2,
+              clothingColor: 0,
+              height: 1,
+            },
+            isCaught: false,
+            lastMessage: tGame('waitingInLine'),
+            chatHistory: [],
+          };
+          return {
+            ...prev,
+            queue: [...prev.queue, newClient],
+            spawnedReservationIds: [...prev.spawnedReservationIds, spawnKey],
+          };
+        });
+        return;
+      }
+
+      if (!characterId.startsWith('n1-res-')) return;
+
+      setGameState(prev => {
+        const res = prev.reservations.find(r => r.id === characterId);
+        if (!res || prev.spawnedReservationIds.includes(res.id)) return prev;
+
+        if (characterId === 'n1-res-late-group') {
+          const scammer: Client = {
+            id: Math.random().toString(36).slice(2, 11),
+            type: ClientType.SCAMMER,
+            patience: 100,
+            physicalState: PhysicalState.IN_QUEUE,
+            dialogueState: DialogueState.AWAITING_GREETING,
+            spawnTime: prev.inGameMinutes,
+            trueFirstName: res.firstName,
+            trueLastName: res.lastName,
+            truePartySize: 4,
+            trueReservationId: res.id,
+            isLate: true,
+            lieType: LieType.SIZE,
+            hasLied: false,
+            visualTraits: {
+              skinTone: 3,
+              hairStyle: 0,
+              hairColor: 3,
+              clothingStyle: 1,
+              clothingColor: 2,
+              height: 1,
+            },
+            isCaught: false,
+            lastMessage: tGame('waitingInLine'),
+            chatHistory: [],
+          };
+          return {
+            ...prev,
+            queue: [...prev.queue, scammer],
+            spawnedReservationIds: [...prev.spawnedReservationIds, res.id],
+          };
+        }
+
+        if (characterId === 'n1-res-phantom') {
+          const phantomDef = CHARACTER_ROSTER.find(c => c.id === 'n1-phantom-eater-night1');
+          const newClient: Client = {
+            id: Math.random().toString(36).slice(2, 11),
+            type: ClientType.SCAMMER,
+            patience: 100,
+            physicalState: PhysicalState.IN_QUEUE,
+            dialogueState: DialogueState.AWAITING_GREETING,
+            spawnTime: prev.inGameMinutes,
+            trueFirstName: 'Fantôme',
+            trueLastName: 'Inconnu',
+            truePartySize: 1,
+            trueReservationId: res.id,
+            isLate: false,
+            lieType: LieType.IDENTITY,
+            hasLied: false,
+            visualTraits: phantomDef?.visualTraits ?? {
+              skinTone: 0,
+              hairStyle: 3,
+              hairColor: 2,
+              clothingStyle: 1,
+              clothingColor: 4,
+              height: 1,
+              glasses: 0,
+            },
+            isCaught: false,
+            characterId: 'n1-phantom-eater-night1',
+            lastMessage: tGame('waitingInLine'),
+            chatHistory: [],
+          };
+          return {
+            ...prev,
+            queue: [...prev.queue, newClient],
+            spawnedReservationIds: [...prev.spawnedReservationIds, res.id],
+          };
+        }
+
+        const dailyCharsFromRoster = prev.dailyCharacterIds
+          .map(id => CHARACTER_ROSTER.find(c => c.id === id))
+          .filter((c): c is CharacterDefinition => c !== undefined);
+        const excludeTraits = dailyCharsFromRoster.map(c => c.visualTraits);
+        const clientData = generateClientData(
+          res,
+          prev.reservations,
+          prev.inGameMinutes,
+          prev.spawnedReservationIds,
+          excludeTraits,
+        );
+        let newClient = createNewClient({
+          data: clientData,
+          currentMinutes: prev.inGameMinutes,
+          res,
+        });
+        if (res.id.startsWith('char-res-')) {
+          const rosterId = res.id.slice('char-res-'.length);
+          const def = dailyCharsFromRoster.find(c => c.id === rosterId);
+          if (def) {
+            newClient = { ...newClient, visualTraits: def.visualTraits, characterId: def.id };
+          }
+        }
+        return {
+          ...prev,
+          queue: [...prev.queue, newClient],
+          spawnedReservationIds: [...prev.spawnedReservationIds, res.id],
+          reservations: prev.reservations.map(r =>
+            r.id === res.id ? { ...r, legitQueuedAt: prev.inGameMinutes } : r,
+          ),
+        };
+      });
+    },
+    [setGameState, spawnCharacterWalkIn],
+  );
+
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
     if (gameState.inGameMinutes >= DOORS_CLOSE_TIME) return;
@@ -165,7 +324,11 @@ export function useClientSpawner(
       .filter((c): c is CharacterDefinition => c !== undefined);
 
     dailyCharsFromRoster
-      .filter(c => c.arrivalMO === 'WALK_IN' || c.arrivalMO === 'LATE')
+      .filter(
+        c =>
+          (c.arrivalMO === 'WALK_IN' || c.arrivalMO === 'LATE') &&
+          !c.id.startsWith('n1-'),
+      )
       .forEach(c => {
         const walkinKey = 'char-walkin-' + c.id;
         const spawnAt = c.arrivalMO === 'LATE' ? START_TIME + 91 : START_TIME + 90;
@@ -187,5 +350,5 @@ export function useClientSpawner(
     bypassChars.forEach(c => spawnBypassCharacter(c));
   }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyCharacterIds, gameState.grid, spawnClient, spawnCharacterWalkIn, spawnBypassCharacter]);
 
-  return { spawnClient, spawnCharacterWalkIn };
+  return { spawnClient, spawnCharacterWalkIn, spawnScriptedCharacter };
 }
