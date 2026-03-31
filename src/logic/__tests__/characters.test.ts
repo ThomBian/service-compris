@@ -33,6 +33,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     nightNumber: 1,
     coversSeated: 0,
     shiftRevenue: 0,
+    activeRules: [],
+    firedEventIds: [],
+    revealedTools: ['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'],
     ...overrides,
   } as GameState;
 }

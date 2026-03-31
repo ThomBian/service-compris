@@ -10,13 +10,14 @@ import {
   Cell,
   CellState,
   VisualTraits,
+  type ToolReveal,
 } from "../types";
 import type { ActiveRule, PathScores } from "../types/campaign";
 import {
   START_TIME,
-  INITIAL_RESERVATIONS,
   QUEUE_PATIENCE_DRAIN_PER_TICK,
 } from "../constants";
+import { NIGHT_1_RESERVATIONS } from "../data/night1Reservations";
 import { generateDailyCharacters, injectCharacterReservations, CHARACTER_ROSTER } from "./characterRoster";
 import { generateReservations } from "./reservationGenerator";
 import {
@@ -817,7 +818,7 @@ export function buildInitialState(
     : generateDailyCharacters(difficulty, CHARACTER_ROSTER, pathScores);
 
   const baseReservations = nightNumber === 1
-    ? INITIAL_RESERVATIONS
+    ? NIGHT_1_RESERVATIONS
     : generateReservations({ nightNumber, rating });
   const reservations = injectCharacterReservations(dailyChars, baseReservations);
 
@@ -844,5 +845,10 @@ export function buildInitialState(
     coversSeated: 0,
     shiftRevenue: 0,
     activeRules: rules,
+    firedEventIds: [],
+    revealedTools:
+      nightNumber === 1
+        ? []
+        : (['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'] as ToolReveal[]),
   };
 }

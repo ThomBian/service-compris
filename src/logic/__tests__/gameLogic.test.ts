@@ -109,6 +109,8 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   coversSeated: 0,
   shiftRevenue: 0,
   activeRules: [],
+  firedEventIds: [],
+  revealedTools: ['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'],
   ...overrides,
 });
 
@@ -901,6 +903,23 @@ describe('visualTraits', () => {
     const a = seedTraits('abc123', 0);
     const b = seedTraits('abc123', 1);
     expect(a).not.toEqual(b);
+  });
+});
+
+describe('buildInitialState — revealedTools', () => {
+  it('seeds empty revealedTools for Night 1', () => {
+    const state = buildInitialState(1);
+    expect(state.revealedTools).toEqual([]);
+  });
+
+  it('seeds full revealedTools for Night 2', () => {
+    const state = buildInitialState(1, { cash: 0, rating: 5, morale: 100, nightNumber: 2 });
+    expect(state.revealedTools).toEqual(['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED']);
+  });
+
+  it('seeds empty firedEventIds on every night', () => {
+    const state = buildInitialState(1);
+    expect(state.firedEventIds).toEqual([]);
   });
 });
 
