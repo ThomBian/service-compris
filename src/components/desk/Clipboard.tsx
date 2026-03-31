@@ -231,6 +231,19 @@ function intensityLabel(level: 0 | 1 | 2 | 3): string {
 export const Clipboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("VIPs");
   const { gameState, pathScores } = useGame();
+  const { revealedTools } = gameState;
+  const showVipTab = revealedTools.includes('CLIPBOARD_VIP');
+  const showBannedTab = revealedTools.includes('CLIPBOARD_BANNED');
+
+  const visibleTabs = React.useMemo(
+    () =>
+      TABS.filter(tab => {
+        if (tab === 'VIPs') return showVipTab;
+        if (tab === 'Banned') return showBannedTab;
+        return true;
+      }),
+    [showVipTab, showBannedTab],
+  );
 
   const seenLogCountRef = useRef(gameState.logs.length);
   const [hasUnseenLogs, setHasUnseenLogs] = useState(false);
@@ -243,6 +256,11 @@ export const Clipboard: React.FC = () => {
       setHasUnseenLogs(true);
     }
   }, [gameState.logs.length, activeTab]);
+
+  useEffect(() => {
+    if (visibleTabs.includes(activeTab)) return;
+    setActiveTab(visibleTabs[0] ?? 'Factions');
+  }, [visibleTabs, activeTab]);
 
   const dailyVipDefs = gameState.dailyCharacterIds
     .map(id => CHARACTER_ROSTER.find(c => c.id === id))
@@ -261,7 +279,7 @@ export const Clipboard: React.FC = () => {
         </span>
       </div>
       <div className="flex gap-1 shrink-0">
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
