@@ -5,14 +5,12 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enCommon from './locales/en/common.json';
 import enUi from './locales/en/ui.json';
 import enGame from './locales/en/game.json';
-import enTour from './locales/en/tour.json';
 import enCampaign from './locales/en/campaign.json';
 import enIntro from './locales/en/intro.json';
 
 import frCommon from './locales/fr/common.json';
 import frUi from './locales/fr/ui.json';
 import frGame from './locales/fr/game.json';
-import frTour from './locales/fr/tour.json';
 import frCampaign from './locales/fr/campaign.json';
 import frIntro from './locales/fr/intro.json';
 
@@ -29,7 +27,6 @@ void i18n
         common: enCommon,
         ui: enUi,
         game: enGame,
-        tour: enTour,
         campaign: enCampaign,
         intro: enIntro,
       },
@@ -37,7 +34,6 @@ void i18n
         common: frCommon,
         ui: frUi,
         game: frGame,
-        tour: frTour,
         campaign: frCampaign,
         intro: frIntro,
       },
@@ -45,7 +41,7 @@ void i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'ui', 'game', 'tour', 'campaign', 'intro'],
+    ns: ['common', 'ui', 'game', 'campaign', 'intro'],
     interpolation: { escapeValue: false },
     detection: {
       order: ['localStorage', 'navigator'],

@@ -107,3 +107,9 @@ Pure functions: grid creation, client generation (lies / identities), greetings,
 - **`docs/game-concept.md`** — core loop and win/lose framing.
 - **`docs/specs/`** — layouts, time/queue, investigation UX, lore notes.
 - **`docs/superpowers/`** — dated plans and design specs for larger features (tour, campaign, i18n, etc.).
+
+- Specs are coming from Obsidian, whenever you plan something take them from the obsidian vault
+- When a plan is executed, update the spec file in Obsidian to show what is done and what is not
+- Attach the specs implemented in the codebase
+- After each feature commited, review the specs in the codebase and update them to match what we have delivered
+- Push a new release note into Obsidian explaining the version change

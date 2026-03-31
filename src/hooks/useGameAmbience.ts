@@ -11,15 +11,14 @@ const JAZZ_FADE_MS = 2000;
 
 /**
  * Loops intro rain + jazz during a shift (shared Howls with `IntroSequence`).
- * Pauses when the player pauses (time frozen, tour excluded); resumes after.
+ * Pauses when the player pauses (time frozen); resumes after.
  * Defers start while intro exit fade is running (`ambienceShiftGate`).
  */
 export function useGameAmbience(opts: {
   shiftEnded: boolean;
   timeMultiplier: number;
-  isTourActive: boolean;
 }): void {
-  const { shiftEnded, timeMultiplier, isTourActive } = opts;
+  const { shiftEnded, timeMultiplier } = opts;
   const everStartedRef = useRef(false);
   const [gestureUnlocked, setGestureUnlocked] = useState(false);
 
@@ -46,8 +45,7 @@ export function useGameAmbience(opts: {
     };
   }, []);
 
-  const shouldRun =
-    !shiftEnded && (timeMultiplier > 0 || isTourActive);
+  const shouldRun = !shiftEnded && timeMultiplier > 0;
 
   useEffect(() => {
     if (!gestureUnlocked) return;

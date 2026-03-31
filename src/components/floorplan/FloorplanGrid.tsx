@@ -131,7 +131,7 @@ export const FloorplanGrid: React.FC<FloorplanGridProps> = ({
 
   return (
     <FloorplanBackground>
-    <div className="flex flex-col h-full" data-tour="floorplan">
+    <div className="flex flex-col h-full">
 
       {/* 1. Title header — Art Deco style */}
       <div

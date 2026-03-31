@@ -5,7 +5,6 @@
 export const Z_INDEX = {
   introBackdrop: 100,
   introChrome: 50,
-  tour: 50,
   gameHeader: 20,
   /** Toasts (portal); content is pointer-events-none. */
   toast: 5000,

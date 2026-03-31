@@ -16,7 +16,7 @@ function readMuted(): boolean {
 
 /**
  * Global mute for all Howler-based SFX (intro, toasts, etc.). Fixed position above
- * intro/tour layers; persists in localStorage.
+ * intro overlays; persists in localStorage.
  */
 export function AudioMuteButton() {
   const { t } = useTranslation('common');
