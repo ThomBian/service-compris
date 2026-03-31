@@ -48,4 +48,13 @@ describe('campaign types', () => {
     };
     expect(event.trigger.kind).toBe('CHARACTER_AT_DESK');
   });
+
+  it('ScriptedEvent CHARACTER_TYPE_AT_DESK trigger compiles', () => {
+    const event: ScriptedEvent = {
+      id: 'type-at-desk',
+      trigger: { kind: 'CHARACTER_TYPE_AT_DESK', type: ClientType.SCAMMER },
+      actions: [{ kind: 'REVEAL_TOOL', tool: 'CLIPBOARD_BANNED' }],
+    };
+    expect(event.trigger.kind).toBe('CHARACTER_TYPE_AT_DESK');
+  });
 });
