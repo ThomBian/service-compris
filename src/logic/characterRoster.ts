@@ -244,6 +244,37 @@ export const CHARACTER_ROSTER: CharacterDefinition[] = [
     consequenceDescription: 'Sodium Bae salts neighbouring tables. Guests leave early. −€60, −20 morale.',
     refusalDescription: 'No salt sprinkled tonight.',
   },
+  // ── Night 1 Tutorial Characters ───────────────────────────────────────────────
+  {
+    id: 'n1-vip-actor',
+    name: 'Le Comédien',
+    role: 'VIP',
+    behaviorType: 'STANDARD_VIP',
+    arrivalMO: 'WALK_IN',
+    expectedPartySize: 1,
+    clueText: 'Gold watch, velvet lapels. Known face from the boulevard.',
+    visualTraits: { skinTone: 1, hairStyle: 2, hairColor: 1, clothingStyle: 0, clothingColor: 0, height: 2, neckwear: 1 },
+    cashBonus: 80,
+    consequenceDescription: 'The Comédien tweets a glowing review. Small cash bonus.',
+    refusalDescription: 'The Comédien leaves in a huff. No viral moment.',
+  },
+  {
+    id: 'n1-phantom-eater-night1',
+    name: 'The Phantom Eater',
+    role: 'BANNED',
+    behaviorType: 'STANDARD_BANNED',
+    arrivalMO: 'RESERVATION_ALIAS',
+    aliasFirstName: 'Le',
+    aliasLastName: 'Fantôme',
+    expectedPartySize: 1,
+    reservedPartySize: 1,
+    clueText: 'Different disguise each time. Always the same chipped gold tooth.',
+    visualTraits: { skinTone: 0, hairStyle: 3, hairColor: 2, clothingStyle: 1, clothingColor: 4, height: 1, glasses: 0 },
+    cashPenalty: 120,
+    consequenceDescription: 'The Phantom Eater finishes every course and leaves €0. −€120.',
+    refusalDescription: 'Not tonight, Phantom. Night 1 is a clean sheet.',
+    gameOver: false,
+  },
 ];
 
 export function generateDailyCharacters(
@@ -267,7 +298,7 @@ export function injectCharacterReservations(
   existingReservations: Reservation[],
 ): Reservation[] {
   const injected: Reservation[] = dailyChars
-    .filter(c => c.arrivalMO === 'RESERVATION_ALIAS')
+    .filter(c => c.arrivalMO === 'RESERVATION_ALIAS' && !c.id.startsWith('n1-'))
     .map((c, index) => {
       // reservedPartySize lets a character arrive with more people than their booking.
       // Falls back to expectedPartySize when not set.

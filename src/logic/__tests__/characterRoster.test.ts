@@ -66,6 +66,21 @@ describe('CHARACTER_ROSTER', () => {
     expect(ids).toContain('sodium-bae');
   });
 
+  it('has n1-vip-actor in the roster', () => {
+    const def = CHARACTER_ROSTER.find(c => c.id === 'n1-vip-actor');
+    expect(def).toBeDefined();
+    expect(def?.role).toBe('VIP');
+  });
+
+  it('has n1-phantom-eater-night1 in the roster', () => {
+    const def = CHARACTER_ROSTER.find(c => c.id === 'n1-phantom-eater-night1');
+    expect(def).toBeDefined();
+    expect(def?.role).toBe('BANNED');
+    expect(def?.arrivalMO).toBe('RESERVATION_ALIAS');
+    expect(def?.aliasFirstName).toBe('Le');
+    expect(def?.aliasLastName).toBe('Fantôme');
+  });
+
   it('all faction-aligned characters have valid factionPath', () => {
     const factionChars = CHARACTER_ROSTER.filter(c => c.factionPath !== undefined);
     factionChars.forEach(c => {
