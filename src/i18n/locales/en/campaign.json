@@ -79,6 +79,21 @@
       "letterPS": "Do not use me as a reference."
     }
   },
+  "mrv": {
+    "n1Step1L1": "We are opening the doors.",
+    "n1Step1L2": "Seat these nobodies. Try not to trip over your own feet.",
+    "n1Step2L1": "Read their lips. Walk-ins are fine, their cash is green. But if they claim a reservation, check the book.",
+    "n1Step2L2": "Here's a secret: Liars pay fat bribes if you seat them anyway. I like cash.",
+    "n1Step2L3": "Too busy for a real reservation? Tell them to get lost. You own the door. Now do your job.",
+    "n1Step3L1": "Read the ticket carefully.",
+    "n1Step3L2": "If they are late, or brought extra friends, they are dead to us.",
+    "n1Step4L1": "Look at that obnoxious gold watch. That is a VIP.",
+    "n1Step4L2": "The rules do not apply to money. Check your VIP list.",
+    "n1Step5L1": "Look at that chipped gold tooth.",
+    "n1Step5L2": "That rat has been eating here for free all month. Check the Banned list.",
+    "n1ClosingL1": "You handled it. All of it — the honest, the liar, the VIP, the rat.",
+    "n1ClosingL2": "Lock up. Tomorrow you run the floor without me watching."
+  },
   "nights": {
     "1": {
       "newspaper": "LE SOLSTICE REOPENS: CAN IT SURVIVE THE HYPE?",

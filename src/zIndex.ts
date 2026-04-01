@@ -7,7 +7,10 @@ export const Z_INDEX = {
   introChrome: 50,
   /** In-game Monsieur V. scripted dialogue overlay. */
   gameDialogue: 55,
-  gameHeader: 20,
+  /** Full-screen dim + resume — above desk scene (see z-10 layers in DeskScene). */
+  pauseOverlay: 40,
+  /** In-game TopBar — above pause so speed / unpause stays reachable. */
+  gameHeader: 50,
   /** Toasts (portal); content is pointer-events-none. */
   toast: 5000,
   /** Global mute — above toasts. */

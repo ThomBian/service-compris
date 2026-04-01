@@ -32,5 +32,8 @@
     "monsieurV": "They're already out there, waiting. Open the doors—for me. I need you on that floor. Please don't waste my trust.",
     "clockIn": "[ Clock In ]"
   },
-  "skip": "Skip to paperwork"
+  "skip": "Skip to paperwork",
+  "mrVDialogueInGame": {
+    "aria": "Monsieur V. — press Enter or click to continue"
+  }
 }

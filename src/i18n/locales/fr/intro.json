@@ -32,5 +32,8 @@
     "monsieurV": "Ils sont déjà là, dehors, qui attendent. Ouvrez — pour moi. J'ai besoin de vous en salle. Ne gâchez pas la confiance que je vous fais.",
     "clockIn": "[ Prendre son Poste ]"
   },
-  "skip": "Passer aux formalités"
+  "skip": "Passer aux formalités",
+  "mrVDialogueInGame": {
+    "aria": "Monsieur V. — Entrée ou clic pour continuer"
+  }
 }

@@ -1,9 +1,27 @@
 import { Reservation } from "./types";
 
 export const START_TIME = 1170; // 19:30
+
+// --- Night 1 scripted tutorial timing (single source of truth) ---
+/** In-game minutes between scripted beats. */
+export const NIGHT_1_SCRIPT_BEAT_GAP = 10;
+/** First scripted beat fires this many minutes after {@link START_TIME}. */
+export const NIGHT_1_SCRIPT_FIRST_BEAT_OFFSET = 3;
+/** Minutes after a beat before the scripted guest enters the queue. */
+export const NIGHT_1_SPAWN_DELAY = 1;
+// Beat timestamps derived from the three constants above:
+export const N1_T1 = START_TIME + NIGHT_1_SCRIPT_FIRST_BEAT_OFFSET;
+export const N1_T2 = N1_T1 + NIGHT_1_SCRIPT_BEAT_GAP;
+export const N1_T3 = N1_T2 + NIGHT_1_SCRIPT_BEAT_GAP;
+export const N1_T4 = N1_T3 + NIGHT_1_SCRIPT_BEAT_GAP;
+export const N1_T5 = N1_T4 + NIGHT_1_SCRIPT_BEAT_GAP;
+/** Night 1 closes at this in-game minute — enough time after the last encounter. */
+export const NIGHT_1_SHIFT_END_TIME = N1_T5 + 27;
+/** MrV delivers the Night 1 closing speech at this minute; the player must dismiss it to end the shift. */
+export const N1_T_CLOSE = N1_T5 + 15;
 /** End of seated service / doors closed — 22:30, minutes from midnight (must match formatTime). */
 export const DOORS_CLOSE_TIME = 22 * 60 + 30;
-export const TICK_RATE = 2500; // 1 in-game minute = 1 real-world seconds (at 1x)
+export const TICK_RATE = 1500; // 1 in-game minute = 1 real-world seconds (at 1x)
 /** Patience lost per clock tick for each client still in the queue (× strike multiplier when strike is active). */
 export const QUEUE_PATIENCE_DRAIN_PER_TICK = 6;
 

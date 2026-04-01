@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import { TYPEWRITER_SOUND_MIN_MS } from '@/src/components/intro/introConstants';
 
 /** Matches `Toast['variant']` — keep in sync with `ToastContext`. */
 export type ToastSoundVariant = 'success' | 'error' | 'warning' | 'info';
@@ -72,4 +73,34 @@ export function playToastSound(variant: ToastSoundVariant): void {
   const howl = s[variant];
   howl.stop();
   howl.play();
+}
+
+// --- Typewriter click (reused for in-game MrV dialogue) ---
+
+let dialogueTypewriterHowl: Howl | null = null;
+let typewriterLastMs = 0;
+
+function ensureDialogueTypewriter(): Howl {
+  if (!dialogueTypewriterHowl) {
+    dialogueTypewriterHowl = new Howl({
+      src: ['/audio/intro/typewriter-click.wav'],
+      volume: 0.45,
+      preload: true,
+    });
+  }
+  return dialogueTypewriterHowl;
+}
+
+/**
+ * Throttled typewriter click for in-game MrV dialogue.
+ * Pass directly as `onChar` to `useTypewriter`.
+ */
+export function playDialogueTypewriterClick(): void {
+  const now = performance.now();
+  if (now - typewriterLastMs < TYPEWRITER_SOUND_MIN_MS) return;
+  typewriterLastMs = now;
+  void Howler.ctx?.resume?.();
+  const h = ensureDialogueTypewriter();
+  h.stop();
+  h.play();
 }

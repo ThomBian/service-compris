@@ -74,9 +74,16 @@ export function useGameAmbience(opts: {
 
       if (!everStartedRef.current) {
         everStartedRef.current = true;
-        s.jazzLoop.volume(0);
-        s.jazzLoop.play();
-        s.jazzLoop.fade(0, JAZZ_TARGET_VOL, JAZZ_FADE_MS);
+        const jazzSeek = s.jazzLoop.seek() as number;
+        if (jazzSeek > 0) {
+          // Resuming after a pause (e.g. between nights) — skip the fade-in
+          s.jazzLoop.volume(JAZZ_TARGET_VOL);
+          s.jazzLoop.play();
+        } else {
+          s.jazzLoop.volume(0);
+          s.jazzLoop.play();
+          s.jazzLoop.fade(0, JAZZ_TARGET_VOL, JAZZ_FADE_MS);
+        }
       } else {
         s.jazzLoop.volume(JAZZ_TARGET_VOL);
         s.jazzLoop.play();
@@ -94,8 +101,8 @@ export function useGameAmbience(opts: {
   useEffect(() => {
     return () => {
       const s = getSharedAmbienceSounds();
-      s.rainLoop.stop();
-      s.jazzLoop.stop();
+      s.rainLoop.pause();
+      s.jazzLoop.pause();
     };
   }, []);
 }

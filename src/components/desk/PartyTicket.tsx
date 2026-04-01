@@ -4,14 +4,20 @@ import { motion } from "motion/react";
 import { useGame } from "../../context/GameContext";
 import { formatTime } from "../../utils";
 import { TicketField } from "./TicketField";
+import { ClientType, PhysicalState } from "../../types";
 
 export const PartyTicket: React.FC = () => {
   const {
-    gameState: { currentClient },
+    gameState: { currentClient, nightNumber },
     askQuestion,
     callOutLie,
     handleDecision,
   } = useGame();
+
+  const highlight =
+    nightNumber === 1 &&
+    currentClient?.type === ClientType.SCAMMER &&
+    currentClient?.physicalState === PhysicalState.AT_DESK;
 
   if (!currentClient) {
     return (
@@ -31,7 +37,16 @@ export const PartyTicket: React.FC = () => {
   }
 
   return (
-    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0_0_#141414] p-3 flex flex-col gap-2 h-full overflow-hidden relative">
+    <div
+      className="relative rounded-xl p-[2px] h-full flex flex-col shadow-[4px_4px_0_0_#141414]"
+      style={{ background: highlight ? '#8b3a0a' : '#141414' }}
+    >
+      {highlight && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+          <div style={{ position: 'absolute', inset: '-100%', background: 'conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)', animation: 'borderSpin 0.6s linear infinite' }} />
+        </div>
+      )}
+    <div className="relative flex-1 min-h-0 bg-white rounded-[10px] p-3 flex flex-col gap-2 overflow-hidden">
       {/* Patience bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
         <motion.div
@@ -106,6 +121,7 @@ export const PartyTicket: React.FC = () => {
         </div>
       </div>
 
+    </div>
     </div>
   );
 };

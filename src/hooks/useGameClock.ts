@@ -15,9 +15,11 @@ export function useGameClock(
     setGameState(prev => {
       if (prev.timeMultiplier === 0 || prev.gameOver) return prev;
 
+      const closeTime = getRule<number>(prev.activeRules, 'SHIFT_END_TIME', DOORS_CLOSE_TIME);
+
       // Shift ended for P&L: past closing with no tables still dining — freeze time so
       // overtime morale drain does not continue under the summary overlay.
-      if (prev.inGameMinutes >= DOORS_CLOSE_TIME) {
+      if (prev.inGameMinutes >= closeTime) {
         const hasOccupied = prev.grid.some(row =>
           row.some(c => c.state === CellState.OCCUPIED),
         );
@@ -27,8 +29,8 @@ export function useGameClock(
       }
 
       const nextMinutes = prev.inGameMinutes + 1;
-      const isOvertime = nextMinutes >= DOORS_CLOSE_TIME;
-      const wasOvertime = prev.inGameMinutes >= DOORS_CLOSE_TIME;
+      const isOvertime = nextMinutes >= closeTime;
+      const wasOvertime = prev.inGameMinutes >= closeTime;
 
       const nextMultiplier =
         isOvertime && !wasOvertime && prev.timeMultiplier < 4

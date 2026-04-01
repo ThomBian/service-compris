@@ -1,10 +1,12 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play } from 'lucide-react';
 import { formatTime } from './utils';
 import { GameProvider, useGame } from './context/GameContext';
 import { PhysicalState, CellState } from './types';
 import { SALARY_COST, ELECTRICITY_COST, FOOD_COST_PER_COVER, DOORS_CLOSE_TIME } from './constants';
+import { getRule } from './logic/nightRules';
 import { TopBar } from './components/TopBar';
 import { ScenePanel } from './components/ScenePanel';
 import { BottomPanel } from './components/BottomPanel';
@@ -17,8 +19,10 @@ import { CorkboardScreen } from './components/CorkboardScreen';
 import { MrVDialogue } from './components/MrVDialogue';
 import { useCampaign } from './hooks/useCampaign';
 import { useGameAmbience } from './hooks/useGameAmbience';
+import { getSharedAmbienceSounds } from './audio/introAudio';
 import type { LedgerData } from './types/campaign';
 import type { VisualTraits } from './types';
+import { Z_INDEX } from './zIndex';
 
 type GamePhase = 'LANDING' | 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
@@ -43,13 +47,27 @@ function GameContent({
   const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
-  const isOvertime = gameState.inGameMinutes >= DOORS_CLOSE_TIME;
+  const closeTime = getRule<number>(gameState.activeRules, 'SHIFT_END_TIME', DOORS_CLOSE_TIME);
+  const isOvertime = gameState.inGameMinutes >= closeTime;
   const hasOccupiedCells = gameState.grid.flat().some(c => c.state === CellState.OCCUPIED);
   const summaryBlockedByDesk =
     gameState.currentClient?.physicalState === PhysicalState.SEATING;
+
+  // Night-end-by-dialogue: track when the closing dialogue is dismissed
+  const [closingDialogueAcknowledged, setClosingDialogueAcknowledged] = React.useState(false);
+  const prevActiveDialogueRef = React.useRef(activeDialogue);
+  React.useEffect(() => {
+    const wasActive = prevActiveDialogueRef.current !== null;
+    prevActiveDialogueRef.current = activeDialogue;
+    if (gameState.nightEndPending && wasActive && activeDialogue === null) {
+      setClosingDialogueAcknowledged(true);
+    }
+  }, [activeDialogue, gameState.nightEndPending]);
+
   const shiftEnded =
     gameState.gameOver ||
-    (isOvertime && !hasOccupiedCells && !summaryBlockedByDesk);
+    (!gameState.nightEndPending && isOvertime && !hasOccupiedCells && !summaryBlockedByDesk) ||
+    (closingDialogueAcknowledged && !hasOccupiedCells && !summaryBlockedByDesk);
 
   useGameAmbience({
     shiftEnded,
@@ -110,21 +128,33 @@ function GameContent({
     setView('floorplan');
   };
 
+  const showDeskBottomBar =
+    view === 'floorplan' || gameState.revealedTools.length > 0;
+
   return (
     <div className="h-screen relative bg-[#E4E3E0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#E4E3E0] overflow-hidden">
       {/* Scene + bottom panel fill full viewport height */}
       <div className={`absolute inset-0 flex flex-col overflow-hidden ${view === 'floorplan' ? 'pt-14' : ''}`}>
-        <ScenePanel
-          view={view}
-          onSeatParty={handleSeatParty}
-          playerIdentity={playerIdentity}
-        />
-        <div className="flex-1 flex flex-col relative overflow-hidden min-h-0">
-          <BottomPanel view={view} isOvertime={isOvertime} playerIdentity={playerIdentity} />
-          {gameState.timeMultiplier === 0 && !shiftEnded && (
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          <ScenePanel
+            view={view}
+            onSeatParty={handleSeatParty}
+            playerIdentity={playerIdentity}
+            expandDeskScene={view === 'desk' && !showDeskBottomBar}
+          />
+          {showDeskBottomBar && (
+            <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+              <BottomPanel view={view} isOvertime={isOvertime} playerIdentity={playerIdentity} />
+            </div>
+          )}
+        </div>
+      </div>
+      {gameState.timeMultiplier === 0 && !shiftEnded && typeof document !== 'undefined'
+        ? createPortal(
             <button
               type="button"
-              className="absolute inset-0 z-10 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-4 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-5"
+              className="fixed inset-0 flex cursor-pointer items-start justify-center border-0 bg-[#141414]/12 px-4 pt-24 pb-0 transition-colors hover:bg-[#141414]/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4E3E0] sm:pt-28"
+              style={{ zIndex: Z_INDEX.pauseOverlay }}
               onClick={() => setTimeMultiplier(gameState.difficulty === 3 ? 3 : 1)}
               aria-label={
                 gameState.difficulty === 3
@@ -142,12 +172,12 @@ function GameContent({
                   {t('app.resumeHint')}
                 </span>
               </span>
-            </button>
-          )}
-        </div>
-      </div>
-      {/* TopBar floats on top of scene */}
-      <div className="absolute top-0 inset-x-0 z-30">
+            </button>,
+            document.body,
+          )
+        : null}
+      {/* TopBar floats above pause overlay so speed controls stay usable */}
+      <div className="absolute top-0 inset-x-0" style={{ zIndex: Z_INDEX.gameHeader }}>
         <TopBar
           inGameMinutes={gameState.inGameMinutes}
           rating={gameState.rating}
@@ -160,7 +190,6 @@ function GameContent({
           nightNumber={gameState.nightNumber}
           isOvertime={isOvertime}
           activeRules={gameState.activeRules}
-          playerIdentity={playerIdentity}
         />
       </div>
       <ToastContainer />
@@ -239,6 +268,9 @@ export default function App() {
     setPersist(undefined);
     setPlayerName('');
     setPlayerAvatarIndex(0);
+    const s = getSharedAmbienceSounds();
+    s.rainLoop.stop();
+    s.jazzLoop.stop();
     setPhase('LANDING');
   }, [campaign]);
 

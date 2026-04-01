@@ -2,6 +2,8 @@ import { useEffect, useCallback, Dispatch, SetStateAction } from 'react';
 import type { GameState, ScriptedEvent } from '../types';
 import { PhysicalState as PS } from '../types';
 import type { NightConfig } from '../types/campaign';
+import { TICK_RATE } from '../constants';
+import i18n from '../i18n';
 
 // --- Pure helpers (exported for testing) ---
 
@@ -56,18 +58,20 @@ export function useScriptedEvents(
       const mult = gameState.timeMultiplier;
       for (const action of event.actions) {
         if (action.kind === 'SHOW_DIALOGUE') {
-          onShowDialogue(action.lines);
+          onShowDialogue(action.lines.map(key => i18n.t(key, { ns: 'campaign' })));
         } else if (action.kind === 'REVEAL_TOOL') {
           setGameState(prev => {
             if (prev.revealedTools.includes(action.tool)) return prev;
             return { ...prev, revealedTools: [...prev.revealedTools, action.tool] };
           });
+        } else if (action.kind === 'SET_SHIFT_END_PENDING') {
+          setGameState(prev => ({ ...prev, nightEndPending: true }));
         } else if (action.kind === 'SPAWN_CHARACTER') {
           const delay = action.delayMinutes ?? 0;
           if (delay === 0) {
             spawnScriptedCharacter(action.characterId);
           } else {
-            const msPerGameMinute = mult > 0 ? 60_000 / mult : 60_000;
+            const msPerGameMinute = mult > 0 ? TICK_RATE / mult : TICK_RATE;
             window.setTimeout(() => spawnScriptedCharacter(action.characterId), delay * msPerGameMinute);
           }
         }

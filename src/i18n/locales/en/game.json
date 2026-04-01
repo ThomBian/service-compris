@@ -45,6 +45,7 @@
   "waitingInLine": "Waiting in line...",
   "maitreGreeting": "Good evening! How may I help you?",
   "syndicateDemand": "We require a table. Immediately.",
+  "greetings.reservationWithName": "Good evening. I have a reservation under {{lastName}}, party of {{partySize}}.",
   "greetings.reservation": [
     "Good evening, I'm here for my table.",
     "Hi, I have a reservation.",

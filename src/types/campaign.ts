@@ -10,7 +10,8 @@ export type RuleKey =
   | 'BLOCKED_GRID_CELLS'
   | 'QUEUE_SPAWN_RATE'
   | 'COVERS_TARGET'
-  | 'STRICT_FALSE_ACCUSATION';
+  | 'STRICT_FALSE_ACCUSATION'
+  | 'SHIFT_END_TIME';
 
 export interface ActiveRule {
   key: RuleKey;

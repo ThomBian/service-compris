@@ -2,11 +2,11 @@ import React from "react";
 import { Book, Check } from "lucide-react";
 import { useGame } from "../../context/GameContext";
 import { formatTime } from "../../utils";
-import { Reservation } from "../../types";
+import { Reservation, ClientType, PhysicalState } from "../../types";
 
 export const BookingLedger: React.FC = () => {
   const {
-    gameState: { reservations, inGameMinutes, currentClient },
+    gameState: { reservations, inGameMinutes, currentClient, nightNumber },
     toggleReservationArrived,
   } = useGame();
 
@@ -17,6 +17,11 @@ export const BookingLedger: React.FC = () => {
   // Both first AND last name must be known before highlighting a conflict.
   // This prevents false positives on first-name matches and requires the player
   // to ask for both name fields before the visual cue fires — by design.
+  const highlight =
+    nightNumber === 1 &&
+    currentClient?.type === ClientType.LEGITIMATE &&
+    currentClient?.physicalState === PhysicalState.AT_DESK;
+
   const conflictReservationId = (() => {
     if (!currentClient?.knownFirstName || !currentClient?.knownLastName)
       return null;
@@ -30,7 +35,16 @@ export const BookingLedger: React.FC = () => {
   })();
 
   return (
-    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0px_0px_rgba(20,20,20,1)] p-3 flex flex-col gap-2 h-full overflow-hidden">
+    <div
+      className="relative rounded-xl p-[2px] h-full flex flex-col shadow-[4px_4px_0px_0px_rgba(20,20,20,1)]"
+      style={{ background: highlight ? '#8b3a0a' : '#141414' }}
+    >
+      {highlight && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+          <div style={{ position: 'absolute', inset: '-100%', background: 'conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)', animation: 'borderSpin 0.6s linear infinite' }} />
+        </div>
+      )}
+    <div className="relative flex-1 min-h-0 bg-white rounded-[10px] p-3 flex flex-col gap-2 overflow-hidden">
       <div className="flex items-center gap-1.5 shrink-0">
         <Book size={12} />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">
@@ -88,6 +102,7 @@ export const BookingLedger: React.FC = () => {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 };

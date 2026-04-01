@@ -45,6 +45,7 @@
   "waitingInLine": "En file d'attente…",
   "maitreGreeting": "Bonsoir ! Comment puis-je vous aider ?",
   "syndicateDemand": "Nous exigeons une table. Immédiatement.",
+  "greetings.reservationWithName": "Bonsoir. J'ai une réservation au nom de {{lastName}}, pour {{partySize}} personnes.",
   "greetings.reservation": [
     "Bonsoir, je suis là pour ma table.",
     "Bonjour, j'ai une réservation.",

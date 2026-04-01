@@ -148,7 +148,8 @@ export type ScriptedTrigger =
 export type ScriptedAction =
   | { kind: 'SHOW_DIALOGUE'; lines: string[] }
   | { kind: 'REVEAL_TOOL'; tool: ToolReveal }
-  | { kind: 'SPAWN_CHARACTER'; characterId: string; delayMinutes?: number };
+  | { kind: 'SPAWN_CHARACTER'; characterId: string; delayMinutes?: number }
+  | { kind: 'SET_SHIFT_END_PENDING' };
 
 export interface ScriptedEvent {
   id: string;
@@ -186,4 +187,5 @@ export interface GameState {
   activeRules: ActiveRule[];
   firedEventIds: string[];
   revealedTools: ToolReveal[];
+  nightEndPending: boolean;
 }

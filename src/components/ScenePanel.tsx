@@ -7,17 +7,26 @@ interface ScenePanelProps {
   view: 'desk' | 'floorplan';
   onSeatParty: () => void;
   playerIdentity?: { name: string; traits: VisualTraits } | null;
+  /** When the desk bottom bar is hidden (no tools yet), let the street scene grow into the space below. */
+  expandDeskScene?: boolean;
 }
 
 export const ScenePanel: React.FC<ScenePanelProps> = ({
   view,
   onSeatParty,
   playerIdentity = null,
+  expandDeskScene = false,
 }) => {
   if (view === 'floorplan') return null;
 
   return (
-    <div className="h-[50vh] shrink-0 overflow-x-hidden">
+    <div
+      className={
+        expandDeskScene
+          ? 'flex min-h-0 flex-1 flex-col overflow-x-hidden'
+          : 'h-[50vh] shrink-0 overflow-x-hidden'
+      }
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key="desk-scene"

@@ -1,92 +1,132 @@
-import type { NightConfig, CampaignPath } from '../types/campaign';
-import { START_TIME } from '../constants';
+import type { NightConfig, CampaignPath } from "../types/campaign";
+import {
+  N1_T1,
+  N1_T2,
+  N1_T3,
+  N1_T4,
+  N1_T5,
+  N1_T_CLOSE,
+  NIGHT_1_SPAWN_DELAY,
+  NIGHT_1_SHIFT_END_TIME,
+} from "../constants";
 
 const NIGHT_1_DEFAULT: NightConfig = {
-  characterIds: ['n1-vip-actor', 'n1-phantom-eater-night1'],
+  characterIds: ["n1-vip-actor", "n1-phantom-eater-night1"],
   rules: [
-    { key: 'RESERVATIONS_DISABLED', value: true },
-    { key: 'COVERS_TARGET', value: 5 },
+    { key: "RESERVATIONS_DISABLED", value: true },
+    { key: "SHIFT_END_TIME", value: NIGHT_1_SHIFT_END_TIME },
   ],
   scriptedEvents: [
+    // Step 1 — spawn couple immediately; MrV speaks when they reach the desk
     {
-      id: 'n1-step1-intro',
-      trigger: { kind: 'TIME', minute: START_TIME + 2 },
+      id: "n1-step1-spawn",
+      trigger: { kind: "TIME", minute: N1_T1 },
+      actions: [{ kind: "SPAWN_CHARACTER", characterId: "n1-walkIn-couple" }],
+    },
+    {
+      id: "n1-step1-intro",
+      trigger: { kind: "CHARACTER_AT_DESK", characterId: "n1-walkIn-couple" },
+      actions: [
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1Step1L1", "mrv.n1Step1L2"] },
+      ],
+    },
+    // Step 2 — ledger revealed at beat; MrV speaks when businessman reaches the desk
+    {
+      id: "n1-step2-ledger-spawn",
+      trigger: { kind: "TIME", minute: N1_T2 },
       actions: [
         {
-          kind: 'SHOW_DIALOGUE',
-          lines: [
-            'We are opening the doors.',
-            'Seat these nobodies. Try not to trip over your own feet.',
-          ],
+          kind: "SPAWN_CHARACTER",
+          characterId: "n1-res-businessman",
+          delayMinutes: NIGHT_1_SPAWN_DELAY,
         },
-        { kind: 'SPAWN_CHARACTER', characterId: 'n1-walkIn-couple', delayMinutes: 1 },
       ],
     },
     {
-      id: 'n1-step2-ledger',
-      trigger: { kind: 'TIME', minute: START_TIME + 8 },
+      id: "n1-step2-ledger",
+      trigger: { kind: "CHARACTER_AT_DESK", characterId: "n1-res-businessman" },
       actions: [
-        { kind: 'REVEAL_TOOL', tool: 'LEDGER' },
+        { kind: "REVEAL_TOOL", tool: "LEDGER" },
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1Step2L1", "mrv.n1Step2L2", "mrv.n1Step2L3"] },
+      ],
+    },
+    // Step 3 — ticket revealed at beat; MrV speaks when late group reaches the desk
+    {
+      id: "n1-step3-ticket-spawn",
+      trigger: { kind: "TIME", minute: N1_T3 },
+      actions: [
+        { kind: "REVEAL_TOOL", tool: "PARTY_TICKET" },
         {
-          kind: 'SHOW_DIALOGUE',
-          lines: [
-            'From now on, we respect the book.',
-            'If they claim a reservation, their name better be in there.',
-          ],
+          kind: "SPAWN_CHARACTER",
+          characterId: "n1-res-late-group",
+          delayMinutes: NIGHT_1_SPAWN_DELAY,
         },
-        { kind: 'SPAWN_CHARACTER', characterId: 'n1-res-businessman', delayMinutes: 1 },
       ],
     },
     {
-      id: 'n1-step3-ticket',
-      trigger: { kind: 'TIME', minute: START_TIME + 15 },
+      id: "n1-step3-ticket",
+      trigger: { kind: "CHARACTER_AT_DESK", characterId: "n1-res-late-group" },
       actions: [
-        { kind: 'REVEAL_TOOL', tool: 'PARTY_TICKET' },
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1Step3L1", "mrv.n1Step3L2"] },
+      ],
+    },
+    // Step 4 — VIP clipboard revealed at beat; MrV speaks when VIP actor reaches the desk
+    {
+      id: "n1-step4-vip-spawn",
+      trigger: { kind: "TIME", minute: N1_T4 },
+      actions: [
+        { kind: "REVEAL_TOOL", tool: "CLIPBOARD_VIP" },
         {
-          kind: 'SHOW_DIALOGUE',
-          lines: [
-            'Read the ticket carefully.',
-            'If they are late, or brought extra friends, they are dead to us.',
-          ],
+          kind: "SPAWN_CHARACTER",
+          characterId: "n1-vip-actor",
+          delayMinutes: NIGHT_1_SPAWN_DELAY,
         },
-        { kind: 'SPAWN_CHARACTER', characterId: 'n1-res-late-group', delayMinutes: 1 },
       ],
     },
     {
-      id: 'n1-step4-vip',
-      trigger: { kind: 'TIME', minute: START_TIME + 22 },
+      id: "n1-step4-vip",
+      trigger: { kind: "CHARACTER_AT_DESK", characterId: "n1-vip-actor" },
       actions: [
-        { kind: 'REVEAL_TOOL', tool: 'CLIPBOARD_VIP' },
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1Step4L1", "mrv.n1Step4L2"] },
+      ],
+    },
+    // Step 5 — Banned tab revealed at beat; MrV speaks when Phantom reaches the desk
+    {
+      id: "n1-step5-banned-spawn",
+      trigger: { kind: "TIME", minute: N1_T5 },
+      actions: [
+        { kind: "REVEAL_TOOL", tool: "CLIPBOARD_BANNED" },
         {
-          kind: 'SHOW_DIALOGUE',
-          lines: [
-            'Look at that obnoxious gold watch. That is a VIP.',
-            'The rules do not apply to money. Check your VIP list.',
-          ],
+          kind: "SPAWN_CHARACTER",
+          characterId: "n1-res-phantom",
+          delayMinutes: NIGHT_1_SPAWN_DELAY,
         },
-        { kind: 'SPAWN_CHARACTER', characterId: 'n1-vip-actor', delayMinutes: 1 },
       ],
     },
     {
-      id: 'n1-step5-banned',
-      trigger: { kind: 'TIME', minute: START_TIME + 29 },
+      id: "n1-step5-banned",
+      trigger: {
+        kind: "CHARACTER_AT_DESK",
+        characterId: "n1-phantom-eater-night1",
+      },
       actions: [
-        { kind: 'REVEAL_TOOL', tool: 'CLIPBOARD_BANNED' },
-        {
-          kind: 'SHOW_DIALOGUE',
-          lines: [
-            'Look at that chipped gold tooth.',
-            'That rat has been eating here for free all month. Check the Banned list.',
-          ],
-        },
-        { kind: 'SPAWN_CHARACTER', characterId: 'n1-res-phantom', delayMinutes: 1 },
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1Step5L1", "mrv.n1Step5L2"] },
+      ],
+    },
+    // Closing — MrV signs off; the player must dismiss to end the night
+    {
+      id: "n1-closing",
+      trigger: { kind: "TIME", minute: N1_T_CLOSE },
+      actions: [
+        { kind: "SHOW_DIALOGUE", lines: ["mrv.n1ClosingL1", "mrv.n1ClosingL2"] },
+        { kind: "SET_SHIFT_END_PENDING" },
       ],
     },
   ],
 };
 
 const NIGHT_2_DEFAULT: NightConfig = {
-  characterIds: ['the-phantom-eater', 'mr-feast', 'the-syndicate'],
+  characterIds: ["the-phantom-eater", "mr-feast", "the-syndicate"],
   rules: [],
 };
 
@@ -95,9 +135,22 @@ const stub = (): NightConfig => ({
   rules: [],
 });
 
-export const CAMPAIGN_CONFIG: Record<number, Record<CampaignPath, NightConfig>> = {
-  1: { default: NIGHT_1_DEFAULT, underworld: NIGHT_1_DEFAULT, michelin: NIGHT_1_DEFAULT, viral: NIGHT_1_DEFAULT },
-  2: { default: NIGHT_2_DEFAULT, underworld: NIGHT_2_DEFAULT, michelin: NIGHT_2_DEFAULT, viral: NIGHT_2_DEFAULT },
+export const CAMPAIGN_CONFIG: Record<
+  number,
+  Record<CampaignPath, NightConfig>
+> = {
+  1: {
+    default: NIGHT_1_DEFAULT,
+    underworld: NIGHT_1_DEFAULT,
+    michelin: NIGHT_1_DEFAULT,
+    viral: NIGHT_1_DEFAULT,
+  },
+  2: {
+    default: NIGHT_2_DEFAULT,
+    underworld: NIGHT_2_DEFAULT,
+    michelin: NIGHT_2_DEFAULT,
+    viral: NIGHT_2_DEFAULT,
+  },
   3: {
     default: stub(),
     underworld: stub(),

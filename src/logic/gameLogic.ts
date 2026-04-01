@@ -257,12 +257,16 @@ export const createNewClient = ({
 // --- Queue Management Logic ---
 
 export function prepareClientForDesk(client: Client): Client {
-  const greeting =
-    client.type === ClientType.WALK_IN
-      ? randomGreeting('walkin')
-      : client.type === ClientType.SCAMMER
-        ? randomGreeting('scammer')
-        : randomGreeting('reservation');
+  const isLegitimate = client.type === ClientType.LEGITIMATE;
+
+  const greeting = client.type === ClientType.WALK_IN
+    ? randomGreeting('walkin')
+    : client.type === ClientType.SCAMMER
+      ? randomGreeting('scammer')
+      : tGame('greetings.reservationWithName', {
+          lastName: client.trueLastName,
+          partySize: client.truePartySize,
+        });
 
   const preparedClient: Client = {
     ...client,
@@ -271,13 +275,16 @@ export function prepareClientForDesk(client: Client): Client {
     lastMessage: greeting,
     chatHistory: [
       { sender: 'maitre-d', text: tGame('maitreGreeting') },
-      { sender: "guest", text: greeting },
+      { sender: 'guest', text: greeting },
     ],
   };
 
-  if (!preparedClient.claimedReservationId) {
-    const shouldAnnounce =
-      preparedClient.type !== ClientType.LEGITIMATE || Math.random() < 0.65;
+  if (isLegitimate && !preparedClient.claimedReservationId) {
+    preparedClient.knownFirstName = client.trueFirstName;
+    preparedClient.knownLastName = client.trueLastName;
+    preparedClient.knownPartySize = client.truePartySize;
+  } else if (!preparedClient.claimedReservationId) {
+    const shouldAnnounce = Math.random() < 0.65;
     if (shouldAnnounce) {
       preparedClient.knownFirstName = preparedClient.trueFirstName;
     }
@@ -850,5 +857,6 @@ export function buildInitialState(
       nightNumber === 1
         ? []
         : (['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'] as ToolReveal[]),
+    nightEndPending: false,
   };
 }

@@ -9,10 +9,9 @@ import {
   FastForward,
   Heart,
 } from "lucide-react";
-import type { VisualTraits } from "../types";
 import type { ActiveRule } from "../types/campaign";
 import { getRule } from "../logic/nightRules";
-import { PixelAvatar } from "./scene/PixelAvatar";
+
 
 interface TopBarProps {
   inGameMinutes: number;
@@ -26,8 +25,6 @@ interface TopBarProps {
   nightNumber: number;
   isOvertime: boolean;
   activeRules?: ActiveRule[];
-  /** From intro character creation; omit when absent (e.g. dev shortcuts). */
-  playerIdentity?: { name: string; traits: VisualTraits } | null;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -42,7 +39,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   nightNumber,
   isOvertime,
   activeRules = [],
-  playerIdentity = null,
 }) => {
   const { t } = useTranslation('ui');
   const pauseDisabled = getRule<boolean>(activeRules, 'PAUSE_DISABLED', false);
@@ -80,20 +76,6 @@ export const TopBar: React.FC<TopBarProps> = ({
             {Math.round(cash)}
           </span>
         </div>
-        {playerIdentity && (
-          <div
-            className="ml-auto flex min-w-0 max-w-[40%] shrink-0 items-center gap-2 border-l border-[#141414]/15 pl-3 sm:ml-0 sm:max-w-none sm:pl-6"
-            title={playerIdentity.name}
-            aria-label={t('topbar.playerIdentityAria', { name: playerIdentity.name })}
-          >
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-[#141414]/20 bg-[#ebe6dc]">
-              <PixelAvatar traits={playerIdentity.traits} scale={2} />
-            </div>
-            <span className="hidden truncate font-mono text-xs font-bold text-[#141414] sm:inline sm:max-w-[8rem]">
-              {playerIdentity.name}
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="flex items-center gap-2 bg-white/50 p-1 rounded-xl border border-[#141414]/10">

@@ -5,6 +5,7 @@ import { PixelAvatar } from "../scene/PixelAvatar";
 import { ActivityLog } from "../ActivityLog";
 import { CHARACTER_ROSTER } from '../../logic/characterRoster';
 import type { CharacterDefinition } from '../../types';
+import { PhysicalState } from '../../types';
 import type { CampaignPath } from '../../types/campaign';
 import { MAX_PATH_SCORE } from '../../constants';
 
@@ -231,7 +232,7 @@ function intensityLabel(level: 0 | 1 | 2 | 3): string {
 export const Clipboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("VIPs");
   const { gameState, pathScores } = useGame();
-  const { revealedTools } = gameState;
+  const { revealedTools, currentClient } = gameState;
   const showVipTab = revealedTools.includes('CLIPBOARD_VIP');
   const showBannedTab = revealedTools.includes('CLIPBOARD_BANNED');
 
@@ -270,8 +271,23 @@ export const Clipboard: React.FC = () => {
     .map(id => CHARACTER_ROSTER.find(c => c.id === id))
     .filter((c): c is CharacterDefinition => c !== undefined && c.role === 'BANNED');
 
+  const clientAtDesk = currentClient?.physicalState === PhysicalState.AT_DESK;
+  const isNight1 = gameState.nightNumber === 1;
+  const highlightVip = isNight1 && clientAtDesk && dailyVipDefs.some(c => c.id === currentClient?.characterId);
+  const highlightBanned = isNight1 && clientAtDesk && dailyBannedDefs.some(c => c.id === currentClient?.characterId);
+  const highlightClipboard = highlightVip || highlightBanned;
+
   return (
-    <div className="bg-white border-2 border-[#141414] rounded-xl shadow-[4px_4px_0_0_#141414] p-3 flex flex-col gap-2 h-full overflow-hidden">
+    <div
+      className="relative rounded-xl p-[2px] h-full flex flex-col shadow-[4px_4px_0_0_#141414]"
+      style={{ background: highlightClipboard ? '#8b3a0a' : '#141414' }}
+    >
+      {highlightClipboard && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+          <div style={{ position: 'absolute', inset: '-100%', background: 'conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)', animation: 'borderSpin 0.6s linear infinite' }} />
+        </div>
+      )}
+      <div className="relative flex-1 min-h-0 bg-white rounded-[10px] p-3 flex flex-col gap-2 overflow-hidden">
       <div className="flex items-center gap-1.5 shrink-0">
         <ClipboardIcon size={12} />
         <span className="text-[9px] font-bold uppercase tracking-widest opacity-50">
@@ -279,22 +295,33 @@ export const Clipboard: React.FC = () => {
         </span>
       </div>
       <div className="flex gap-1 shrink-0">
-        {visibleTabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative px-2 py-0.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-colors ${
-              activeTab === tab
-                ? "bg-[#141414] text-[#E4E3E0]"
-                : "bg-[#141414]/10 hover:bg-[#141414]/20"
-            }`}
-          >
-            {tab}
-            {tab === "Log" && hasUnseenLogs && activeTab !== "Log" && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500" />
-            )}
-          </button>
-        ))}
+        {visibleTabs.map((tab) => {
+          const tabHighlighted = (tab === 'VIPs' && highlightVip) || (tab === 'Banned' && highlightBanned);
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative overflow-hidden px-2 py-0.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-colors ${
+                activeTab === tab
+                  ? "bg-[#141414] text-[#E4E3E0]"
+                  : !tabHighlighted
+                    ? "bg-[#141414]/10 hover:bg-[#141414]/20"
+                    : ""
+              }`}
+              style={tabHighlighted && activeTab !== tab ? {
+                background: 'linear-gradient(90deg, #1a0800 0%, #1a0800 30%, rgba(240,192,64,0.8) 50%, #1a0800 70%, #1a0800 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'tabShimmer 1.5s ease-in-out infinite',
+                color: '#f0c040',
+              } : undefined}
+            >
+              <span className="relative z-10">{tab}</span>
+              {tab === "Log" && hasUnseenLogs && activeTab !== "Log" && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 z-10" />
+              )}
+            </button>
+          );
+        })}
       </div>
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === "VIPs" ? (
@@ -367,6 +394,7 @@ export const Clipboard: React.FC = () => {
             {activeTab} — coming soon
           </div>
         )}
+      </div>
       </div>
     </div>
   );

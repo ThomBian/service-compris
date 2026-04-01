@@ -174,6 +174,7 @@ export function useClientSpawner(
               height: 1,
             },
             isCaught: false,
+            characterId: 'n1-walkIn-couple',
             lastMessage: tGame('waitingInLine'),
             chatHistory: [],
           };
@@ -216,6 +217,7 @@ export function useClientSpawner(
               height: 1,
             },
             isCaught: false,
+            characterId: 'n1-res-late-group',
             lastMessage: tGame('waitingInLine'),
             chatHistory: [],
           };
@@ -223,6 +225,44 @@ export function useClientSpawner(
             ...prev,
             queue: [...prev.queue, scammer],
             spawnedReservationIds: [...prev.spawnedReservationIds, res.id],
+          };
+        }
+
+        if (characterId === 'n1-res-businessman') {
+          const newClient: Client = {
+            id: Math.random().toString(36).slice(2, 11),
+            type: ClientType.LEGITIMATE,
+            patience: 100,
+            physicalState: PhysicalState.IN_QUEUE,
+            dialogueState: DialogueState.AWAITING_GREETING,
+            spawnTime: prev.inGameMinutes,
+            trueFirstName: res.firstName,
+            trueLastName: res.lastName,
+            truePartySize: res.partySize,
+            trueReservationId: res.id,
+            isLate: false,
+            lieType: LieType.NONE,
+            hasLied: false,
+            visualTraits: {
+              skinTone: 1,
+              hairStyle: 2,
+              hairColor: 3,
+              clothingStyle: 3,
+              clothingColor: 1,
+              height: 2,
+            },
+            isCaught: false,
+            characterId: 'n1-res-businessman',
+            lastMessage: tGame('waitingInLine'),
+            chatHistory: [],
+          };
+          return {
+            ...prev,
+            queue: [...prev.queue, newClient],
+            spawnedReservationIds: [...prev.spawnedReservationIds, res.id],
+            reservations: prev.reservations.map(r =>
+              r.id === res.id ? { ...r, legitQueuedAt: prev.inGameMinutes } : r,
+            ),
           };
         }
 
@@ -285,6 +325,8 @@ export function useClientSpawner(
           if (def) {
             newClient = { ...newClient, visualTraits: def.visualTraits, characterId: def.id };
           }
+        } else if (res.id.startsWith('n1-res-')) {
+          newClient = { ...newClient, characterId: res.id };
         }
         return {
           ...prev,
@@ -301,7 +343,8 @@ export function useClientSpawner(
 
   useEffect(() => {
     if (gameState.timeMultiplier === 0) return;
-    if (gameState.inGameMinutes >= DOORS_CLOSE_TIME) return;
+    const closeTime = getRule<number>(gameState.activeRules, 'SHIFT_END_TIME', DOORS_CLOSE_TIME);
+    if (gameState.inGameMinutes >= closeTime) return;
 
     const toSpawn = gameState.reservations.filter(res => {
       if (gameState.spawnedReservationIds.includes(res.id)) return false;
@@ -315,7 +358,7 @@ export function useClientSpawner(
     }
 
     const spawnRateMultiplier = getRule<number>(gameState.activeRules, 'QUEUE_SPAWN_RATE', 1);
-    if (Math.random() < 0.05 * spawnRateMultiplier && gameState.queue.length < 5) {
+    if (!reservationsDisabled && Math.random() < 0.05 * spawnRateMultiplier && gameState.queue.length < 5) {
       spawnClient();
     }
 

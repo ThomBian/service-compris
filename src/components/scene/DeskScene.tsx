@@ -83,7 +83,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
 }) => {
   const { t } = useTranslation("ui");
   const {
-    gameState: { currentClient, queue },
+    gameState: { currentClient, queue, nightNumber },
     callOutLie,
   } = useGame();
   const isClientAtDesk = currentClient?.physicalState === PhysicalState.AT_DESK;
@@ -196,9 +196,6 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
       {/* Maitre d' column — stacked: button → fixed speech zone → avatar */}
       <div className="flex flex-col items-center w-[160px] shrink-0">
         {/* Seat Party button — sits just above the speech bubble zone */}
-        <style>{`
-          @keyframes seatBorderSpin { to { transform: rotate(1turn); } }
-        `}</style>
         <AnimatePresence>
           {canSeat && (
             <motion.div
@@ -208,20 +205,22 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
               exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 0.2 }}
-              className="relative group mb-1 rounded-[14px] p-[2px]"
+              className="relative mb-1 rounded-[14px] p-[2px]"
               style={{ background: "#8b3a0a" }}
             >
-              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px] opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: "-100%",
-                    background:
-                      "conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)",
-                    animation: "seatBorderSpin 0.6s linear infinite",
-                  }}
-                />
-              </div>
+              {nightNumber === 1 && (
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px]">
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "-100%",
+                      background:
+                        "conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)",
+                      animation: "borderSpin 0.6s linear infinite",
+                    }}
+                  />
+                </div>
+              )}
               <button
                 type="button"
                 onClick={onSeatParty}

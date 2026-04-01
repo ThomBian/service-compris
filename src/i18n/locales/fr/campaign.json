@@ -79,6 +79,21 @@
       "letterPS": "Ne me citez pas comme référence."
     }
   },
+  "mrv": {
+    "n1Step1L1": "Nous ouvrons les portes.",
+    "n1Step1L2": "Placez ces anonymes. Essayez de ne pas trébucher.",
+    "n1Step2L1": "Lisez-les bien. Les sans-réservation, leur argent est bon. Mais s'ils prétendent avoir réservé, vérifiez le livre.",
+    "n1Step2L2": "Un secret : les menteurs paient grassement si vous les placez quand même. J'aime l'argent.",
+    "n1Step2L3": "Trop chargé pour une vraie réservation ? Dites-leur de dégager. Vous contrôlez la porte. Maintenant, au travail.",
+    "n1Step3L1": "Lisez le ticket attentivement.",
+    "n1Step3L2": "En retard, ou avec des invités surprise — pour nous, ils sont morts.",
+    "n1Step4L1": "Cette montre en or est insupportable. C'est un VIP.",
+    "n1Step4L2": "L'argent n'a pas de règles. Vérifiez votre liste VIP.",
+    "n1Step5L1": "Cette dent en or ébréchée.",
+    "n1Step5L2": "Ce rat mange chez nous gratuitement depuis un mois. Vérifiez la liste des bannis.",
+    "n1ClosingL1": "Vous avez tout géré. L'honnête, le menteur, le VIP, le rat.",
+    "n1ClosingL2": "Fermez. Demain, vous gérez la salle sans moi dans votre dos."
+  },
   "nights": {
     "1": {
       "newspaper": "LE SOLSTICE ROUVRE : TIENDRA-T-IL LA PRESSION ?",
