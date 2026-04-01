@@ -923,3 +923,20 @@ describe('buildInitialState — campaign params', () => {
     expect(state.dailyCharacterIds).toEqual(['the-syndicate']);
   });
 });
+
+describe('buildInitialState — revealedTools', () => {
+  it('seeds empty revealedTools for Night 1', () => {
+    const state = buildInitialState(1);
+    expect(state.revealedTools).toEqual([]);
+  });
+
+  it('seeds full revealedTools for Night 2', () => {
+    const state = buildInitialState(1, { cash: 0, rating: 5, morale: 100, nightNumber: 2 });
+    expect(state.revealedTools).toEqual(['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED']);
+  });
+
+  it('seeds empty firedEventIds on every night', () => {
+    const state = buildInitialState(1);
+    expect(state.firedEventIds).toEqual([]);
+  });
+});
