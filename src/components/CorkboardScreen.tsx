@@ -13,10 +13,8 @@ import {
 } from '@/src/hooks/useCarouselSummary';
 import { playStampThwack, playStampCrinkle } from '@/src/audio/gameSfx';
 import { NewspaperReveal } from '@/src/components/corkboard/NewspaperReveal';
-import { LedgerReveal } from '@/src/components/corkboard/LedgerReveal';
+import { LedgerReveal, LEDGER_ROW_COUNT } from '@/src/components/corkboard/LedgerReveal';
 import { MemoReveal } from '@/src/components/corkboard/MemoReveal';
-
-const LEDGER_ROW_COUNT = 10;
 
 function corkboardPaperZIndex(
   paper: 'newspaper' | 'ledger' | 'memo',
@@ -56,6 +54,9 @@ export function CorkboardScreen({
 }: CorkboardScreenProps) {
   const { t } = useTranslation('campaign');
   const isLoss = variant === 'fired';
+  if (import.meta.env.DEV && isLoss && firedReason === undefined) {
+    console.warn('[CorkboardScreen] variant=fired but firedReason is undefined; defaulting to MORALE');
+  }
   const lossReason = firedReason ?? 'MORALE';
   const nightSegment = campaignNightsKeySegment(nightNumber, activePath);
   const nk = `nights.${nightSegment}`;

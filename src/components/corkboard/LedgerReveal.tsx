@@ -3,6 +3,9 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import type { LedgerData } from '@/src/types/campaign';
 
+/** Must match the number of entries in the `rows` array below. */
+export const LEDGER_ROW_COUNT = 10;
+
 interface LedgerRevealProps {
   ledger: LedgerData;
   revealedLines: number;

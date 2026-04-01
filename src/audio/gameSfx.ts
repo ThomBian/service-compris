@@ -113,7 +113,8 @@ const CORKBOARD_PATH = {
   ledgerDing: '/audio/corkboard/ledger-ding.wav',
   swish: '/audio/corkboard/paper-swish.wav',
   stampThwack: '/audio/corkboard/stamp-thwack.wav',
-  stampCrinkle: '/audio/corkboard/stamp-crinkle.wav',
+  // TODO: replace with '/audio/corkboard/stamp-crinkle.wav' once asset is delivered
+  stampCrinkle: '/audio/corkboard/paper-swish.wav',
 } as const;
 
 let corkboardSounds: Record<keyof typeof CORKBOARD_PATH, Howl> | null = null;

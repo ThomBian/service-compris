@@ -97,11 +97,16 @@ function GameContent({
 
     const foodCost = gameState.coversSeated * FOOD_COST_PER_COVER;
     const bill = SALARY_COST + ELECTRICITY_COST + foodCost;
-    const cashAfter = Math.max(0, gameState.cash - bill);
+    // Base cash calculation on tracked shiftRevenue (not gameState.cash which can drift
+    // from untracked character bonuses). Cash on hand = previous night's cash + this
+    // night's revenue - operating costs.
+    const startingCash = persist?.cash ?? 0;
+    const netProfit = gameState.shiftRevenue - bill;
+    const cashAfter = Math.max(0, startingCash + netProfit);
 
     const ledger: LedgerData = {
       cash: cashAfter,
-      netProfit: cashAfter - (persist?.cash ?? 0),
+      netProfit,
       rating: Math.max(1.0, gameState.rating),
       morale: Math.max(0, gameState.morale),
       coversSeated: gameState.coversSeated,
