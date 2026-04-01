@@ -33,7 +33,7 @@
 - Create: `public/audio/corkboard/README.md`
 - Modify: `src/audio/gameSfx.ts`
 
-- [ ] **Step 1: Create audio placeholder README**
+- [x] **Step 1: Create audio placeholder README**
 
 Create `public/audio/corkboard/README.md`:
 
@@ -52,7 +52,7 @@ Drop audio files here. All are referenced by `src/audio/gameSfx.ts`.
 | `stamp-crinkle.wav` | Paper crinkle after stamp settles (~200ms after thwack) |
 ```
 
-- [ ] **Step 2: Append corkboard SFX to `src/audio/gameSfx.ts`**
+- [x] **Step 2: Append corkboard SFX to `src/audio/gameSfx.ts`**
 
 Add after the closing brace of `playDialogueTypewriterClick`:
 
@@ -133,14 +133,14 @@ export function playStampCrinkle(): void {
 }
 ```
 
-- [ ] **Step 3: Verify lint passes**
+- [x] **Step 3: Verify lint passes**
 
 ```bash
 npm run lint
 ```
 Expected: no type errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add public/audio/corkboard/README.md src/audio/gameSfx.ts
@@ -155,7 +155,7 @@ git commit -m "feat(corkboard): add SFX stubs for carousel (telegraph, odometer,
 - Modify: `src/i18n/locales/en/campaign.json`
 - Modify: `src/i18n/locales/fr/campaign.json`
 
-- [ ] **Step 1: Update EN stamp values and add carousel key**
+- [x] **Step 1: Update EN stamp values and add carousel key**
 
 In `src/i18n/locales/en/campaign.json`:
 
@@ -170,7 +170,7 @@ In `src/i18n/locales/en/campaign.json`:
 }
 ```
 
-- [ ] **Step 2: Update FR stamp values and add carousel key**
+- [x] **Step 2: Update FR stamp values and add carousel key**
 
 In `src/i18n/locales/fr/campaign.json`:
 
@@ -185,7 +185,7 @@ In `src/i18n/locales/fr/campaign.json`:
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/i18n/locales/en/campaign.json src/i18n/locales/fr/campaign.json
@@ -219,7 +219,7 @@ export function useCarouselSummary(
 }
 ```
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `src/hooks/__tests__/useCarouselSummary.test.ts`:
 
@@ -366,14 +366,14 @@ describe('useCarouselSummary', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- useCarouselSummary --run
 ```
 Expected: FAIL — module not found
 
-- [ ] **Step 3: Implement `useCarouselSummary`**
+- [x] **Step 3: Implement `useCarouselSummary`**
 
 Create `src/hooks/useCarouselSummary.ts`:
 
@@ -487,14 +487,14 @@ export function useCarouselSummary(
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test -- useCarouselSummary --run
 ```
 Expected: all tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/hooks/useCarouselSummary.ts src/hooks/__tests__/useCarouselSummary.test.ts
@@ -514,7 +514,7 @@ Framer Motion positioning pattern used here and in all reveal components:
 
 `x` and `y` in Framer Motion variants accept CSS unit strings (`'-38vw'`, `'-30vh'`), so viewport-relative dismissed positions work correctly without JS math.
 
-- [ ] **Step 1: Create `src/components/corkboard/NewspaperReveal.tsx`**
+- [x] **Step 1: Create `src/components/corkboard/NewspaperReveal.tsx`**
 
 ```tsx
 import React from 'react';
@@ -631,14 +631,14 @@ export function NewspaperReveal({
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- [x] **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 Expected: no type errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/corkboard/NewspaperReveal.tsx
@@ -654,7 +654,7 @@ git commit -m "feat(corkboard): add NewspaperReveal carousel component"
 
 The stamp renders inside this component, but only when `showStamp` is true (controlled by `CorkboardScreen` in the `final` step). The stamp animates with a spring slam effect.
 
-- [ ] **Step 1: Create `src/components/corkboard/LedgerReveal.tsx`**
+- [x] **Step 1: Create `src/components/corkboard/LedgerReveal.tsx`**
 
 ```tsx
 import React from 'react';
@@ -812,14 +812,14 @@ export function LedgerReveal({
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- [x] **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 Expected: no type errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/corkboard/LedgerReveal.tsx
@@ -835,7 +835,7 @@ git commit -m "feat(corkboard): add LedgerReveal carousel component with stamp s
 
 During the typewriter reveal the full memo content is shown as a plain `<pre>`-style block (character by character). Once typing is done (`memoDisplayed === memoFull`), the component switches to the fully-styled layout (blockquote, salutation, sign-off, etc.). This gives the typewriter feel during reveal and the polished final look once complete.
 
-- [ ] **Step 1: Create `src/components/corkboard/MemoReveal.tsx`**
+- [x] **Step 1: Create `src/components/corkboard/MemoReveal.tsx`**
 
 ```tsx
 import React from 'react';
@@ -974,14 +974,14 @@ export function MemoReveal({
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- [x] **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 Expected: no type errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/components/corkboard/MemoReveal.tsx
@@ -1006,7 +1006,7 @@ What changes:
 
 Note: rename the local `setTimeout` variable to `timerId` to avoid shadowing the `t` translation function.
 
-- [ ] **Step 1: Rewrite `src/components/CorkboardScreen.tsx`**
+- [x] **Step 1: Rewrite `src/components/CorkboardScreen.tsx`**
 
 ```tsx
 import React from 'react';
@@ -1209,21 +1209,21 @@ export function CorkboardScreen({
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- [x] **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 Expected: no type errors
 
-- [ ] **Step 3: Run all tests**
+- [x] **Step 3: Run all tests**
 
 ```bash
 npm run test -- --run
 ```
 Expected: all tests PASS
 
-- [ ] **Step 4: Smoke test in dev**
+- [x] **Step 4: Smoke test in dev**
 
 ```bash
 npm run dev
@@ -1235,7 +1235,7 @@ Open the game and verify:
 3. **Skip test** — press ENTER while text is typing → text jumps to complete instantly
 4. **Click test** — clicking anywhere on screen (not on CTA buttons) advances the carousel
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/CorkboardScreen.tsx

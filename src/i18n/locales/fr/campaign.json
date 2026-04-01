@@ -39,11 +39,14 @@
     "cta": {
       "giveResignation": "Remettre ma démission.",
       "openRestaurant": "Ouvrir le restaurant"
+    },
+    "carousel": {
+      "pressEnter": "[ APPUYEZ SUR ENTRÉE ]"
     }
   },
   "fired": {
     "MORALE": {
-      "ledgerStamp": "Déserté",
+      "ledgerStamp": "DÉMISSIONNÉ",
       "newspaperHeadline": "TOUT LE PERSONNEL QUITTE LE SOLSTICE EN PLEIN SERVICE",
       "newspaperDeck": "Des témoins évoquent un chaos feutré : cuisine et salle sont parties en même temps.",
       "newspaperBodyLeft": "Les clients ont vu l'équipe interrompre son travail et sortir par la cuisine. Un serveur aurait murmuré « pas pour tout l'or du monde ». Tables laissées en plan ; certains invités se sont servis au vin — petit réconfort, confirment les témoins.",
@@ -55,7 +58,7 @@
       "letterPS": "Elle est partie la première. Elle sent toujours venir les choses."
     },
     "VIP": {
-      "ledgerStamp": "Révoqué",
+      "ledgerStamp": "SCANDALE",
       "newspaperHeadline": "INVITÉ DE MARQUE REFUSÉ À L'ENTRÉE D'UN RESTAURANT",
       "newspaperDeck": "Incident diplomatique rue du Solstice : l'hôte aurait refusé l'entrée à une personnalité.",
       "newspaperBodyLeft": "Un dîner discret a viré à l'incident : un VIP se serait vu refuser l'entrée au Solstice pour une « politique non communiquée ». Son escorte l'a quitté sans commentaire. On l'a revu plus tard, seul, dans un bistro rive gauche.",
@@ -67,7 +70,7 @@
       "letterPS": "Vos affaires personnelles seront envoyées. Un jour. Il pourrait pleuvoir."
     },
     "BANNED": {
-      "ledgerStamp": "Compromis",
+      "ledgerStamp": "COMPROMIS",
       "newspaperHeadline": "UN FICHÉ S'ASSOIT AU SOLSTICE — LE SERVICE DÉRAILLE",
       "newspaperDeck": "Des sources confirment : une personne bannie a été accueillie et assise, service perturbé.",
       "newspaperBodyLeft": "Des initiés rapportent qu'une figure connue de la restauration est entrée au Solstice malgré le registre des interdits. Trois tables vidées, deux tables parties sans dessert.",

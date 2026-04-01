@@ -13,6 +13,7 @@ import {
   blockShiftAmbienceUntil,
 } from '@/src/audio/ambienceShiftGate';
 import { createIntroSounds, type IntroSounds } from '@/src/audio/introAudio';
+import { playDialogueTypewriterClick } from '@/src/audio/gameSfx';
 import { useTypewriter } from '@/src/hooks/useTypewriter';
 import { useIntroScreen0Enter, useIntroScreen1Enter } from '@/src/hooks/useIntroEnterKeys';
 import { INTRO_AVATARS } from '@/src/components/intro/introAvatars';
@@ -23,7 +24,6 @@ import {
   INTRO_SEEN_KEY,
   readIntroSeen,
   SCREEN0_KEYS,
-  TYPEWRITER_SOUND_MIN_MS,
 } from '@/src/components/intro/introConstants';
 import {
   MonsieurVDialogueBlock,
@@ -95,7 +95,6 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   const introScreenRef = useRef(screen);
   const audioStartedRef = useRef(false);
   const soundsRef = useRef<IntroSounds | null>(null);
-  const typewriterSoundLastRef = useRef(0);
 
   const [showSkip] = useState(readIntroSeen);
 
@@ -110,22 +109,9 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
     return () => {
       const s = soundsRef.current;
       if (!s) return;
-      s.typewriterClick.stop();
       s.clipboardThud.stop();
       s.doorOpen.stop();
     };
-  }, []);
-
-  const playTypeChar = useCallback(() => {
-    const now = performance.now();
-    if (now - typewriterSoundLastRef.current < TYPEWRITER_SOUND_MIN_MS) {
-      return;
-    }
-    typewriterSoundLastRef.current = now;
-    const s = soundsRef.current;
-    if (!s) return;
-    s.typewriterClick.stop();
-    s.typewriterClick.play();
   }, []);
 
   const screen0Text = t(SCREEN0_KEYS[screen0Para]);
@@ -136,7 +122,7 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   } = useTypewriter(
     screen0Text,
     INTRO_CHAR_DELAY_MS,
-    playTypeChar,
+    playDialogueTypewriterClick,
     INTRO_JITTER_MS,
   );
 
@@ -149,7 +135,7 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
   } = useTypewriter(
     screen1LineText,
     INTRO_CHAR_DELAY_MS,
-    playTypeChar,
+    playDialogueTypewriterClick,
     INTRO_JITTER_MS,
   );
 
@@ -478,7 +464,6 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
       ensureSounds={ensureSounds}
       startAmbience={startAmbience}
       finishIntro={finishIntro}
-      playTypeChar={playTypeChar}
       introCharDelayMs={INTRO_CHAR_DELAY_MS}
       introJitterMs={INTRO_JITTER_MS}
     />
@@ -493,7 +478,6 @@ interface IntroScreens23Props {
   ensureSounds: () => IntroSounds;
   startAmbience: () => void;
   finishIntro: () => void;
-  playTypeChar: () => void;
   introCharDelayMs: number;
   introJitterMs: number;
 }
@@ -506,7 +490,6 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
   ensureSounds,
   startAmbience,
   finishIntro,
-  playTypeChar,
   introCharDelayMs,
   introJitterMs,
 }) => {
@@ -549,7 +532,7 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
   } = useTypewriter(
     s2Current,
     introCharDelayMs,
-    playTypeChar,
+    playDialogueTypewriterClick,
     introJitterMs,
   );
 
@@ -603,7 +586,7 @@ const IntroScreens23: React.FC<IntroScreens23Props> = ({
   } = useTypewriter(
     screen3LineText,
     introCharDelayMs,
-    playTypeChar,
+    playDialogueTypewriterClick,
     introJitterMs,
   );
 

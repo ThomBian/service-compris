@@ -39,11 +39,14 @@
     "cta": {
       "giveResignation": "Give Resignation.",
       "openRestaurant": "Open Restaurant"
+    },
+    "carousel": {
+      "pressEnter": "[ PRESS ENTER ]"
     }
   },
   "fired": {
     "MORALE": {
-      "ledgerStamp": "Abandoned",
+      "ledgerStamp": "DÉMISSIONNÉ",
       "newspaperHeadline": "ENTIRE STAFF WALKS OUT MID-SERVICE AT LE SOLSTICE",
       "newspaperDeck": "Witnesses describe scenes of quiet chaos as kitchen and floor staff left simultaneously.",
       "newspaperBodyLeft": "Diners reported that staff simply stopped mid-task and filed out through the kitchen entrance. One server was overheard saying \"not for any amount of money.\" Tables were left uncleared. Several guests helped themselves to the wine — a minor silver lining, witnesses confirmed.",
@@ -55,7 +58,7 @@
       "letterPS": "She was the first to go. She always knows."
     },
     "VIP": {
-      "ledgerStamp": "Dismissed",
+      "ledgerStamp": "SCANDALE",
       "newspaperHeadline": "DISTINGUISHED GUEST TURNED AWAY AT DOOR OF LOCAL RESTAURANT",
       "newspaperDeck": "A diplomatic incident erupted on Solstice Street when the host refused entry to a notable guest.",
       "newspaperBodyLeft": "What should have been a quiet dinner became an incident when a VIP was refused entry to Le Solstice, reportedly for an \"undisclosed policy.\" Their security detail was observed escorting them away without comment. The guest was seen later that evening at a bistro on the Left Bank, eating alone.",
@@ -67,7 +70,7 @@
       "letterPS": "Your personal items will be posted. Eventually. It may rain."
     },
     "BANNED": {
-      "ledgerStamp": "Compromised",
+      "ledgerStamp": "COMPROMIS",
       "newspaperHeadline": "KNOWN TROUBLEMAKER SEATED AT LE SOLSTICE — CHAOS ENSUES",
       "newspaperDeck": "Sources confirm a banned individual was admitted and seated, resulting in a disrupted service.",
       "newspaperBodyLeft": "Industry insiders report that a figure well known to the hospitality community was permitted entry to Le Solstice despite appearing on the establishment's own banned register. The resulting disruption cleared three tables and sent two parties into the street without their desserts.",

@@ -14,7 +14,6 @@ export const DIFFICULTY_VALUES = [0, 1, 2, 3] as const;
 
 export const INTRO_CHAR_DELAY_MS = 12;
 export const INTRO_JITTER_MS = 5;
-export const TYPEWRITER_SOUND_MIN_MS = 85;
 
 export function readIntroSeen(): boolean {
   try {

@@ -6,9 +6,11 @@ export interface GameAmbienceSounds {
   jazzLoop: Howl;
 }
 
-/** One-shot SFX used only during the intro (not shared across mount cycles). */
+/**
+ * One-shot SFX used only during the intro (not shared across mount cycles).
+ * Typewriter strikes use `playDialogueTypewriterClick` in `gameSfx.ts` (shared with corkboard / in-game Mr. V).
+ */
 export interface IntroOneShotSounds {
-  typewriterClick: Howl;
   clipboardThud: Howl;
   doorOpen: Howl;
 }
@@ -24,7 +26,6 @@ export interface IntroSounds extends GameAmbienceSounds, IntroOneShotSounds {}
 const PATH = {
   rain: '/audio/intro/rain-loop.wav',
   jazz: '/audio/intro/jazz-loop.wav',
-  typewriter: '/audio/intro/typewriter-click.wav',
   door: '/audio/intro/door-open.wav',
 } as const;
 
@@ -81,12 +82,6 @@ export function createGameAmbienceSounds(): GameAmbienceSounds {
  */
 export function createIntroOneShotSounds(): IntroOneShotSounds {
   return {
-    typewriterClick: new Howl({
-      src: [PATH.typewriter],
-      volume: 0.6,
-      preload: true,
-      onloaderror: devLoadErr('typewriter-click'),
-    }),
     clipboardThud: new Howl({
       src: [PATH.door],
       volume: 0.5,
