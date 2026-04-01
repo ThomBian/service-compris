@@ -205,11 +205,23 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
               exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 0.2 }}
-              className="relative mb-1 rounded-[14px] p-[2px]"
+              className="relative group mb-1 rounded-[14px] p-[2px]"
               style={{ background: "#8b3a0a" }}
             >
-              {nightNumber === 1 && (
+              {nightNumber === 1 ? (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px]">
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "-100%",
+                      background:
+                        "conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)",
+                      animation: "borderSpin 0.6s linear infinite",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px] opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                   <div
                     style={{
                       position: "absolute",

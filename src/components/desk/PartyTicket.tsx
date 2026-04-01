@@ -46,7 +46,7 @@ export const PartyTicket: React.FC = () => {
           <div style={{ position: 'absolute', inset: '-100%', background: 'conic-gradient(#f0c040 0deg, #f0c040 90deg, #8b3a0a 120deg, #8b3a0a 360deg)', animation: 'borderSpin 0.6s linear infinite' }} />
         </div>
       )}
-    <div className="relative flex-1 min-h-0 bg-white rounded-[10px] p-3 flex flex-col gap-2 overflow-hidden">
+      <div className="relative flex-1 min-h-0 bg-white rounded-[10px] p-3 flex flex-col gap-2 overflow-hidden">
       {/* Patience bar */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
         <motion.div

@@ -257,8 +257,6 @@ export const createNewClient = ({
 // --- Queue Management Logic ---
 
 export function prepareClientForDesk(client: Client): Client {
-  const isLegitimate = client.type === ClientType.LEGITIMATE;
-
   const greeting = client.type === ClientType.WALK_IN
     ? randomGreeting('walkin')
     : client.type === ClientType.SCAMMER
@@ -279,17 +277,23 @@ export function prepareClientForDesk(client: Client): Client {
     ],
   };
 
-  if (isLegitimate && !preparedClient.claimedReservationId) {
+  if (preparedClient.claimedReservationId) {
+    // Impersonator: no pre-filled ticket fields — player must investigate.
+  } else if (client.type === ClientType.WALK_IN) {
     preparedClient.knownFirstName = client.trueFirstName;
-    preparedClient.knownLastName = client.trueLastName;
-    preparedClient.knownPartySize = client.truePartySize;
-  } else if (!preparedClient.claimedReservationId) {
+    if (Math.random() > 0.5)
+      preparedClient.knownPartySize = client.truePartySize;
+  } else if (client.type === ClientType.SCAMMER) {
+    preparedClient.knownFirstName = client.trueFirstName;
+    if (Math.random() > 0.5)
+      preparedClient.knownPartySize = client.truePartySize;
+  } else if (client.type === ClientType.LEGITIMATE) {
     const shouldAnnounce = Math.random() < 0.65;
     if (shouldAnnounce) {
       preparedClient.knownFirstName = preparedClient.trueFirstName;
     }
     if (Math.random() > 0.5)
-      preparedClient.knownPartySize = preparedClient.truePartySize;
+      preparedClient.knownPartySize = client.truePartySize;
   }
 
   return preparedClient;

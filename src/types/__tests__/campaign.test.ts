@@ -1,6 +1,7 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import type { ActiveRule, RuleKey, NightConfig, CampaignState, LedgerData } from '../campaign';
 import type { ScriptedEvent } from '../../types';
+import { ClientType } from '../../types';
 
 describe('campaign types', () => {
   it('ActiveRule value covers all rule key shapes', () => {
@@ -46,5 +47,14 @@ describe('campaign types', () => {
       actions: [{ kind: 'SHOW_DIALOGUE', lines: ['Check the list.'] }],
     };
     expect(event.trigger.kind).toBe('CHARACTER_AT_DESK');
+  });
+
+  it('ScriptedEvent CHARACTER_TYPE_AT_DESK trigger compiles', () => {
+    const event: ScriptedEvent = {
+      id: 'type-at-desk',
+      trigger: { kind: 'CHARACTER_TYPE_AT_DESK', type: ClientType.SCAMMER },
+      actions: [{ kind: 'REVEAL_TOOL', tool: 'CLIPBOARD_BANNED' }],
+    };
+    expect(event.trigger.kind).toBe('CHARACTER_TYPE_AT_DESK');
   });
 });
