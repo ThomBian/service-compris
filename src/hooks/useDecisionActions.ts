@@ -22,6 +22,8 @@ import {
 import { type Toast } from "../context/ToastContext";
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { tGame, tCharacter } from '../i18n/tGame';
+import { BOSS_ROSTER } from '../data/bossRoster';
+import { createCharacter } from '../logic/characters/factory';
 
 type ShowToast = (
   title: string,
@@ -76,6 +78,25 @@ export function useDecisionActions(
         if (!prev.currentClient) return prev;
 
         const deskClient = prev.currentClient;
+
+        // BOSS BANNED interception — gate the refuse behind a mini-game
+        if (deskClient.characterId) {
+          const boss = BOSS_ROSTER.find(
+            b => b.id === deskClient.characterId && b.role === 'BANNED',
+          );
+          if (boss) {
+            return {
+              ...prev,
+              activeBossEncounter: {
+                bossId: boss.id,
+                interceptedAction: 'REFUSE' as const,
+                miniGame: boss.miniGame,
+                previousTimeMultiplier: prev.timeMultiplier,
+              },
+              timeMultiplier: 0,
+            };
+          }
+        }
 
         // CHARACTER REFUSE — short-circuit normal logic
         if (deskClient.characterId) {
@@ -163,6 +184,23 @@ export function useDecisionActions(
   const seatParty = useCallback(() => {
     setGameState((prev) => {
       if (!prev.currentClient) return prev;
+      const boss = prev.currentClient.characterId
+        ? BOSS_ROSTER.find(
+            b => b.id === prev.currentClient!.characterId && b.role === 'VIP',
+          )
+        : undefined;
+      if (boss) {
+        return {
+          ...prev,
+          activeBossEncounter: {
+            bossId: boss.id,
+            interceptedAction: 'SEAT' as const,
+            miniGame: boss.miniGame,
+            previousTimeMultiplier: prev.timeMultiplier,
+          },
+          timeMultiplier: 0,
+        };
+      }
       return {
         ...prev,
         grid: clearFloorplanSelection(prev.grid),
@@ -173,6 +211,94 @@ export function useDecisionActions(
       };
     });
   }, [setGameState]);
+
+  const clearBossEncounter = useCallback(
+    (outcome: 'WIN' | 'LOSE') => {
+      let toastArgs: [string, string | undefined, Toast['variant']] | null = null;
+
+      flushSync(() => {
+        setGameState((prev) => {
+          if (!prev.activeBossEncounter) return prev;
+          const { bossId, interceptedAction, previousTimeMultiplier } =
+            prev.activeBossEncounter;
+          const boss = BOSS_ROSTER.find(b => b.id === bossId);
+          const base = {
+            ...prev,
+            activeBossEncounter: null,
+            timeMultiplier: previousTimeMultiplier,
+          };
+          if (!boss) return base;
+
+          const ch = createCharacter(boss);
+
+          if (outcome === 'WIN') {
+            if (interceptedAction === 'SEAT') {
+              toastArgs = [
+                tGame('boss.winSeat', { name: boss.name }),
+                undefined,
+                'success',
+              ];
+              return {
+                ...base,
+                currentClient: prev.currentClient
+                  ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
+                  : null,
+              };
+            }
+            const charOutcome = ch.onRefused(prev);
+            toastArgs = [
+              tGame('boss.winRefuse', { name: boss.name }),
+              undefined,
+              'success',
+            ];
+            return applyMoraleGameOver({
+              ...base,
+              ...charOutcome,
+              currentClient: null,
+              logs: [
+                tGame('logVipRefused', {
+                  role: tGame('roleBanned'),
+                  name: boss.name,
+                }),
+                ...base.logs,
+              ].slice(0, 50),
+            });
+          }
+          if (interceptedAction === 'SEAT') {
+            const charOutcome = ch.onRefused(prev);
+            toastArgs = [
+              tGame('boss.loseSeat', { name: boss.name }),
+              undefined,
+              'error',
+            ];
+            return applyMoraleGameOver({
+              ...base,
+              ...charOutcome,
+              currentClient: null,
+              logs: [
+                tGame('boss.stormedOut', { name: boss.name }),
+                ...base.logs,
+              ].slice(0, 50),
+            });
+          }
+          toastArgs = [
+            tGame('boss.loseRefuse', { name: boss.name }),
+            undefined,
+            'error',
+          ];
+          return {
+            ...base,
+            currentClient: prev.currentClient
+              ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
+              : null,
+          };
+        });
+      });
+
+      if (toastArgs) showToast(...toastArgs);
+    },
+    [setGameState, showToast],
+  );
 
   const toggleCellSelection = useCallback(
     (x: number, y: number) => {
@@ -424,5 +550,6 @@ export function useDecisionActions(
     confirmSeating,
     refuseSeatedParty,
     lastCallTable,
+    clearBossEncounter,
   };
 }

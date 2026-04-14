@@ -106,5 +106,24 @@
   "characters.fake-influencer.refusalDescription": "No free meals, no hit pieces. Well handled.",
   "characters.the-dictator.clueText": "Extremely dangerous. Do not seat under any circumstances.",
   "characters.the-dictator.consequenceDescription": "Didn't like the food. Attacked the restaurant.",
-  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided."
+  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided.",
+  "boss": {
+    "winSeat": "{{name}} is satisfied. Proceed to seating.",
+    "winRefuse": "Well handled. {{name}} turned away.",
+    "loseSeat": "{{name}} is furious.",
+    "loseRefuse": "You failed. {{name}} forces their way in.",
+    "stormedOut": "{{name}} stormed out in fury.",
+    "syndicateDon": {
+      "quote": "You understand how this works. Don't disappoint me."
+    },
+    "grandInquisitor": {
+      "quote": "The house will be judged tonight."
+    },
+    "influencer": {
+      "quote": "My followers are watching. Make it iconic."
+    },
+    "aristocrat": {
+      "quote": "I do not wait. I am waited upon."
+    }
+  }
 }
