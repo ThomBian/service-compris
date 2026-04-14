@@ -5,12 +5,10 @@ import type { MiniGameId } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { BOSS_ROSTER } from '../../data/bossRoster';
 import { Z_INDEX } from '../../zIndex';
+import { CoatCheckGame } from './CoatCheckGame';
+import type { MiniGameProps } from './miniGameTypes';
 
-export interface MiniGameProps {
-  onWin: () => void;
-  onLose: () => void;
-  durationMs: number;
-}
+export type { MiniGameProps } from './miniGameTypes';
 
 // Populated by each mini-game plan. Placeholder stubs for now.
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
@@ -53,19 +51,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
       </div>
     </div>
   ),
-  COAT_CHECK: ({ onWin, onLose }) => (
-    <div className="flex flex-col items-center gap-4 p-8">
-      <p className="text-white/60 text-sm tracking-widest uppercase">Coat Check — coming soon</p>
-      <div className="flex gap-4">
-        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
-          Win
-        </button>
-        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
-          Lose
-        </button>
-      </div>
-    </div>
-  ),
+  COAT_CHECK: CoatCheckGame,
 };
 
 // Duration (ms) per mini-game

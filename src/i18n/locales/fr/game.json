@@ -123,7 +123,10 @@
       "quote": "Mes abonnés regardent. Rendez ça iconique."
     },
     "aristocrat": {
-      "quote": "Je n'attends pas. On m'attend."
+      "quote": "Si la Duchesse touche le sol, vous êtes renvoyé."
+    },
+    "coatCheck": {
+      "instruction": "Déplacez le pointeur pour faire glisser le panier et attraper chaque objet."
     }
   }
 }

@@ -123,7 +123,10 @@
       "quote": "My followers are watching. Make it iconic."
     },
     "aristocrat": {
-      "quote": "I do not wait. I am waited upon."
+      "quote": "If the Duchess touches the floor, you are finished."
+    },
+    "coatCheck": {
+      "instruction": "Move the pointer to slide the basket and catch every item."
     }
   }
 }
