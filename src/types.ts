@@ -136,6 +136,25 @@ export interface Client {
 
 export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | 'COVERS_TARGET' | null;
 
+// --- Boss Encounters ---
+
+export type MiniGameId = 'HANDSHAKE' | 'WHITE_GLOVE' | 'PAPARAZZI' | 'COAT_CHECK';
+
+export interface BossDefinition extends CharacterDefinition {
+  miniGame: MiniGameId;
+  /** i18n key in the 'game' namespace — boss taunt shown during intro */
+  quoteKey: string;
+  spawnCondition: (state: GameState) => boolean;
+}
+
+export interface ActiveBossEncounter {
+  bossId: string;
+  interceptedAction: 'SEAT' | 'REFUSE';
+  miniGame: MiniGameId;
+  /** Restored when encounter ends so the clock resumes at the same speed */
+  previousTimeMultiplier: number;
+}
+
 // --- Scripted Events ---
 
 export type ToolReveal = 'LEDGER' | 'PARTY_TICKET' | 'CLIPBOARD_VIP' | 'CLIPBOARD_BANNED';
@@ -188,4 +207,6 @@ export interface GameState {
   firedEventIds: string[];
   revealedTools: ToolReveal[];
   nightEndPending: boolean;
+  /** Non-null while a boss mini-game overlay is active. Pauses the clock. */
+  activeBossEncounter: ActiveBossEncounter | null;
 }
