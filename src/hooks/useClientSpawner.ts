@@ -14,6 +14,7 @@ import {
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
+import { BOSS_ROSTER } from '../data/bossRoster';
 import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
 import { getRule } from '../logic/nightRules';
 import { tGame } from '../i18n/tGame';
@@ -391,7 +392,31 @@ export function useClientSpawner(
       gameState.grid.flat().filter(cell => cell.state === CellState.EMPTY).length <= 4
     );
     bypassChars.forEach(c => spawnBypassCharacter(c));
-  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyCharacterIds, gameState.grid, spawnClient, spawnCharacterWalkIn, spawnBypassCharacter]);
+
+    // BOSS CHARACTERS — condition-based spawn (once per shift)
+    BOSS_ROSTER.forEach(boss => {
+      const spawnKey = 'char-walkin-' + boss.id;
+      if (gameState.spawnedReservationIds.includes(spawnKey)) return;
+      if (!boss.spawnCondition(gameState)) return;
+      spawnCharacterWalkIn(boss);
+    });
+  }, [
+    gameState.inGameMinutes,
+    gameState.timeMultiplier,
+    gameState.reservations,
+    gameState.spawnedReservationIds,
+    gameState.queue,
+    gameState.queue.length,
+    gameState.dailyCharacterIds,
+    gameState.grid,
+    gameState.cash,
+    gameState.rating,
+    gameState.shiftRevenue,
+    gameState.morale,
+    spawnClient,
+    spawnCharacterWalkIn,
+    spawnBypassCharacter,
+  ]);
 
   return { spawnClient, spawnCharacterWalkIn, spawnScriptedCharacter };
 }
