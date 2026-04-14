@@ -23,6 +23,7 @@ import { getSharedAmbienceSounds } from './audio/introAudio';
 import type { LedgerData } from './types/campaign';
 import type { VisualTraits } from './types';
 import { Z_INDEX } from './zIndex';
+import { BossEncounterOverlay } from './components/boss/BossEncounterOverlay';
 
 type GamePhase = 'LANDING' | 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
@@ -89,6 +90,16 @@ function GameContent({
     }
   }, [view, gameState.currentClient?.physicalState, isOvertime, shiftEnded]);
 
+  // After boss encounter clears with SEAT WIN, currentClient is in SEATING state → show floorplan
+  React.useEffect(() => {
+    if (
+      !gameState.activeBossEncounter &&
+      gameState.currentClient?.physicalState === PhysicalState.SEATING
+    ) {
+      setView('floorplan');
+    }
+  }, [gameState.activeBossEncounter, gameState.currentClient?.physicalState]);
+
   // Fire onShiftEnd exactly once when shift ends
   const shiftEndFiredRef = React.useRef(false);
   React.useEffect(() => {
@@ -130,7 +141,6 @@ function GameContent({
 
   const handleSeatParty = () => {
     seatParty();
-    setView('floorplan');
   };
 
   const showDeskBottomBar =
@@ -154,7 +164,10 @@ function GameContent({
           )}
         </div>
       </div>
-      {gameState.timeMultiplier === 0 && !shiftEnded && typeof document !== 'undefined'
+      {gameState.timeMultiplier === 0 &&
+        !gameState.activeBossEncounter &&
+        !shiftEnded &&
+        typeof document !== 'undefined'
         ? createPortal(
             <button
               type="button"
@@ -201,6 +214,7 @@ function GameContent({
       {activeDialogue && (
         <MrVDialogue lines={activeDialogue} onDismiss={onDialogueDismiss} />
       )}
+      <BossEncounterOverlay />
     </div>
   );
 }
