@@ -74,6 +74,7 @@ export function useGameEngine(
     confirmSeating,
     refuseSeatedParty,
     lastCallTable,
+    clearBossEncounter,
   } = useDecisionActions(setGameState, showToast, characters, incrementPathScore);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
@@ -92,5 +93,6 @@ export function useGameEngine(
     setTimeMultiplier,
     resetGame,
     lastCallTable,
+    clearBossEncounter,
   };
 }

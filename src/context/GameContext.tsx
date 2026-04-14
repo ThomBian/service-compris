@@ -18,6 +18,7 @@ interface GameContextType {
   setTimeMultiplier: (m: number) => void;
   resetGame: (difficulty: number, persist?: { cash: number; rating: number; morale: number; nightNumber: number }) => void;
   lastCallTable: (partyId: string) => void;
+  clearBossEncounter: (outcome: 'WIN' | 'LOSE') => void;
 }
 
 interface GameProviderProps {
