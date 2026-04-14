@@ -25,6 +25,15 @@ import type { VisualTraits } from './types';
 import { Z_INDEX } from './zIndex';
 import { BossEncounterOverlay } from './components/boss/BossEncounterOverlay';
 
+/** Dev + VITE_DEV_START_NIGHT>=2: "New game" skips intro and night 1 onboarding. Build-time in Vite. */
+const DEV_START_NIGHT: number = (() => {
+  if (!import.meta.env.DEV) return 0;
+  const raw = import.meta.env.VITE_DEV_START_NIGHT;
+  if (raw === undefined || raw === '') return 0;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 2 ? n : 0;
+})();
+
 type GamePhase = 'LANDING' | 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
 interface GameContentProps {
@@ -294,6 +303,20 @@ export default function App() {
   }, [campaign]);
 
   const handleStartFromLanding = React.useCallback(() => {
+    if (DEV_START_NIGHT >= 2) {
+      campaign.setDevCampaignNight(DEV_START_NIGHT);
+      setPersist({
+        cash: 0,
+        rating: 5,
+        morale: 100,
+        nightNumber: DEV_START_NIGHT,
+      });
+      setDifficulty(1);
+      setPlayerName('');
+      setPlayerAvatarIndex(0);
+      setPhase('PLAYING');
+      return;
+    }
     campaign.resetCampaign();
     setPersist(undefined);
     setPhase('INTRO');

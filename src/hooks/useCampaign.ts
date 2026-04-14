@@ -26,6 +26,8 @@ export interface UseCampaignReturn {
   advanceNight: (ledger: LedgerData) => void;
   fireCorkboard: (reason: 'MORALE' | 'VIP' | 'BANNED', ledger: LedgerData) => void;
   resetCampaign: () => void;
+  /** Dev only: reset path scores and jump campaign meta to this night (no-op in production). */
+  setDevCampaignNight: (nightNumber: number) => void;
 }
 
 export function useCampaign(): UseCampaignReturn {
@@ -62,5 +64,19 @@ export function useCampaign(): UseCampaignReturn {
     setState(INITIAL_STATE);
   }, []);
 
-  return { campaignState: state, activePath, activeNightConfig, incrementPathScore, advanceNight, fireCorkboard, resetCampaign };
+  const setDevCampaignNight = React.useCallback((nightNumber: number) => {
+    if (!import.meta.env.DEV) return;
+    setState({ ...INITIAL_STATE, nightNumber });
+  }, []);
+
+  return {
+    campaignState: state,
+    activePath,
+    activeNightConfig,
+    incrementPathScore,
+    advanceNight,
+    fireCorkboard,
+    resetCampaign,
+    setDevCampaignNight,
+  };
 }
