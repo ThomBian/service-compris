@@ -144,6 +144,8 @@ export interface BossDefinition extends CharacterDefinition {
   miniGame: MiniGameId;
   /** i18n key in the 'game' namespace — boss taunt shown during intro */
   quoteKey: string;
+  /** Optional extra lines (game namespace keys), shown before `quoteKey` during the dramatic intro */
+  introLineKeys?: readonly string[];
   spawnCondition: (state: GameState) => boolean;
 }
 

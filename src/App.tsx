@@ -21,10 +21,12 @@ import { useCampaign } from './hooks/useCampaign';
 import { useGameAmbience } from './hooks/useGameAmbience';
 import { getSharedAmbienceSounds } from './audio/introAudio';
 import type { LedgerData } from './types/campaign';
-import type { MiniGameId, VisualTraits } from './types';
+import type { VisualTraits } from './types';
 import { Z_INDEX } from './zIndex';
 import { BossEncounterOverlay } from './components/boss/BossEncounterOverlay';
-import { DEV_MINI_GAME_ORDER } from './data/bossRoster';
+import { DevPlayApiProvider, useDevPlayApi } from './dev/DevPlayApiContext';
+import { DevCommandPalette } from './components/dev/DevCommandPalette';
+import { DEV_MOCK_LEDGER } from './dev/devMockLedger';
 
 /** Dev + VITE_DEV_START_NIGHT>=2: "New game" skips intro and night 1 onboarding. Build-time in Vite. */
 const DEV_START_NIGHT: number = (() => {
@@ -56,6 +58,7 @@ function GameContent({
 }: GameContentProps) {
   const { t } = useTranslation('ui');
   const { gameState, seatParty, setTimeMultiplier, resetGame, devStartBossEncounter } = useGame();
+  const { setLaunchMiniGame } = useDevPlayApi();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
   const closeTime = getRule<number>(gameState.activeRules, 'SHIFT_END_TIME', DOORS_CLOSE_TIME);
@@ -90,37 +93,15 @@ function GameContent({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const devMiniGameParamConsumed = React.useRef(false);
   React.useEffect(() => {
-    if (!import.meta.env.DEV || !devStartBossEncounter) return;
-    if (devMiniGameParamConsumed.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const raw = params.get('devMiniGame');
-    if (!raw) return;
-    const normalized = raw.trim().toUpperCase();
-    if (!(DEV_MINI_GAME_ORDER as readonly string[]).includes(normalized)) return;
-    devMiniGameParamConsumed.current = true;
-    devStartBossEncounter(normalized as MiniGameId);
-    params.delete('devMiniGame');
-    const qs = params.toString();
-    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`;
-    window.history.replaceState(null, '', next);
-  }, [devStartBossEncounter]);
-
-  React.useEffect(() => {
-    if (!import.meta.env.DEV || !devStartBossEncounter) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!e.shiftKey || !e.altKey) return;
-      if (e.key < '1' || e.key > '4') return;
-      const idx = Number(e.key) - 1;
-      const miniGame = DEV_MINI_GAME_ORDER[idx];
-      if (!miniGame) return;
-      e.preventDefault();
-      devStartBossEncounter(miniGame);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [devStartBossEncounter]);
+    if (!import.meta.env.DEV) return;
+    if (devStartBossEncounter) {
+      setLaunchMiniGame(devStartBossEncounter);
+    } else {
+      setLaunchMiniGame(null);
+    }
+    return () => setLaunchMiniGame(null);
+  }, [devStartBossEncounter, setLaunchMiniGame]);
 
   React.useEffect(() => {
     if (isOvertime && !shiftEnded) {
@@ -367,41 +348,19 @@ export default function App() {
     [campaign],
   );
 
-  // DEV ONLY — Shift+C jumps to corkboard with mock data; Shift+F jumps to fired screen
-  React.useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const DEV_LEDGER: LedgerData = {
-      cash: 1240, netProfit: 340, rating: 4.2, morale: 72,
-      coversSeated: 18, shiftRevenue: 1440, salaryCost: 800,
-      electricityCost: 200, foodCost: 100,
-      logs: [
-        'Party of 2 seated (reservation).',
-        'Walk-in refused — no tables available.',
-        'Scammer caught and removed.',
-        'VIP Marcel Dupont seated.',
-        'Last call — table cleared early.',
-        'Party of 4 seated.',
-        'Reservation no-show marked.',
-        'Rush hour — 3 parties in queue.',
-      ],
-    };
-    const handler = (e: KeyboardEvent) => {
-      if (!e.shiftKey) return;
-      if (e.key === 'C') {
-        campaign.advanceNight(DEV_LEDGER);
-        setPhase('CORKBOARD');
-      }
-      if (e.key === 'F') {
-        campaign.fireCorkboard('MORALE', DEV_LEDGER);
-        setPhase('CORKBOARD');
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+  const handleDevAdvanceCorkboard = React.useCallback(() => {
+    campaign.advanceNight(DEV_MOCK_LEDGER);
+    setPhase('CORKBOARD');
+  }, [campaign]);
+
+  const handleDevFiredCorkboard = React.useCallback(() => {
+    campaign.fireCorkboard('MORALE', DEV_MOCK_LEDGER);
+    setPhase('CORKBOARD');
   }, [campaign]);
 
   return (
-    <>
+    <DevPlayApiProvider>
+      <>
       <AudioMuteButton />
       {phase === 'LANDING' && (
         <LandingPage onStartGame={handleStartFromLanding} />
@@ -437,6 +396,13 @@ export default function App() {
           />
         </GameProvider>
       )}
-    </>
+      {import.meta.env.DEV && (
+        <DevCommandPalette
+          onAdvanceCorkboard={handleDevAdvanceCorkboard}
+          onFiredCorkboard={handleDevFiredCorkboard}
+        />
+      )}
+      </>
+    </DevPlayApiProvider>
   );
 }

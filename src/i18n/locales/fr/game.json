@@ -108,21 +108,40 @@
   "characters.the-dictator.consequenceDescription": "Didn't like the food. Attacked the restaurant.",
   "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided.",
   "boss": {
+    "encounterLabel": "⚡ Rencontre de boss",
+    "speaking": "Parole",
+    "roleVIP": "Client très important",
+    "roleBanned": "Liste noire — ne pas placer",
+    "skipTyping": "Afficher toute la phrase",
+    "nextLine": "Phrase suivante",
+    "toChallenge": "Affronter l'épreuve",
+    "advanceHint": "Entrée ou clic sur le bouton",
+    "interceptLabel": "Interception",
+    "beginTrial": "Commencer l'épreuve",
+    "fallbackContinue": "Continuer",
     "winSeat": "{{name}} est satisfait. Passez à la table.",
     "winRefuse": "Bien géré. {{name}} renvoyé.",
     "loseSeat": "{{name}} est furieux.",
     "loseRefuse": "Vous avez échoué. {{name}} s'impose.",
     "stormedOut": "{{name}} est parti en furie.",
     "syndicateDon": {
+      "intro1": "Vous avez hésité en voyant mon nom sur la liste.",
+      "intro2": "Il n'y a qu'une seule réponse que j'accepte ce soir.",
       "quote": "Vous savez comment ça se passe. Ne me décevez pas."
     },
     "grandInquisitor": {
+      "intro1": "Tenez-vous droit. J'examine chaque personne dans cette salle.",
+      "intro2": "Vos registres, vos yeux, votre sang-froid — tout est noté.",
       "quote": "La maison sera jugée ce soir."
     },
     "influencer": {
+      "intro1": "Lumières. Caméra. Vous.",
+      "intro2": "Si ce moment n'est pas iconique, votre réputation non plus.",
       "quote": "Mes abonnés regardent. Rendez ça iconique."
     },
     "aristocrat": {
+      "intro1": "Vous osez me refuser à l'entrée ?",
+      "intro2": "Mon entourage regarde. Un faux pas, et ce sol devient votre CV.",
       "quote": "Si la Duchesse touche le sol, vous êtes renvoyé."
     },
     "coatCheck": {

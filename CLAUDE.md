@@ -15,11 +15,11 @@ npm run clean      # Remove dist/
 
 ## Development (local / `import.meta.env.DEV`)
 
-These shortcuts are stripped or inert in production builds.
+The dev **command palette** is the single entry point for test helpers (mock corkboard jumps, boss mini-games while a shift is running). It is omitted from production builds.
 
-- **`VITE_DEV_START_NIGHT`:** If set in `.env` to an integer **≥ 2**, starting a new game from the landing page skips the intro and jumps to that night number (see `DEV_START_NIGHT` in `src/App.tsx`).
-- **Global (any app phase):** **Shift+C** — advance to corkboard with mock ledger data. **Shift+F** — same with a “fired” corkboard outcome. Implemented in `src/App.tsx`.
-- **Boss mini-games (PLAYING only):** **`devStartBossEncounter`** on `GameContext` in dev. **Shift+Alt+1** … **Shift+Alt+4** launch mini games in order: `HANDSHAKE`, `WHITE_GLOVE`, `PAPARAZZI`, `COAT_CHECK` (see `DEV_MINI_GAME_ORDER` in `src/data/bossRoster.ts`). Optional URL: add **`?devMiniGame=HANDSHAKE`** (or another `MiniGameId`) — consumed once on load and removed from the address bar via `history.replaceState`.
+- **Open / close:** **Cmd+Shift+K** (macOS) or **Ctrl+Shift+K** (Windows/Linux). A small **Dev** corner button can also open it when enabled; uncheck “Show Dev button when closed” in the palette footer to hide that button — preference is stored in **`localStorage`** under `service-compris-dev-palette-ui`.
+- **Implementation:** [`src/components/dev/DevCommandPalette.tsx`](src/components/dev/DevCommandPalette.tsx), [`src/dev/DevPlayApiContext.tsx`](src/dev/DevPlayApiContext.tsx), mock ledger in [`src/dev/devMockLedger.ts`](src/dev/devMockLedger.ts).
+- **`VITE_DEV_START_NIGHT`:** Optional `.env` value (integer **≥ 2**): starting a new game from the landing page skips the intro and jumps to that night (see `DEV_START_NIGHT` in [`src/App.tsx`](src/App.tsx)). Unrelated to the palette.
 
 ## How we work
 
@@ -33,14 +33,16 @@ Stack: **i18next** + **react-i18next** + browser language detection. Supported l
 
 Namespaces (keep keys grouped; mirror structure across locales):
 
-| Namespace   | Typical content                                      |
-|------------|-------------------------------------------------------|
-| `common`   | Shared chrome, errors, generic labels                 |
-| `ui`       | Buttons, panels, navigation                           |
-| `game`     | In-game copy, log lines, dialogue-adjacent strings    |
-| `tour`     | Onboarding / tour steps                             |
-| `campaign` | Corkboard, landing, meta-progression copy             |
-| `intro`    | Cinematic intro / character creation copy              |
+
+| Namespace  | Typical content                                    |
+| ---------- | -------------------------------------------------- |
+| `common`   | Shared chrome, errors, generic labels              |
+| `ui`       | Buttons, panels, navigation                        |
+| `game`     | In-game copy, log lines, dialogue-adjacent strings |
+| `tour`     | Onboarding / tour steps                            |
+| `campaign` | Corkboard, landing, meta-progression copy          |
+| `intro`    | Cinematic intro / character creation copy          |
+
 
 Entry point: `src/i18n/index.ts`. The app entry should import it **once** (side effect) so initialization runs before render, e.g. `import '@/src/i18n'` in `main.tsx`.
 
@@ -62,12 +64,12 @@ High-level flow:
 ### In-shift UI (`GameContent`)
 
 - **Top:** `TopBar` — time, rating, cash, morale, speed, difficulty, tour entry, night/rules hints; optional **player identity** (pixel avatar + name from intro) when set in `App` state.
-- **Center column:** `ScenePanel` toggles **`DeskScene` | `FloorplanScene`** (desk vs floorplan view); `BottomPanel` holds queue, bookings, podium-style actions below the scene.
+- **Center column:** `ScenePanel` toggles `**DeskScene` | `FloorplanScene`** (desk vs floorplan view); `BottomPanel` holds queue, bookings, podium-style actions below the scene.
 - **Overlays:** `TourOverlay`, `ToastContainer`, full-screen pause when time multiplier is 0.
 
 ### State management
 
-All game state flows through **`GameContext`** (`src/context/GameContext.tsx`), which wraps **`useGameEngine`** — a hook that composes subsystems:
+All game state flows through `**GameContext`** (`src/context/GameContext.tsx`), which wraps `**useGameEngine**` — a hook that composes subsystems:
 
 ```
 useGameEngine
@@ -93,7 +95,7 @@ Campaign-specific types live under `src/types/campaign.ts` (e.g. ledger, path sc
 
 ### Game logic (`src/logic/gameLogic.ts`)
 
-Pure functions: grid creation, client generation (lies / identities), greetings, scoring helpers, etc. Keep this file free of React; use **`i18n.t()`** when emitting user-visible strings from here.
+Pure functions: grid creation, client generation (lies / identities), greetings, scoring helpers, etc. Keep this file free of React; use `**i18n.t()`** when emitting user-visible strings from here.
 
 ### Key constants (`src/constants.ts`)
 
@@ -112,12 +114,12 @@ Pure functions: grid creation, client generation (lies / identities), greetings,
 
 ## Docs
 
-- **`docs/game-concept.md`** — core loop and win/lose framing.
-- **`docs/specs/`** — layouts, time/queue, investigation UX, lore notes.
-- **`docs/superpowers/`** — dated plans and design specs for larger features (tour, campaign, i18n, etc.).
-
+- `**docs/game-concept.md`** — core loop and win/lose framing.
+- `**docs/specs/**` — layouts, time/queue, investigation UX, lore notes.
+- `**docs/superpowers/**` — dated plans and design specs for larger features (tour, campaign, i18n, etc.).
 - Specs are coming from Obsidian, whenever you plan something take them from the obsidian vault
 - When a plan is executed, update the spec file in Obsidian to show what is done and what is not
 - Attach the specs implemented in the codebase
 - After each feature commited, review the specs in the codebase and update them to match what we have delivered
 - Push a new release note into Obsidian explaining the version change
+

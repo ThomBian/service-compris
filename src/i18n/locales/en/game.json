@@ -108,21 +108,40 @@
   "characters.the-dictator.consequenceDescription": "Didn't like the food. Attacked the restaurant.",
   "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided.",
   "boss": {
+    "encounterLabel": "⚡ Boss encounter",
+    "speaking": "Speaking",
+    "roleVIP": "Very important guest",
+    "roleBanned": "Banned — do not seat",
+    "skipTyping": "Show full line",
+    "nextLine": "Next line",
+    "toChallenge": "Face the challenge",
+    "advanceHint": "Enter or click the button",
+    "interceptLabel": "Intercepted",
+    "beginTrial": "Begin trial",
+    "fallbackContinue": "Continue",
     "winSeat": "{{name}} is satisfied. Proceed to seating.",
     "winRefuse": "Well handled. {{name}} turned away.",
     "loseSeat": "{{name}} is furious.",
     "loseRefuse": "You failed. {{name}} forces their way in.",
     "stormedOut": "{{name}} stormed out in fury.",
     "syndicateDon": {
+      "intro1": "You hesitated when you saw my name on the list.",
+      "intro2": "There is only one answer I accept tonight.",
       "quote": "You understand how this works. Don't disappoint me."
     },
     "grandInquisitor": {
+      "intro1": "Straighten up. I am reviewing everyone in this room.",
+      "intro2": "Your ledgers, your eyes, your nerve — all on the record.",
       "quote": "The house will be judged tonight."
     },
     "influencer": {
+      "intro1": "Lights. Camera. You.",
+      "intro2": "If this moment is not iconic, neither is your reputation.",
       "quote": "My followers are watching. Make it iconic."
     },
     "aristocrat": {
+      "intro1": "You dare refuse me at the door?",
+      "intro2": "My entourage is watching. One slip, and this floor becomes your résumé.",
       "quote": "If the Duchess touches the floor, you are finished."
     },
     "coatCheck": {

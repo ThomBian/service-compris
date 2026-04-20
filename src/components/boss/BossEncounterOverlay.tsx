@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useCountdown } from '../../hooks/useCountdown';
 import type { MiniGameId } from '../../types';
@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { BOSS_ROSTER } from '../../data/bossRoster';
 import { Z_INDEX } from '../../zIndex';
 import { CoatCheckGame } from './CoatCheckGame';
+import { BossEncounterIntro } from './BossEncounterIntro';
+import { PixelAvatar } from '../scene/PixelAvatar';
 import type { MiniGameProps } from './miniGameTypes';
 
 export type { MiniGameProps } from './miniGameTypes';
@@ -63,13 +65,17 @@ const DURATIONS: Record<MiniGameId, number> = {
 };
 
 export function BossEncounterOverlay() {
-  const { gameState, clearBossEncounter } = useGame();
   const { t } = useTranslation('game');
+  const { gameState, clearBossEncounter } = useGame();
   const encounter = gameState.activeBossEncounter;
   const resolvedRef = useRef(false);
+  const [phase, setPhase] = useState<'intro' | 'game'>('intro');
 
   React.useEffect(() => {
-    if (encounter) resolvedRef.current = false;
+    if (encounter) {
+      resolvedRef.current = false;
+      setPhase('intro');
+    }
   }, [encounter]);
 
   const resolve = (outcome: 'WIN' | 'LOSE') => {
@@ -79,9 +85,10 @@ export function BossEncounterOverlay() {
   };
 
   const durationMs = encounter ? DURATIONS[encounter.miniGame] : 0;
+  const gameDurationMs = phase === 'game' ? durationMs : 0;
   useCountdown(
-    durationMs,
-    durationMs > 0 ? () => resolve('LOSE') : undefined,
+    gameDurationMs,
+    gameDurationMs > 0 ? () => resolve('LOSE') : undefined,
   );
 
   if (!encounter) return null;
@@ -89,37 +96,57 @@ export function BossEncounterOverlay() {
   const boss = BOSS_ROSTER.find(b => b.id === encounter.bossId);
   const Game = MINI_GAMES[encounter.miniGame];
   const commandWord = encounter.interceptedAction === 'SEAT' ? 'SEAT.' : 'REFUSE.';
-  const quote = boss ? t(boss.quoteKey) : '';
 
   return (
     <div
-      className="fixed inset-0 bg-black flex flex-col items-center justify-center"
-      style={{ animation: 'fadeIn 0.2s ease', zIndex: Z_INDEX.introBackdrop }}
+      className="fixed inset-0 flex flex-col bg-black"
+      style={{ animation: 'fadeIn 0.25s ease', zIndex: Z_INDEX.introBackdrop }}
     >
-      <div
-        className="flex flex-col items-center gap-2 mb-8"
-        style={{ animation: 'slamIn 0.6s cubic-bezier(0.22, 1, 0.36, 1)' }}
-      >
-        <p className="text-white/40 text-xs tracking-[4px] uppercase">⚡ Boss Encounter</p>
-        <h1 className="text-[#e8c97a] text-2xl font-black tracking-[3px] uppercase">
-          {boss?.name ?? encounter.bossId}
-        </h1>
-        <div className="w-10 h-px bg-white/20 my-1" />
-        <p className="text-white text-4xl font-black tracking-[6px] uppercase">{commandWord}</p>
-        {quote ? (
-          <p className="text-white/50 text-sm italic mt-1 max-w-xs text-center">{quote}</p>
-        ) : null}
-      </div>
+      {phase === 'intro' && boss ? (
+        <BossEncounterIntro
+          boss={boss}
+          commandWord={commandWord}
+          onBegin={() => setPhase('game')}
+        />
+      ) : null}
 
-      <div className="w-full max-w-lg">
-        <Game onWin={() => resolve('WIN')} onLose={() => resolve('LOSE')} durationMs={durationMs} />
-      </div>
+      {phase === 'intro' && !boss ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <p className="text-sm uppercase tracking-widest text-white/50">{encounter.bossId}</p>
+          <button
+            type="button"
+            onClick={() => setPhase('game')}
+            className="rounded-lg border-2 border-white/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white/80"
+          >
+            {t('boss.fallbackContinue')}
+          </button>
+        </div>
+      ) : null}
 
-      <TimerBar durationMs={durationMs} onExpire={() => resolve('LOSE')} />
+      {phase === 'game' ? (
+        <>
+          {boss ? (
+            <div
+              className="pointer-events-none absolute left-3 top-3 z-1 flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-2 py-1.5 sm:left-4 sm:top-4"
+              aria-hidden
+            >
+              <PixelAvatar traits={boss.visualTraits} scale={2} />
+              <span className="max-w-40 truncate text-[10px] font-bold uppercase tracking-wide text-white/55 sm:max-w-56 sm:text-xs">
+                {boss.name}
+              </span>
+            </div>
+          ) : null}
+          <div className="flex flex-1 flex-col items-center justify-center px-3 pb-8 pt-14 sm:px-4 sm:pb-10 sm:pt-16">
+            <div className="w-full max-w-lg">
+              <Game onWin={() => resolve('WIN')} onLose={() => resolve('LOSE')} durationMs={durationMs} />
+            </div>
+          </div>
+          <TimerBar durationMs={durationMs} onExpire={() => resolve('LOSE')} />
+        </>
+      ) : null}
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slamIn { from { transform: scale(1.15); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
     </div>
   );
