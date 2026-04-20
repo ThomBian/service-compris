@@ -1,6 +1,6 @@
 # Boss encounter stakes step — design spec
 
-**Status:** Approved for implementation (brainstorming 2026-04-20).  
+**Status:** Implemented (code 2026-04-20). Originally approved in brainstorming 2026-04-20.  
 **Scope:** Replace the “Intercepted” + giant `SEAT.` / `REFUSE.` beat with a **character-first, consequence-forward** screen before the mini-game.
 
 ## Problem
@@ -21,20 +21,24 @@ The final intro step shows `interceptLabel` (“Intercepted”) and a large comm
 
 ## User decisions (brainstorm)
 
-| Topic | Decision |
-|-------|-----------|
-| Hero emphasis | Character first, then stakes |
-| Character line | Reuse existing quote (`quoteKey` text) |
-| Quote on stakes step | Repeat **full** quote again |
+
+| Topic                | Decision                               |
+| -------------------- | -------------------------------------- |
+| Hero emphasis        | Character first, then stakes           |
+| Character line       | Reuse existing quote (`quoteKey` text) |
+| Quote on stakes step | Repeat **full** quote again            |
+
 
 ## Content model
 
 ### Outcomes (source of truth)
 
-| `interceptedAction` | WIN | LOSE |
-|---------------------|-----|------|
-| `SEAT` | Player earns seating; `PhysicalState.SEATING` when client present | Refusal-style consequence; storm-out / `loseSeat` path |
-| `REFUSE` | BANNED refused path; client cleared | Client forced toward **seating** (`loseRefuse`) |
+
+| `interceptedAction` | WIN                                                               | LOSE                                                   |
+| ------------------- | ----------------------------------------------------------------- | ------------------------------------------------------ |
+| `SEAT`              | Player earns seating; `PhysicalState.SEATING` when client present | Refusal-style consequence; storm-out / `loseSeat` path |
+| `REFUSE`            | BANNED refused path; client cleared                               | Client forced toward **seating** (`loseRefuse`)        |
+
 
 Stake copy must paraphrase these outcomes in **player-facing** language (not internal state names).
 
@@ -65,8 +69,8 @@ After typewriter lines complete (`showCommand === true`):
 
 ## Component changes
 
-- **`BossEncounterIntro`:** Accept `interceptedAction: 'SEAT' | 'REFUSE'`. Render stakes block instead of `interceptLabel` + `commandWord` megatype.
-- **`BossEncounterOverlay`:** Pass `encounter.interceptedAction` into `BossEncounterIntro`; stop passing `commandWord` for display (or pass only if needed for a11y `aria-label`).
+- `**BossEncounterIntro`:** Accept `interceptedAction: 'SEAT' | 'REFUSE'`. Render stakes block instead of `interceptLabel` + `commandWord` megatype.
+- `**BossEncounterOverlay`:** Pass `encounter.interceptedAction` into `BossEncounterIntro`; stop passing `commandWord` for display (or pass only if needed for a11y `aria-label`).
 
 ## Accessibility
 

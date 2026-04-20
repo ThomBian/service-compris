@@ -12,20 +12,25 @@ import { playDialogueTypewriterClick } from '../../audio/gameSfx';
 
 interface BossEncounterIntroProps {
   boss: BossDefinition;
-  commandWord: string;
+  interceptedAction: 'SEAT' | 'REFUSE';
   onBegin: () => void;
 }
 
 /**
  * Full-screen dramatic beat: large boss portrait, serif dialogue with typewriter,
- * then the intercepted command and a single CTA into the mini-game.
+ * then repeated quote + stakes (win/lose) and a single CTA into the mini-game.
  */
 export function BossEncounterIntro({
   boss,
-  commandWord,
+  interceptedAction,
   onBegin,
 }: BossEncounterIntroProps) {
   const { t } = useTranslation('game');
+
+  const stakeKeys =
+    interceptedAction === 'SEAT'
+      ? ({ win: 'boss.stakesSeatWin', lose: 'boss.stakesSeatLose' } as const)
+      : ({ win: 'boss.stakesRefuseWin', lose: 'boss.stakesRefuseLose' } as const);
 
   const lineKeys = useMemo(
     () => [...(boss.introLineKeys ?? []), boss.quoteKey],
@@ -159,22 +164,37 @@ export function BossEncounterIntro({
                 </p>
               </>
             ) : (
-              <>
+              <section
+                aria-labelledby="boss-stakes-quote"
+                className="animate-[bossStakesStep_0.55s_ease-out_both]"
+              >
                 <p
-                  className="mb-2 text-[10px] font-bold uppercase tracking-[0.35em] text-white/40"
+                  id="boss-stakes-quote"
+                  className="whitespace-pre-wrap text-center text-base font-semibold leading-relaxed text-[#e8e4dc] sm:text-lg"
                   style={{ fontFamily: INTRO_SERIF_FONT }}
                 >
-                  {t('boss.interceptLabel')}
+                  {t(boss.quoteKey)}
                 </p>
                 <p
-                  className="text-center text-4xl font-black uppercase tracking-[0.2em] text-white sm:text-5xl sm:tracking-[0.28em]"
-                  style={{
-                    fontFamily: INTRO_SERIF_FONT,
-                    animation: 'bossCommandPulse 0.6s ease-out both',
-                  }}
+                  className="mb-3 mt-5 text-[10px] font-bold uppercase tracking-[0.35em] text-[#e8c97a]/75"
+                  style={{ fontFamily: INTRO_SERIF_FONT }}
                 >
-                  {commandWord}
+                  {t('boss.stakesEyebrow')}
                 </p>
+                <div className="space-y-3 text-left text-sm leading-relaxed text-[#e8e4dc]/95 sm:text-base">
+                  <p style={{ fontFamily: INTRO_SERIF_FONT }}>
+                    <span className="font-bold text-[#e8c97a]">
+                      {t('boss.stakesSucceedLabel')}{' '}
+                    </span>
+                    {t(stakeKeys.win, { name: boss.name })}
+                  </p>
+                  <p style={{ fontFamily: INTRO_SERIF_FONT }}>
+                    <span className="font-bold text-[#e8c97a]">
+                      {t('boss.stakesFailLabel')}{' '}
+                    </span>
+                    {t(stakeKeys.lose, { name: boss.name })}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={advance}
@@ -186,7 +206,7 @@ export function BossEncounterIntro({
                 <p className="mt-2 text-center text-[10px] text-white/35">
                   {t('boss.advanceHint')}
                 </p>
-              </>
+              </section>
             )}
           </MonsieurVDialogueBlock>
         </div>
@@ -197,9 +217,9 @@ export function BossEncounterIntro({
           from { transform: translateY(16px) scale(0.96); opacity: 0; }
           to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        @keyframes bossCommandPulse {
-          from { transform: scale(1.08); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
+        @keyframes bossStakesStep {
+          from { transform: translateY(8px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
     </div>

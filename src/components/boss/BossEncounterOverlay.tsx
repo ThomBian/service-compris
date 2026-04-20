@@ -95,7 +95,6 @@ export function BossEncounterOverlay() {
 
   const boss = BOSS_ROSTER.find(b => b.id === encounter.bossId);
   const Game = MINI_GAMES[encounter.miniGame];
-  const commandWord = encounter.interceptedAction === 'SEAT' ? 'SEAT.' : 'REFUSE.';
 
   return (
     <div
@@ -105,7 +104,7 @@ export function BossEncounterOverlay() {
       {phase === 'intro' && boss ? (
         <BossEncounterIntro
           boss={boss}
-          commandWord={commandWord}
+          interceptedAction={encounter.interceptedAction}
           onBegin={() => setPhase('game')}
         />
       ) : null}
