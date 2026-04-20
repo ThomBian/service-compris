@@ -1,16 +1,34 @@
-import type { BossDefinition } from '../types';
+import type { BossDefinition, MiniGameId } from "../types";
+
+/** Order matches Shift+Alt+1 … 4 in dev (`GameContent`). */
+export const DEV_MINI_GAME_ORDER = [
+  "HANDSHAKE",
+  "WHITE_GLOVE",
+  "PAPARAZZI",
+  "COAT_CHECK",
+] as const satisfies readonly MiniGameId[];
+
+export function bossForMiniGame(miniGame: MiniGameId): BossDefinition {
+  const boss = BOSS_ROSTER.find(b => b.miniGame === miniGame);
+  if (!boss) throw new Error(`No boss for mini game: ${miniGame}`);
+  return boss;
+}
 
 export const BOSS_ROSTER: BossDefinition[] = [
   {
-    id: 'syndicate-don',
-    name: 'The Syndicate Don',
-    role: 'VIP',
-    behaviorType: 'STANDARD_VIP',
-    miniGame: 'HANDSHAKE',
-    quoteKey: 'boss.syndicateDon.quote',
-    arrivalMO: 'WALK_IN',
+    id: "syndicate-don",
+    name: "The Syndicate Don",
+    role: "VIP",
+    behaviorType: "STANDARD_VIP",
+    miniGame: "HANDSHAKE",
+    quoteKey: "boss.syndicateDon.quote",
+    introLineKeys: [
+      "boss.syndicateDon.intro1",
+      "boss.syndicateDon.intro2",
+    ],
+    arrivalMO: "WALK_IN",
     expectedPartySize: 4,
-    clueText: 'Watch out for the Pinstripes tonight.',
+    clueText: "Watch out for the Pinstripes tonight.",
     visualTraits: {
       skinTone: 1,
       hairStyle: 1,
@@ -24,20 +42,25 @@ export const BOSS_ROSTER: BossDefinition[] = [
     cashBonus: 1000,
     moralePenalty: 25,
     ratingPenalty: 1.0,
-    consequenceDescription: 'They leave a briefcase of cash on the ledger.',
-    refusalDescription: 'The Don smashes the front window.',
+    consequenceDescription: "They leave a briefcase of cash on the ledger.",
+    refusalDescription: "The Don smashes the front window.",
     spawnCondition: (s) => s.cash >= 600,
   },
   {
-    id: 'grand-inquisitor',
-    name: 'The Grand Inquisitor',
-    role: 'BANNED',
-    behaviorType: 'STANDARD_BANNED',
-    miniGame: 'WHITE_GLOVE',
-    quoteKey: 'boss.grandInquisitor.quote',
-    arrivalMO: 'WALK_IN',
+    id: "grand-inquisitor",
+    name: "The Grand Inquisitor",
+    role: "BANNED",
+    behaviorType: "STANDARD_BANNED",
+    miniGame: "WHITE_GLOVE",
+    quoteKey: "boss.grandInquisitor.quote",
+    introLineKeys: [
+      "boss.grandInquisitor.intro1",
+      "boss.grandInquisitor.intro2",
+    ],
+    arrivalMO: "WALK_IN",
     expectedPartySize: 1,
-    clueText: 'The Inquisition is doing random inspections. Look for the Crimson Ascot.',
+    clueText:
+      "The Inquisition is doing random inspections. Look for the Crimson Ascot.",
     visualTraits: {
       skinTone: 2,
       hairStyle: 3,
@@ -49,20 +72,26 @@ export const BOSS_ROSTER: BossDefinition[] = [
     },
     ratingPenalty: 2.0,
     moralePenalty: 0,
-    consequenceDescription: 'The Inquisitor mutters, "Acceptable." Rating immunity granted.',
-    refusalDescription: 'The Inquisitor screams. Two full stars lost immediately.',
+    consequenceDescription:
+      'The Inquisitor mutters, "Acceptable." Rating immunity granted.',
+    refusalDescription:
+      "The Inquisitor screams. Two full stars lost immediately.",
     spawnCondition: (s) => s.rating >= 4.0 && s.inGameMinutes >= 1290,
   },
   {
-    id: 'influencer-megastar',
-    name: 'The Influencer',
-    role: 'VIP',
-    behaviorType: 'STANDARD_VIP',
-    miniGame: 'PAPARAZZI',
-    quoteKey: 'boss.influencer.quote',
-    arrivalMO: 'WALK_IN',
+    id: "influencer-megastar",
+    name: "The Influencer",
+    role: "VIP",
+    behaviorType: "STANDARD_VIP",
+    miniGame: "PAPARAZZI",
+    quoteKey: "boss.influencer.quote",
+    introLineKeys: [
+      "boss.influencer.intro1",
+      "boss.influencer.intro2",
+    ],
+    arrivalMO: "WALK_IN",
     expectedPartySize: 2,
-    clueText: 'A megastar is rumored to visit tonight. Neon hoodie.',
+    clueText: "A megastar is rumored to visit tonight. Neon hoodie.",
     visualTraits: {
       skinTone: 3,
       hairStyle: 2,
@@ -73,20 +102,26 @@ export const BOSS_ROSTER: BossDefinition[] = [
     },
     moralePenalty: 15,
     ratingPenalty: 0,
-    consequenceDescription: 'Their viral post instantly refills the queue patience meters.',
-    refusalDescription: 'The Influencer is caught from a bad angle. Massive queue patience drain.',
+    consequenceDescription:
+      "Their viral post instantly refills the queue patience meters.",
+    refusalDescription:
+      "The Influencer is caught from a bad angle. Massive queue patience drain.",
     spawnCondition: (s) => s.shiftRevenue >= 400,
   },
   {
-    id: 'aristocrat',
-    name: 'The Duchess',
-    role: 'BANNED',
-    behaviorType: 'STANDARD_BANNED',
-    miniGame: 'COAT_CHECK',
-    quoteKey: 'boss.aristocrat.quote',
-    arrivalMO: 'WALK_IN',
+    id: "aristocrat",
+    name: "The Duchess",
+    role: "BANNED",
+    behaviorType: "STANDARD_BANNED",
+    miniGame: "COAT_CHECK",
+    quoteKey: "boss.aristocrat.quote",
+    introLineKeys: [
+      "boss.aristocrat.intro1",
+      "boss.aristocrat.intro2",
+    ],
+    arrivalMO: "WALK_IN",
     expectedPartySize: 2,
-    clueText: 'The Duchess is coming. She brings her own lighting.',
+    clueText: "The Duchess is coming. She brings her own lighting.",
     visualTraits: {
       skinTone: 0,
       hairStyle: 4,
@@ -99,8 +134,8 @@ export const BOSS_ROSTER: BossDefinition[] = [
     gameOver: true,
     moralePenalty: 0,
     ratingPenalty: 0,
-    consequenceDescription: 'The Duchess scoffs and demands her table.',
-    refusalDescription: 'The poodle hits the floor. YOU ARE FIRED.',
+    consequenceDescription: "The Duchess scoffs and demands her table.",
+    refusalDescription: "The poodle hits the floor. YOU ARE FIRED.",
     spawnCondition: (s) => s.morale <= 65 && s.queue.length >= 3,
   },
 ];

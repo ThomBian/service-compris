@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
-import { GameState } from '../types';
+import { GameState, type MiniGameId } from '../types';
 import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
 
 interface GameContextType {
@@ -19,6 +19,8 @@ interface GameContextType {
   resetGame: (difficulty: number, persist?: { cash: number; rating: number; morale: number; nightNumber: number }) => void;
   lastCallTable: (partyId: string) => void;
   clearBossEncounter: (outcome: 'WIN' | 'LOSE') => void;
+  /** Dev only — set via `useGameEngine` when `import.meta.env.DEV`. */
+  devStartBossEncounter?: (miniGame: MiniGameId) => void;
 }
 
 interface GameProviderProps {

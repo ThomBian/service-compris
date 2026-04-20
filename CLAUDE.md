@@ -13,6 +13,14 @@ npm run test:watch # Watch mode for development
 npm run clean      # Remove dist/
 ```
 
+## Development (local / `import.meta.env.DEV`)
+
+These shortcuts are stripped or inert in production builds.
+
+- **`VITE_DEV_START_NIGHT`:** If set in `.env` to an integer **≥ 2**, starting a new game from the landing page skips the intro and jumps to that night number (see `DEV_START_NIGHT` in `src/App.tsx`).
+- **Global (any app phase):** **Shift+C** — advance to corkboard with mock ledger data. **Shift+F** — same with a “fired” corkboard outcome. Implemented in `src/App.tsx`.
+- **Boss mini-games (PLAYING only):** **`devStartBossEncounter`** on `GameContext` in dev. **Shift+Alt+1** … **Shift+Alt+4** launch mini games in order: `HANDSHAKE`, `WHITE_GLOVE`, `PAPARAZZI`, `COAT_CHECK` (see `DEV_MINI_GAME_ORDER` in `src/data/bossRoster.ts`). Optional URL: add **`?devMiniGame=HANDSHAKE`** (or another `MiniGameId`) — consumed once on load and removed from the address bar via `history.replaceState`.
+
 ## How we work
 
 - **Bilingual product (EN + FR):** Treat the game as localized by default. User-facing copy lives in **i18n JSON** (`src/i18n/locales/{en,fr}/`), not hard-coded in components—add or update keys in **both** languages when you introduce or change text. Use `useTranslation` in React and `i18n.t()` in non-React code (pure logic, hooks that build strings). Persisted strings (e.g. activity logs) should be resolved at write time with `i18n.t(...)` unless we explicitly re-localize on read later.

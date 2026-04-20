@@ -75,6 +75,7 @@ export function useGameEngine(
     refuseSeatedParty,
     lastCallTable,
     clearBossEncounter,
+    devStartBossEncounter,
   } = useDecisionActions(setGameState, showToast, characters, incrementPathScore);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
@@ -94,5 +95,6 @@ export function useGameEngine(
     resetGame,
     lastCallTable,
     clearBossEncounter,
+    ...(import.meta.env.DEV ? { devStartBossEncounter } : {}),
   };
 }

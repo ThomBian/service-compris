@@ -6,6 +6,7 @@ import {
   CellState,
   ClientType,
   LieType,
+  type MiniGameId,
 } from "../types";
 import { mealDurationForPartySize, LAST_CALL_RATING_PENALTY } from "../constants";
 import { getRule } from "../logic/nightRules";
@@ -22,7 +23,7 @@ import {
 import { type Toast } from "../context/ToastContext";
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { tGame, tCharacter } from '../i18n/tGame';
-import { BOSS_ROSTER } from '../data/bossRoster';
+import { BOSS_ROSTER, bossForMiniGame } from '../data/bossRoster';
 import { createCharacter } from '../logic/characters/factory';
 
 type ShowToast = (
@@ -542,6 +543,24 @@ export function useDecisionActions(
     });
   }, [setGameState]);
 
+  const devStartBossEncounter = useCallback((miniGame: MiniGameId) => {
+    if (!import.meta.env.DEV) return;
+    setGameState(prev => {
+      const boss = bossForMiniGame(miniGame);
+      const interceptedAction = boss.role === "VIP" ? ("SEAT" as const) : ("REFUSE" as const);
+      return {
+        ...prev,
+        activeBossEncounter: {
+          bossId: boss.id,
+          interceptedAction,
+          miniGame: boss.miniGame,
+          previousTimeMultiplier: prev.timeMultiplier,
+        },
+        timeMultiplier: 0,
+      };
+    });
+  }, [setGameState]);
+
   return {
     handleDecision,
     waitInLine,
@@ -551,5 +570,6 @@ export function useDecisionActions(
     refuseSeatedParty,
     lastCallTable,
     clearBossEncounter,
+    devStartBossEncounter,
   };
 }
