@@ -179,6 +179,30 @@ export function playPaperSwish(): void {
   h.play();
 }
 
+// --- Boss mini-game: coat check parry (`public/audio/game/coat-parry.wav`) ---
+
+let coatParryHowl: Howl | null = null;
+
+function ensureCoatParryHowl(): Howl {
+  if (!coatParryHowl) {
+    coatParryHowl = new Howl({
+      src: ['/audio/game/coat-parry.wav'],
+      volume: 0.46,
+      preload: true,
+      onloaderror: devLoadErr('coat-parry'),
+    });
+  }
+  return coatParryHowl;
+}
+
+/** Parry tap in boss COAT_CHECK mini-game. */
+export function playCoatParrySfx(): void {
+  void Howler.ctx?.resume?.();
+  const h = ensureCoatParryHowl();
+  h.stop();
+  h.play();
+}
+
 /** Bass-boosted stamp impact on the ledger. */
 export function playStampThwack(): void {
   void Howler.ctx?.resume?.();

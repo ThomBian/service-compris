@@ -64,7 +64,7 @@ const DURATIONS: Record<MiniGameId, number> = {
   HANDSHAKE: 10000,
   WHITE_GLOVE: 4000,
   PAPARAZZI: 4000,
-  COAT_CHECK: 12000,
+  COAT_CHECK: 20000,
 };
 
 export function BossEncounterOverlay() {
@@ -94,16 +94,13 @@ export function BossEncounterOverlay() {
   const onGameLose = useCallback(() => resolve('LOSE'), [resolve]);
 
   const durationMs = encounter ? DURATIONS[encounter.miniGame] : 0;
-  const gameDurationMs = phase === 'game' ? durationMs : 0;
-  useCountdown(
-    gameDurationMs,
-    gameDurationMs > 0 ? onGameLose : undefined,
-  );
 
   if (!encounter) return null;
 
   const boss = BOSS_ROSTER.find(b => b.id === encounter.bossId);
   const Game = MINI_GAMES[encounter.miniGame];
+  const onTimerExpire =
+    encounter.miniGame === 'COAT_CHECK' ? onGameWin : onGameLose;
 
   return (
     <div
@@ -146,10 +143,15 @@ export function BossEncounterOverlay() {
           ) : null}
           <div className="flex min-h-0 flex-1 flex-col items-center px-3 pb-2 pt-14 sm:px-4 sm:pt-16">
             <div className="flex min-h-0 w-full max-w-lg flex-1 flex-col">
-              <Game onWin={onGameWin} onLose={onGameLose} durationMs={durationMs} />
+              <Game
+                onWin={onGameWin}
+                onLose={onGameLose}
+                durationMs={durationMs}
+                bossVisualTraits={boss?.visualTraits}
+              />
             </div>
           </div>
-          <TimerBar durationMs={durationMs} onExpire={onGameLose} />
+          <TimerBar durationMs={durationMs} onExpire={onTimerExpire} />
         </>
       ) : null}
 
@@ -160,7 +162,13 @@ export function BossEncounterOverlay() {
   );
 }
 
-function TimerBar({ durationMs, onExpire }: { durationMs: number; onExpire: () => void }) {
+function TimerBar({
+  durationMs,
+  onExpire,
+}: {
+  durationMs: number;
+  onExpire: (() => void) | undefined;
+}) {
   const { progress } = useCountdown(durationMs, onExpire);
   const color = progress > 0.5 ? '#e8c97a' : progress > 0.25 ? '#f59e0b' : '#ef4444';
   return (

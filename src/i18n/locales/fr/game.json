@@ -152,7 +152,8 @@
       "quote": "Si la Duchesse touche le sol, vous êtes renvoyé."
     },
     "coatCheck": {
-      "instruction": "Déplacez le pointeur pour faire glisser le panier et attraper chaque objet."
+      "instruction": "Tapez chaque objet lancé avant qu'il n'atteigne la ligne. Trois ratés et vous perdez.",
+      "livesAria": "{{remaining}} cœurs sur {{max}} restants. {{lost}} perdus."
     }
   }
 }

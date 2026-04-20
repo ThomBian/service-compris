@@ -152,7 +152,8 @@
       "quote": "If the Duchess touches the floor, you are finished."
     },
     "coatCheck": {
-      "instruction": "Move the pointer to slide the basket and catch every item."
+      "instruction": "Tap each thrown item before it reaches the line. Three misses and you lose.",
+      "livesAria": "{{remaining}} of {{max}} hearts remaining. {{lost}} lost."
     }
   }
 }
