@@ -126,6 +126,8 @@
     "stakesRefuseLose": "{{name}} forces their way in — you'll have to bring them to a table.",
     "beginTrial": "Begin trial",
     "fallbackContinue": "Continue",
+    "outcomeHeadingWin": "Victory",
+    "outcomeHeadingLose": "Defeat",
     "winSeat": "{{name}} is satisfied. Proceed to seating.",
     "winRefuse": "Well handled. {{name}} turned away.",
     "loseSeat": "{{name}} is furious.",
@@ -134,22 +136,30 @@
     "syndicateDon": {
       "intro1": "You hesitated when you saw my name on the list.",
       "intro2": "There is only one answer I accept tonight.",
-      "quote": "You understand how this works. Don't disappoint me."
+      "quote": "You understand how this works. Don't disappoint me.",
+      "summaryWin": "The Don gives you a single, slow nod — you held the line at the door.",
+      "summaryLose": "The Don leaves without a word. Whatever broke in that room, it wasn't the furniture."
     },
     "grandInquisitor": {
       "intro1": "Straighten up. I am reviewing everyone in this room.",
       "intro2": "Your ledgers, your eyes, your nerve — all on the record.",
-      "quote": "The house will be judged tonight."
+      "quote": "The house will be judged tonight.",
+      "summaryWin": "The Inquisition closes its book — tonight's verdict reads in your favor.",
+      "summaryLose": "The Inquisition leaves a mark on the ledger you cannot buff out."
     },
     "influencer": {
       "intro1": "Lights. Camera. You.",
       "intro2": "If this moment is not iconic, neither is your reputation.",
-      "quote": "My followers are watching. Make it iconic."
+      "quote": "My followers are watching. Make it iconic.",
+      "summaryWin": "The feed moves on: no scandal, no spiral — just a story that died in drafts.",
+      "summaryLose": "The clip is already cutting itself. Your night just became content."
     },
     "aristocrat": {
       "intro1": "You dare refuse me at the door?",
       "intro2": "My entourage is watching. One slip, and this floor becomes your résumé.",
-      "quote": "If the Duchess touches the floor, you are finished."
+      "quote": "If the Duchess touches the floor, you are finished.",
+      "summaryWin": "The Duchess lifts her chin and withdraws — the floor stays yours, for now.",
+      "summaryLose": "The floor remembers every slip. So does she."
     },
     "coatCheck": {
       "instruction": "Tap each thrown item before it reaches the line. Three misses and you lose.",

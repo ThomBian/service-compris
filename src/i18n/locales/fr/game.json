@@ -126,6 +126,8 @@
     "stakesRefuseLose": "{{name}} s'impose — vous devrez le placer à une table.",
     "beginTrial": "Commencer l'épreuve",
     "fallbackContinue": "Continuer",
+    "outcomeHeadingWin": "Victoire",
+    "outcomeHeadingLose": "Défaite",
     "winSeat": "{{name}} est satisfait. Passez à la table.",
     "winRefuse": "Bien géré. {{name}} renvoyé.",
     "loseSeat": "{{name}} est furieux.",
@@ -134,22 +136,30 @@
     "syndicateDon": {
       "intro1": "Vous avez hésité en voyant mon nom sur la liste.",
       "intro2": "Il n'y a qu'une seule réponse que j'accepte ce soir.",
-      "quote": "Vous savez comment ça se passe. Ne me décevez pas."
+      "quote": "Vous savez comment ça se passe. Ne me décevez pas.",
+      "summaryWin": "Le Don vous accorde un lent signe de tête — vous avez tenu à l'entrée.",
+      "summaryLose": "Le Don s'en va sans un mot. Ce qui a cédé dans cette salle, ce n'était pas le mobilier."
     },
     "grandInquisitor": {
       "intro1": "Tenez-vous droit. J'examine chaque personne dans cette salle.",
       "intro2": "Vos registres, vos yeux, votre sang-froid — tout est noté.",
-      "quote": "La maison sera jugée ce soir."
+      "quote": "La maison sera jugée ce soir.",
+      "summaryWin": "L'Inquisition referme son livre — ce soir, le verdict vous est favorable.",
+      "summaryLose": "L'Inquisition laisse une trace sur le registre qu'aucun chiffon n'effacera."
     },
     "influencer": {
       "intro1": "Lumières. Caméra. Vous.",
       "intro2": "Si ce moment n'est pas iconique, votre réputation non plus.",
-      "quote": "Mes abonnés regardent. Rendez ça iconique."
+      "quote": "Mes abonnés regardent. Rendez ça iconique.",
+      "summaryWin": "Le fil d'actualité passe à la suite : pas de scandale, pas de spirale — juste une story restée en brouillon.",
+      "summaryLose": "Le montage se fait tout seul. Votre soirée vient de devenir du contenu."
     },
     "aristocrat": {
       "intro1": "Vous osez me refuser à l'entrée ?",
       "intro2": "Mon entourage regarde. Un faux pas, et ce sol devient votre CV.",
-      "quote": "Si la Duchesse touche le sol, vous êtes renvoyé."
+      "quote": "Si la Duchesse touche le sol, vous êtes renvoyé.",
+      "summaryWin": "La Duchesse relève le menton et se retire — le sol est encore à vous, pour l'instant.",
+      "summaryLose": "Le sol se souvient de chaque faux pas. Elle aussi."
     },
     "coatCheck": {
       "instruction": "Tapez chaque objet lancé avant qu'il n'atteigne la ligne. Trois ratés et vous perdez.",

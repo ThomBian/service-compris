@@ -7,6 +7,7 @@ import { BOSS_ROSTER } from '../../data/bossRoster';
 import { Z_INDEX } from '../../zIndex';
 import { CoatCheckGame } from './CoatCheckGame';
 import { BossEncounterIntro } from './BossEncounterIntro';
+import { BossEncounterOutcome } from './BossEncounterOutcome';
 import { PixelAvatar } from '../scene/PixelAvatar';
 import type { MiniGameProps } from './miniGameTypes';
 
@@ -72,23 +73,28 @@ export function BossEncounterOverlay() {
   const { gameState, clearBossEncounter } = useGame();
   const encounter = gameState.activeBossEncounter;
   const resolvedRef = useRef(false);
-  const [phase, setPhase] = useState<'intro' | 'game'>('intro');
+  const [phase, setPhase] = useState<'intro' | 'game' | 'outcome'>('intro');
+  const [pendingOutcome, setPendingOutcome] = useState<'WIN' | 'LOSE' | null>(null);
 
   React.useEffect(() => {
     if (encounter) {
       resolvedRef.current = false;
       setPhase('intro');
+      setPendingOutcome(null);
     }
   }, [encounter]);
 
-  const resolve = useCallback(
-    (outcome: 'WIN' | 'LOSE') => {
-      if (resolvedRef.current) return;
-      resolvedRef.current = true;
-      clearBossEncounter(outcome);
-    },
-    [clearBossEncounter],
-  );
+  const resolve = useCallback((outcome: 'WIN' | 'LOSE') => {
+    if (resolvedRef.current) return;
+    resolvedRef.current = true;
+    setPendingOutcome(outcome);
+    setPhase('outcome');
+  }, []);
+
+  const handleOutcomeContinue = useCallback(() => {
+    if (pendingOutcome == null) return;
+    clearBossEncounter(pendingOutcome);
+  }, [clearBossEncounter, pendingOutcome]);
 
   const onGameWin = useCallback(() => resolve('WIN'), [resolve]);
   const onGameLose = useCallback(() => resolve('LOSE'), [resolve]);
@@ -153,6 +159,17 @@ export function BossEncounterOverlay() {
           </div>
           <TimerBar durationMs={durationMs} onExpire={onTimerExpire} />
         </>
+      ) : null}
+
+      {phase === 'outcome' && pendingOutcome ? (
+        <BossEncounterOutcome
+          boss={boss}
+          bossId={encounter.bossId}
+          displayName={boss?.name ?? encounter.bossId}
+          outcome={pendingOutcome}
+          interceptedAction={encounter.interceptedAction}
+          onContinue={handleOutcomeContinue}
+        />
       ) : null}
 
       <style>{`
