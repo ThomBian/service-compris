@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { useCountdown } from '../../hooks/useCountdown';
 import type { MiniGameId } from '../../types';
@@ -13,9 +13,12 @@ import type { MiniGameProps } from './miniGameTypes';
 export type { MiniGameProps } from './miniGameTypes';
 
 // Populated by each mini-game plan. Placeholder stubs for now.
+const miniGamePlaceholderClass =
+  'flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 sm:p-8';
+
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   HANDSHAKE: ({ onWin, onLose }) => (
-    <div className="flex flex-col items-center gap-4 p-8">
+    <div className={miniGamePlaceholderClass}>
       <p className="text-white/60 text-sm tracking-widest uppercase">Handshake — coming soon</p>
       <div className="flex gap-4">
         <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
@@ -28,7 +31,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
     </div>
   ),
   WHITE_GLOVE: ({ onWin, onLose }) => (
-    <div className="flex flex-col items-center gap-4 p-8">
+    <div className={miniGamePlaceholderClass}>
       <p className="text-white/60 text-sm tracking-widest uppercase">White Glove — coming soon</p>
       <div className="flex gap-4">
         <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
@@ -41,7 +44,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
     </div>
   ),
   PAPARAZZI: ({ onWin, onLose }) => (
-    <div className="flex flex-col items-center gap-4 p-8">
+    <div className={miniGamePlaceholderClass}>
       <p className="text-white/60 text-sm tracking-widest uppercase">Paparazzi — coming soon</p>
       <div className="flex gap-4">
         <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
@@ -78,17 +81,23 @@ export function BossEncounterOverlay() {
     }
   }, [encounter]);
 
-  const resolve = (outcome: 'WIN' | 'LOSE') => {
-    if (resolvedRef.current) return;
-    resolvedRef.current = true;
-    clearBossEncounter(outcome);
-  };
+  const resolve = useCallback(
+    (outcome: 'WIN' | 'LOSE') => {
+      if (resolvedRef.current) return;
+      resolvedRef.current = true;
+      clearBossEncounter(outcome);
+    },
+    [clearBossEncounter],
+  );
+
+  const onGameWin = useCallback(() => resolve('WIN'), [resolve]);
+  const onGameLose = useCallback(() => resolve('LOSE'), [resolve]);
 
   const durationMs = encounter ? DURATIONS[encounter.miniGame] : 0;
   const gameDurationMs = phase === 'game' ? durationMs : 0;
   useCountdown(
     gameDurationMs,
-    gameDurationMs > 0 ? () => resolve('LOSE') : undefined,
+    gameDurationMs > 0 ? onGameLose : undefined,
   );
 
   if (!encounter) return null;
@@ -98,7 +107,7 @@ export function BossEncounterOverlay() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col bg-black"
+      className="fixed inset-0 flex h-[100dvh] min-h-0 flex-col bg-black"
       style={{ animation: 'fadeIn 0.25s ease', zIndex: Z_INDEX.introBackdrop }}
     >
       {phase === 'intro' && boss ? (
@@ -135,12 +144,12 @@ export function BossEncounterOverlay() {
               </span>
             </div>
           ) : null}
-          <div className="flex flex-1 flex-col items-center justify-center px-3 pb-8 pt-14 sm:px-4 sm:pb-10 sm:pt-16">
-            <div className="w-full max-w-lg">
-              <Game onWin={() => resolve('WIN')} onLose={() => resolve('LOSE')} durationMs={durationMs} />
+          <div className="flex min-h-0 flex-1 flex-col items-center px-3 pb-2 pt-14 sm:px-4 sm:pt-16">
+            <div className="flex min-h-0 w-full max-w-lg flex-1 flex-col">
+              <Game onWin={onGameWin} onLose={onGameLose} durationMs={durationMs} />
             </div>
           </div>
-          <TimerBar durationMs={durationMs} onExpire={() => resolve('LOSE')} />
+          <TimerBar durationMs={durationMs} onExpire={onGameLose} />
         </>
       ) : null}
 
