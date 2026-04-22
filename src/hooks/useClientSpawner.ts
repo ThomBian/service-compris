@@ -397,8 +397,9 @@ export function useClientSpawner(
     bypassChars.forEach(c => spawnBypassCharacter(c));
 
     // BOSS CHARACTERS — warn first, spawn after delay
-    const pendingTimers: Array<{ id: ReturnType<typeof setTimeout>; bossId: string }> = [];
-
+    // warnedBossIdsRef persists across re-runs (ticks) to prevent re-warning.
+    // Post-unmount setTimeout is benign in React 18 (state update silently dropped),
+    // and spawnCharacterWalkIn has its own spawnedReservationIds idempotency guard.
     BOSS_ROSTER.forEach(boss => {
       const spawnKey = 'char-walkin-' + boss.id;
       if (gameState.spawnedReservationIds.includes(spawnKey)) return;
@@ -407,16 +408,8 @@ export function useClientSpawner(
 
       warnedBossIdsRef.current.add(boss.id);
       onBossWarning?.(boss);
-      const id = setTimeout(() => spawnCharacterWalkIn(boss), BOSS_WARN_DELAY_MS);
-      pendingTimers.push({ id, bossId: boss.id });
+      setTimeout(() => spawnCharacterWalkIn(boss), BOSS_WARN_DELAY_MS);
     });
-
-    return () => {
-      pendingTimers.forEach(({ id, bossId }) => {
-        clearTimeout(id);
-        warnedBossIdsRef.current.delete(bossId);
-      });
-    };
   }, [
     gameState.inGameMinutes,
     gameState.timeMultiplier,
