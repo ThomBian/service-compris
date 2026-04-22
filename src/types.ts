@@ -140,6 +140,13 @@ export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | 'COVERS_TARGET' | nul
 
 export type MiniGameId = 'HANDSHAKE' | 'WHITE_GLOVE' | 'PAPARAZZI' | 'COAT_CHECK';
 
+/** Ledger hits for refusing a roster VIP boss or seating a roster banned boss (wrong house policy). */
+export interface BossPolicyPenalty {
+  ratingLoss: number;
+  moraleLoss: number;
+  cashLoss: number;
+}
+
 export interface BossDefinition extends CharacterDefinition {
   miniGame: MiniGameId;
   /** i18n key in the 'game' namespace — boss taunt shown during intro */
@@ -147,6 +154,16 @@ export interface BossDefinition extends CharacterDefinition {
   /** Optional extra lines (game namespace keys), shown before `quoteKey` during the dramatic intro */
   introLineKeys?: readonly string[];
   spawnCondition: (state: GameState) => boolean;
+  /**
+   * Refusing this VIP boss is always wrong for the house — applied after a REFUSE encounter
+   * (mini-game win or lose). Stacks on top of any narrative outcome.
+   */
+  vipRefusalWrongPolicy?: Partial<BossPolicyPenalty>;
+  /**
+   * Seating this banned boss is wrong — applied when a SEAT encounter still sends them
+   * toward the floor (win or lose). Stacks after `onSeated` consequences from the boss def.
+   */
+  bannedSeatWrongPolicy?: Partial<BossPolicyPenalty>;
 }
 
 export interface ActiveBossEncounter {

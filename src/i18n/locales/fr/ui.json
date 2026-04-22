@@ -89,7 +89,11 @@
     "cashFine": "Amende",
     "moraleHit": "Moral",
     "ratingLoss": "Perte de note",
-    "slippedThrough": "Passé entre les mailles"
+    "slippedThrough": "Passé entre les mailles",
+    "bossBadge": "Boss",
+    "bossStatusPending": "Pas encore déclenché — surveillez les conditions.",
+    "bossStatusLooming": "Prévu ce soir — attendez-vous à un walk-in.",
+    "bossStatusInHouse": "En salle — file ou bureau."
   },
   "floorplan": {
     "title": "Plan de salle",

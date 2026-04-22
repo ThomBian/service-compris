@@ -44,6 +44,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
     ratingPenalty: 1.0,
     consequenceDescription: "They leave a briefcase of cash on the ledger.",
     refusalDescription: "The Don smashes the front window.",
+    vipRefusalWrongPolicy: { ratingLoss: 2.75, moraleLoss: 55, cashLoss: 450 },
     spawnCondition: (s) => s.cash >= 600,
   },
   {
@@ -76,6 +77,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
       'The Inquisitor mutters, "Acceptable." Rating immunity granted.',
     refusalDescription:
       "The Inquisitor screams. Two full stars lost immediately.",
+    bannedSeatWrongPolicy: { ratingLoss: 1.25, moraleLoss: 28, cashLoss: 180 },
     spawnCondition: (s) => s.rating >= 4.0 && s.inGameMinutes >= 1290,
   },
   {
@@ -106,6 +108,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
       "Their viral post instantly refills the queue patience meters.",
     refusalDescription:
       "The Influencer is caught from a bad angle. Massive queue patience drain.",
+    vipRefusalWrongPolicy: { ratingLoss: 2.1, moraleLoss: 48, cashLoss: 320 },
     spawnCondition: (s) => s.shiftRevenue >= 400,
   },
   {
@@ -136,6 +139,8 @@ export const BOSS_ROSTER: BossDefinition[] = [
     ratingPenalty: 0,
     consequenceDescription: "The Duchess scoffs and demands her table.",
     refusalDescription: "The poodle hits the floor. YOU ARE FIRED.",
+    /** `onSeated` already fires game over — keep extra policy hits light. */
+    bannedSeatWrongPolicy: { ratingLoss: 0, moraleLoss: 12, cashLoss: 80 },
     spawnCondition: (s) => s.morale <= 65 && s.queue.length >= 3,
   },
 ];

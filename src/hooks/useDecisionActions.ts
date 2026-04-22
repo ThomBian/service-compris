@@ -28,6 +28,11 @@ import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { tGame, tCharacter } from '../i18n/tGame';
 import { BOSS_ROSTER, bossForMiniGame } from '../data/bossRoster';
 import { createCharacter } from '../logic/characters/factory';
+import {
+  applyBossPolicyPenalty,
+  bannedSeatWrongPolicy,
+  vipRefusalWrongPolicy,
+} from '../logic/bossWrongPolicy';
 
 function deskClientForBossEncounter(prev: GameState, boss: BossDefinition): Client {
   return {
@@ -105,11 +110,11 @@ export function useDecisionActions(
 
         const deskClient = prev.currentClient;
 
-        // BOSS BANNED interception — gate the refuse behind a mini-game
+        // Boss encounter — refuse is gated behind the mini-game (VIP + BANNED).
+        // Bosses are not in `characters` (CHARACTER_ROSTER only), so without this
+        // branch VIP bosses fall through to walk-in refusal and nothing fires.
         if (deskClient.characterId) {
-          const boss = BOSS_ROSTER.find(
-            b => b.id === deskClient.characterId && b.role === 'BANNED',
-          );
+          const boss = BOSS_ROSTER.find(b => b.id === deskClient.characterId);
           if (boss) {
             return {
               ...prev,
@@ -211,9 +216,7 @@ export function useDecisionActions(
     setGameState((prev) => {
       if (!prev.currentClient) return prev;
       const boss = prev.currentClient.characterId
-        ? BOSS_ROSTER.find(
-            b => b.id === prev.currentClient!.characterId && b.role === 'VIP',
-          )
+        ? BOSS_ROSTER.find(b => b.id === prev.currentClient!.characterId)
         : undefined;
       if (boss) {
         return {
@@ -256,9 +259,40 @@ export function useDecisionActions(
           if (!boss) return base;
 
           const ch = createCharacter(boss);
+          const gridCleared = clearFloorplanSelection(prev.grid);
+          const clientSeating = prev.currentClient
+            ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
+            : null;
+
+          const bannedSeatPenalized = () => {
+            const afterIntent = { ...base, grid: gridCleared, currentClient: clientSeating };
+            const afterSeated = { ...afterIntent, ...ch.onSeated(prev) };
+            const econ = applyBossPolicyPenalty(afterSeated, bannedSeatWrongPolicy(boss));
+            const next = applyMoraleGameOver({ ...afterSeated, ...econ });
+            const detail = buildDeltaDetail(
+              next.cash - prev.cash,
+              next.rating - prev.rating,
+              next.morale - prev.morale,
+            );
+            toastArgs = [
+              tGame('boss.toastWrongPolicyBannedSeated', { name: boss.name }),
+              detail,
+              'error',
+            ];
+            return {
+              ...next,
+              logs: [tGame('logBossPolicyBannedSeated', { name: boss.name }), ...next.logs].slice(
+                0,
+                50,
+              ),
+            };
+          };
 
           if (outcome === 'WIN') {
             if (interceptedAction === 'SEAT') {
+              if (boss.role === 'BANNED') {
+                return bannedSeatPenalized();
+              }
               toastArgs = [
                 tGame('boss.winSeat', { name: boss.name }),
                 undefined,
@@ -266,12 +300,35 @@ export function useDecisionActions(
               ];
               return {
                 ...base,
-                grid: clearFloorplanSelection(prev.grid),
-                currentClient: prev.currentClient
-                  ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
-                  : null,
+                grid: gridCleared,
+                currentClient: clientSeating,
               };
             }
+
+            if (boss.role === 'VIP') {
+              const econ = applyBossPolicyPenalty(prev, vipRefusalWrongPolicy(boss));
+              const next = applyMoraleGameOver({
+                ...base,
+                ...econ,
+                currentClient: null,
+                logs: [
+                  tGame('logBossPolicyVipRefused', { name: boss.name }),
+                  ...base.logs,
+                ].slice(0, 50),
+              });
+              const detail = buildDeltaDetail(
+                next.cash - prev.cash,
+                next.rating - prev.rating,
+                next.morale - prev.morale,
+              );
+              toastArgs = [
+                tGame('boss.toastWrongPolicyVipRefused', { name: boss.name }),
+                detail,
+                'error',
+              ];
+              return next;
+            }
+
             const charOutcome = ch.onRefused(prev);
             toastArgs = [
               tGame('boss.winRefuse', { name: boss.name }),
@@ -291,7 +348,11 @@ export function useDecisionActions(
               ].slice(0, 50),
             });
           }
+
           if (interceptedAction === 'SEAT') {
+            if (boss.role === 'BANNED') {
+              return bannedSeatPenalized();
+            }
             toastArgs = [
               tGame('boss.loseSeat', { name: boss.name }),
               undefined,
@@ -299,24 +360,37 @@ export function useDecisionActions(
             ];
             return {
               ...base,
-              grid: clearFloorplanSelection(prev.grid),
-              currentClient: prev.currentClient
-                ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
-                : null,
+              grid: gridCleared,
+              currentClient: clientSeating,
             };
           }
-          toastArgs = [
-            tGame('boss.loseRefuse', { name: boss.name }),
-            undefined,
-            'error',
-          ];
-          return {
-            ...base,
-            grid: clearFloorplanSelection(prev.grid),
-            currentClient: prev.currentClient
-              ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
-              : null,
-          };
+
+          if (boss.role === 'VIP') {
+            const econ = applyBossPolicyPenalty(prev, vipRefusalWrongPolicy(boss));
+            const next = applyMoraleGameOver({
+              ...base,
+              ...econ,
+              grid: gridCleared,
+              currentClient: clientSeating,
+              logs: [
+                tGame('logBossPolicyVipRefusedForced', { name: boss.name }),
+                ...base.logs,
+              ].slice(0, 50),
+            });
+            const detail = buildDeltaDetail(
+              next.cash - prev.cash,
+              next.rating - prev.rating,
+              next.morale - prev.morale,
+            );
+            toastArgs = [
+              tGame('boss.toastWrongPolicyVipRefused', { name: boss.name }),
+              detail,
+              'error',
+            ];
+            return next;
+          }
+
+          return bannedSeatPenalized();
         });
       });
 

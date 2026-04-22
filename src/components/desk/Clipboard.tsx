@@ -1,13 +1,33 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clipboard as ClipboardIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useGame } from "../../context/GameContext";
 import { PixelAvatar } from "../scene/PixelAvatar";
 import { ActivityLog } from "../ActivityLog";
 import { CHARACTER_ROSTER } from "../../logic/characterRoster";
-import type { CharacterDefinition } from "../../types";
+import { BOSS_ROSTER } from "../../data/bossRoster";
+import type { BossDefinition, CharacterDefinition, GameState } from "../../types";
 import { PhysicalState } from "../../types";
 import type { CampaignPath } from "../../types/campaign";
 import { MAX_PATH_SCORE } from "../../constants";
+
+type BossExpectation = "pending" | "looming" | "in_venue" | "seated";
+
+function getBossExpectation(boss: BossDefinition, gameState: GameState): BossExpectation {
+  if (gameState.seatedCharacterIds.includes(boss.id)) return "seated";
+  const inVenue =
+    gameState.queue.some(c => c.characterId === boss.id) ||
+    gameState.currentClient?.characterId === boss.id;
+  if (inVenue) return "in_venue";
+  const walkKey = `char-walkin-${boss.id}`;
+  if (gameState.spawnedReservationIds.includes(walkKey)) return "looming";
+  if (boss.spawnCondition(gameState)) return "looming";
+  return "pending";
+}
+
+function isBossOnClipboard(boss: BossDefinition, gameState: GameState): boolean {
+  return getBossExpectation(boss, gameState) !== "pending";
+}
 
 const TABS = [
   "VIPs",
@@ -177,6 +197,123 @@ const BannedDossierEntry: React.FC<BannedDossierEntryProps> = ({
   );
 };
 
+function BossClipCard({
+  boss,
+  variant,
+  gameState,
+}: {
+  boss: BossDefinition;
+  variant: "vip" | "banned";
+  gameState: GameState;
+}) {
+  const { t } = useTranslation("ui");
+  const expectation = getBossExpectation(boss, gameState);
+  const isSeated = expectation === "seated";
+
+  const statusKey =
+    expectation === "in_venue"
+      ? "clipboard.bossStatusInHouse"
+      : expectation === "looming"
+        ? "clipboard.bossStatusLooming"
+        : "clipboard.bossStatusPending";
+
+  const outer =
+    variant === "vip"
+      ? isSeated
+        ? "border-green-400 bg-green-50"
+        : expectation === "looming" || expectation === "in_venue"
+          ? "border-amber-400 bg-amber-50/90"
+          : "border-[#e0d8cc] bg-[#fffdf8]"
+      : isSeated
+        ? "border-red-500 bg-red-50"
+        : expectation === "looming" || expectation === "in_venue"
+          ? "border-amber-500 bg-amber-50/85"
+          : "bg-white/60 border-[#141414]/10";
+
+  const vipBadge = isSeated ? (
+    <div className="inline-flex items-center gap-1 rounded bg-green-100 border border-green-400 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">✓</span>
+      <span className="text-[8px] text-green-700 font-semibold">{t("clipboard.seated")}</span>
+    </div>
+  ) : (
+    <div className="inline-flex flex-wrap items-center gap-1">
+      <div className="inline-flex items-center gap-1 rounded border border-[#141414]/20 bg-[#141414]/8 px-1 py-0.5 w-fit">
+        <span className="text-[8px] font-bold uppercase tracking-wide text-[#141414]/80">
+          {t("clipboard.bossBadge")}
+        </span>
+      </div>
+      <div
+        className={`inline-flex items-center gap-1 rounded border px-1 py-0.5 w-fit ${
+          expectation === "pending"
+            ? "border-[#141414]/15 bg-white/70 text-[#555]"
+            : "border-amber-600/40 bg-amber-100/80 text-amber-950"
+        }`}
+      >
+        <span className="text-[8px] font-semibold leading-tight">{t(statusKey)}</span>
+      </div>
+    </div>
+  );
+
+  const bannedBadge = isSeated ? (
+    <div className="inline-flex items-center gap-1 rounded bg-red-100 border border-red-400 px-1 py-0.5 w-fit">
+      <span className="text-[9px]">⚠️</span>
+      <span className="text-[8px] text-red-700 font-semibold">{t("clipboard.slippedThrough")}</span>
+    </div>
+  ) : (
+    <div className="inline-flex flex-wrap items-center gap-1">
+      <div className="inline-flex items-center gap-1 rounded border border-[#141414]/20 bg-[#141414]/8 px-1 py-0.5 w-fit">
+        <span className="text-[8px] font-bold uppercase tracking-wide text-[#141414]/80">
+          {t("clipboard.bossBadge")}
+        </span>
+      </div>
+      <div
+        className={`inline-flex items-center gap-1 rounded border px-1 py-0.5 w-fit ${
+          expectation === "pending"
+            ? "border-[#141414]/15 bg-white/70 text-[#555]"
+            : "border-amber-700/35 bg-amber-100/90 text-amber-950"
+        }`}
+      >
+        <span className="text-[8px] font-semibold leading-tight">{t(statusKey)}</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`relative rounded-md border p-2 flex gap-2 items-start ${outer}`}>
+      <div
+        className="shrink-0 w-10 flex items-end justify-center"
+        style={{ opacity: isSeated ? 0.6 : 1 }}
+      >
+        <PixelAvatar traits={boss.visualTraits} scale={1} />
+      </div>
+      <div className={`flex flex-col gap-1 flex-1 ${isSeated ? "opacity-70" : ""}`}>
+        <div
+          className={`text-[10px] font-bold ${
+            isSeated ? (variant === "vip" ? "text-green-700" : "text-red-700") : "text-[#141414]"
+          }`}
+        >
+          {boss.name}
+        </div>
+        <div className="text-[8px] text-[#666] leading-tight">{boss.clueText}</div>
+        <div className="text-[8px] text-[#888] leading-tight">
+          {t("clipboard.walkInNoRes", { n: boss.expectedPartySize })}
+        </div>
+        {variant === "vip" ? vipBadge : bannedBadge}
+      </div>
+      {isSeated && variant === "vip" && (
+        <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-700">
+          <span className="text-[9px] font-bold text-white">✓</span>
+        </div>
+      )}
+      {isSeated && variant === "banned" && (
+        <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600">
+          <span className="text-[9px] font-bold text-white">!</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const FACTION_DISPLAY: Array<{
   path: CampaignPath;
   name: string;
@@ -239,6 +376,7 @@ function intensityLabel(level: 0 | 1 | 2 | 3): string {
 }
 
 export const Clipboard: React.FC = () => {
+  const { t } = useTranslation("ui");
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("VIPs");
   const { gameState, pathScores } = useGame();
   const { revealedTools, currentClient } = gameState;
@@ -272,28 +410,38 @@ export const Clipboard: React.FC = () => {
     setActiveTab(visibleTabs[0] ?? "Factions");
   }, [visibleTabs, activeTab]);
 
-  const dailyVipDefs = gameState.dailyCharacterIds
-    .map((id) => CHARACTER_ROSTER.find((c) => c.id === id))
-    .filter(
-      (c): c is CharacterDefinition => c !== undefined && c.role === "VIP",
+  const mergedVipDefs = useMemo(() => {
+    const fromDaily = gameState.dailyCharacterIds
+      .map((id) => CHARACTER_ROSTER.find((c) => c.id === id))
+      .filter((c): c is CharacterDefinition => c !== undefined && c.role === "VIP");
+    const ids = new Set(fromDaily.map((c) => c.id));
+    const rosterBossVips = BOSS_ROSTER.filter(
+      (b) => b.role === "VIP" && isBossOnClipboard(b, gameState),
     );
+    return [...fromDaily, ...rosterBossVips.filter((b) => !ids.has(b.id))];
+  }, [gameState]);
 
-  const dailyBannedDefs = gameState.dailyCharacterIds
-    .map((id) => CHARACTER_ROSTER.find((c) => c.id === id))
-    .filter(
-      (c): c is CharacterDefinition => c !== undefined && c.role === "BANNED",
+  const mergedBannedDefs = useMemo(() => {
+    const fromDaily = gameState.dailyCharacterIds
+      .map((id) => CHARACTER_ROSTER.find((c) => c.id === id))
+      .filter((c): c is CharacterDefinition => c !== undefined && c.role === "BANNED");
+    const ids = new Set(fromDaily.map((c) => c.id));
+    const rosterBossBanned = BOSS_ROSTER.filter(
+      (b) => b.role === "BANNED" && isBossOnClipboard(b, gameState),
     );
+    return [...fromDaily, ...rosterBossBanned.filter((b) => !ids.has(b.id))];
+  }, [gameState]);
 
   const clientAtDesk = currentClient?.physicalState === PhysicalState.AT_DESK;
   const isNight1 = gameState.nightNumber === 1;
   const highlightVip =
     isNight1 &&
     clientAtDesk &&
-    dailyVipDefs.some((c) => c.id === currentClient?.characterId);
+    mergedVipDefs.some((c) => c.id === currentClient?.characterId);
   const highlightBanned =
     isNight1 &&
     clientAtDesk &&
-    dailyBannedDefs.some((c) => c.id === currentClient?.characterId);
+    mergedBannedDefs.some((c) => c.id === currentClient?.characterId);
   const highlightClipboard = highlightVip || highlightBanned;
 
   return (
@@ -360,18 +508,26 @@ export const Clipboard: React.FC = () => {
         <div className="flex-1 overflow-y-auto min-h-0">
           {activeTab === "VIPs" ? (
             <div className="flex flex-col gap-2 p-1">
-              {dailyVipDefs.length === 0 ? (
-                <p className="text-[10px] opacity-40 italic p-1">
-                  No VIPs expected tonight.
-                </p>
+              {mergedVipDefs.length === 0 ? (
+                <p className="p-1 text-[10px] italic opacity-40">{t("clipboard.noVips")}</p>
               ) : (
-                dailyVipDefs.map((char) => (
-                  <VipDossierEntry
-                    key={char.id}
-                    char={char}
-                    isSeated={gameState.seatedCharacterIds.includes(char.id)}
-                  />
-                ))
+                mergedVipDefs.map((char) => {
+                  const boss = BOSS_ROSTER.find((b) => b.id === char.id && b.role === "VIP");
+                  if (boss) {
+                    return (
+                      <React.Fragment key={boss.id}>
+                        <BossClipCard boss={boss} variant="vip" gameState={gameState} />
+                      </React.Fragment>
+                    );
+                  }
+                  return (
+                    <VipDossierEntry
+                      key={char.id}
+                      char={char}
+                      isSeated={gameState.seatedCharacterIds.includes(char.id)}
+                    />
+                  );
+                })
               )}
             </div>
           ) : activeTab === "Factions" ? (
@@ -412,18 +568,26 @@ export const Clipboard: React.FC = () => {
             <ActivityLog logs={gameState.logs} />
           ) : activeTab === "Banned" ? (
             <div className="flex flex-col gap-2 p-1">
-              {dailyBannedDefs.length === 0 ? (
-                <p className="text-[10px] opacity-40 italic p-1">
-                  No trouble expected tonight.
-                </p>
+              {mergedBannedDefs.length === 0 ? (
+                <p className="p-1 text-[10px] italic opacity-40">{t("clipboard.noBanned")}</p>
               ) : (
-                dailyBannedDefs.map((char) => (
-                  <BannedDossierEntry
-                    key={char.id}
-                    char={char}
-                    isSeated={gameState.seatedCharacterIds.includes(char.id)}
-                  />
-                ))
+                mergedBannedDefs.map((char) => {
+                  const boss = BOSS_ROSTER.find((b) => b.id === char.id && b.role === "BANNED");
+                  if (boss) {
+                    return (
+                      <React.Fragment key={boss.id}>
+                        <BossClipCard boss={boss} variant="banned" gameState={gameState} />
+                      </React.Fragment>
+                    );
+                  }
+                  return (
+                    <BannedDossierEntry
+                      key={char.id}
+                      char={char}
+                      isSeated={gameState.seatedCharacterIds.includes(char.id)}
+                    />
+                  );
+                })
               )}
             </div>
           ) : (

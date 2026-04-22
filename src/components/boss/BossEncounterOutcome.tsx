@@ -34,9 +34,21 @@ export function BossEncounterOutcome({
   const suffix = outcome === 'WIN' ? 'summaryWin' : 'summaryLose';
   const specificKey = `boss.${group}.${suffix}`;
 
-  const body = i18n.exists(specificKey, { ns: 'game' })
-    ? t(specificKey, { name: displayName })
-    : outcome === 'WIN'
+  const policyHouseMistake =
+    !!boss &&
+    ((boss.role === 'VIP' && interceptedAction === 'REFUSE') ||
+      (boss.role === 'BANNED' && interceptedAction === 'SEAT'));
+
+  const body = policyHouseMistake
+    ? t(
+        boss.role === 'VIP'
+          ? 'boss.policyOutcomeVipRefused'
+          : 'boss.policyOutcomeBannedSeated',
+        { name: displayName },
+      )
+    : i18n.exists(specificKey, { ns: 'game' })
+      ? t(specificKey, { name: displayName })
+      : outcome === 'WIN'
         ? interceptedAction === 'SEAT'
           ? t('boss.winSeat', { name: displayName })
           : t('boss.winRefuse', { name: displayName })
@@ -48,8 +60,14 @@ export function BossEncounterOutcome({
     continueRef.current?.focus();
   }, []);
 
-  const heading =
-    outcome === 'WIN' ? t('boss.outcomeHeadingWin') : t('boss.outcomeHeadingLose');
+  const heading = policyHouseMistake
+    ? t('boss.outcomeHeadingPolicy')
+    : outcome === 'WIN'
+      ? t('boss.outcomeHeadingWin')
+      : t('boss.outcomeHeadingLose');
+
+  const policyHeadingClass =
+    'text-2xl font-black uppercase tracking-[0.18em] text-amber-400/95 sm:text-3xl';
 
   return (
     <div
@@ -72,9 +90,11 @@ export function BossEncounterOutcome({
           <h2
             id="boss-outcome-heading"
             className={
-              outcome === 'WIN'
-                ? 'text-2xl font-black uppercase tracking-[0.18em] text-emerald-400/95 sm:text-3xl'
-                : 'text-2xl font-black uppercase tracking-[0.18em] text-red-400/95 sm:text-3xl'
+              policyHouseMistake
+                ? policyHeadingClass
+                : outcome === 'WIN'
+                  ? 'text-2xl font-black uppercase tracking-[0.18em] text-emerald-400/95 sm:text-3xl'
+                  : 'text-2xl font-black uppercase tracking-[0.18em] text-red-400/95 sm:text-3xl'
             }
           >
             {heading}
