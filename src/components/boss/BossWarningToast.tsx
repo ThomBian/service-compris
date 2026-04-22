@@ -16,15 +16,22 @@ interface BossWarningToastProps {
 
 export const BossWarningToast: React.FC<BossWarningToastProps> = ({ boss, onDismiss }) => {
   const { t } = useTranslation('ui');
+  const onDismissRef = React.useRef(onDismiss);
+
+  useEffect(() => {
+    onDismissRef.current = onDismiss;
+  });
 
   useEffect(() => {
     playBossWarningSting();
-    const timer = setTimeout(onDismiss, DISMISS_DELAY_MS);
+    const timer = setTimeout(() => onDismissRef.current(), DISMISS_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [onDismiss]);
+  }, []);
 
   return createPortal(
     <motion.div
+      role="alert"
+      aria-label={t('boss.warningLabel')}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
