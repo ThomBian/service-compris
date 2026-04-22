@@ -182,8 +182,13 @@
       }
     },
     "whiteGlove": {
-      "instruction": "Réagissez vite aux consignes d'inspection. Gardez un rythme propre pour éviter l'erreur fatale.",
-      "placeholder": "Gant blanc - bientôt disponible"
+      "instruction": "Alignez les deux ustensiles sur leurs contours. Terminez 5 dressages parfaits en 20 secondes.",
+      "placeholder": "Gant blanc - bientôt disponible",
+      "alignHint": "W/A/S/D ou fleches deplace, Q/E pivote, TAB fait defiler, 1-5 change de table.",
+      "comboProgress": "{{current}} / {{target}} dressages",
+      "forkLabel": "Fourchette",
+      "knifeLabel": "Couteau",
+      "snapped": "Aligne"
     },
     "paparazzi": {
       "instruction": "Tapez uniquement les cadres verts. Evitez les cadres rouges. Atteignez 8 bonnes prises en 20 secondes. Un tap rouge ou un cadre vert manqué met fin à la manche.",

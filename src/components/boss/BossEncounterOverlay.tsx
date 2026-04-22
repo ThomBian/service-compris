@@ -8,6 +8,7 @@ import { Z_INDEX } from '../../zIndex';
 import { CoatCheckGame } from './CoatCheckGame';
 import { HandshakeGame } from './HandshakeGame';
 import { PaparazziGame } from './PaparazziGame';
+import { WhiteGloveGame } from './WhiteGloveGame';
 import { BossEncounterIntro } from './BossEncounterIntro';
 import { BossEncounterOutcome } from './BossEncounterOutcome';
 import { PixelAvatar } from '../scene/PixelAvatar';
@@ -46,9 +47,7 @@ function PlaceholderMiniGame({
 
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   HANDSHAKE: HandshakeGame,
-  WHITE_GLOVE: ({ onWin, onLose }) => (
-    <PlaceholderMiniGame titleKey="boss.whiteGlove.placeholder" onWin={onWin} onLose={onLose} />
-  ),
+  WHITE_GLOVE: WhiteGloveGame,
   PAPARAZZI: PaparazziGame,
   COAT_CHECK: CoatCheckGame,
 };
@@ -56,7 +55,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
 // Duration (ms) per mini-game
 const DURATIONS: Record<MiniGameId, number> = {
   HANDSHAKE: 0,
-  WHITE_GLOVE: 4000,
+  WHITE_GLOVE: 20_000,
   PAPARAZZI: 20_000,
   COAT_CHECK: 20000,
 };

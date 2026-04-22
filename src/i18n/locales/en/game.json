@@ -182,8 +182,13 @@
       }
     },
     "whiteGlove": {
-      "instruction": "React quickly to the inspection prompts. Keep your rhythm clean to avoid a fatal error.",
-      "placeholder": "White Glove - coming soon"
+      "instruction": "Align both utensils with their outlines. Complete 5 perfect settings in 20 seconds.",
+      "placeholder": "White Glove - coming soon",
+      "alignHint": "W/A/S/D or arrows move, Q/E rotate, TAB cycles items, 1-5 jumps table.",
+      "comboProgress": "{{current}} / {{target}} settings",
+      "forkLabel": "Fork",
+      "knifeLabel": "Knife",
+      "snapped": "Snapped"
     },
     "paparazzi": {
       "instruction": "Tap only green frames. Avoid red frames. Reach 8 good shots in 20 seconds. A red tap or a missed green frame ends the run.",
