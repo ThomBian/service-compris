@@ -295,9 +295,6 @@ export default function App() {
   React.useEffect(() => {
     setDialogueQueue([]);
     setActiveDialogue(null);
-  }, [phase]);
-
-  React.useEffect(() => {
     setBossWarning(null);
   }, [phase]);
 
