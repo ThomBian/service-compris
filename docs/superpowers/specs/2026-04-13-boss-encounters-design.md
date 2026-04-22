@@ -112,6 +112,7 @@ interface MiniGameProps {
   onWin: () => void;
   onLose: () => void;
   durationMs: number;
+  bossVisualTraits?: VisualTraits; // optional — e.g. Coat Check shows the boss
 }
 ```
 
@@ -150,36 +151,38 @@ Clock resumes in both cases (timeMultiplier restored to previous value).
 
 - **Quote (EN):** *"You know the moves, or you don't."*
 - **Mechanic:** Simon Says / sequence memory
-- **Duration:** 10s
-- **Phase 1 (~1.5s):** Animate a 4-item sequence on desk objects (ledger, bell, inkwell, ledger). Items highlight in order.
-- **Phase 2:** Player clicks items to replay sequence. Wrong click → instant `onLose()`. Full match → `onWin()`.
-- **Loop**: Repeat with longer sequences up to 10
+- **Duration:** **No shell countdown** (`DURATIONS.HANDSHAKE === 0`; no `TimerBar`). Loss comes only from wrong inputs during the repeat phase.
+- **Phase 1 (~1.5s):** Animate a 4-item sequence on desk objects (ledger, bell, coin, whiskey). Items highlight in order.
+- **Phase 2:** Player clicks items to replay sequence. Wrong click → instant `onLose()`. Correct full match → sequence extends until **8** items, then `onWin()`.
+- **Loop:** Repeat with longer sequences up to target length 8 (`TARGET_SEQUENCE_LENGTH`).
 - **Implementation:** `useState` for sequence + playerInput. No animation frame needed.
 
 ### 2. White Glove — `WhiteGloveGame` (Grand Inquisitor, BANNED)
 
 - **Quote (EN):** *"Mediocrity is an insult to the craft."*
-- **Mechanic:** Precision drag & drop
-- **Duration:** 4s
-- **Setup:** Fork and knife rendered with CSS transform at haphazard positions. Dashed target outlines shown.
-- **Mechanic:** Pointer events drive `transform: translate + rotate`. Snap tolerance ±8px position, ±5° rotation.
-- **Both items snapped before timer → `onWin()`.** Timer expires → `onLose()`.
-- **Implementation:** `useDrag` hook with pointer capture.
+- **Mechanic:** Precision **keyboard** placement (WASD / arrows translate, Q/E rotate, Tab cycles fork/knife, 1–5 jump tables) across **five** simultaneous place settings.
+- **Duration:** **20s** shell (`DURATIONS.WHITE_GLOVE`); `TimerBar` expiry → `onLose` if not already resolved.
+- **Setup:** Five plate centers scale with measured arena (`ResizeObserver`); fork and knife per table at imperfect positions; dashed outlines show targets.
+- **Snap tolerance:** ±8px position, ±5° rotation (`isSnapped` helper).
+- **Win:** All **5** tables have **both** fork and knife snapped before time runs out.
+- **Lose:** Timer expires before 5/5 complete.
+- **Implementation:** React state + `useLayoutEffect` for bounds; no pointer drag in shipped build.
 
 ### 3. Paparazzi Flash — `PaparazziGame` (Influencer Megastar, VIP)
 
 - **Quote (EN):** *"Only the good angles. I will know."*
 - **Mechanic:** Whack-a-mole / target identification
-- **Duration:** 4s
-- **Setup:** Green (good angle) and red (bad angle) viewfinder icons spawn at random positions on an interval.
-- **Click red → instant `onLose()`.** Miss all greens OR timer ends → `onLose()`. All greens clicked, no reds → `onWin()`.
-- **Implementation:** `useAnimationFrame` drives spawn intervals. Track spawned + clicked sets.
+- **Duration:** **20s** (`DURATIONS.PAPARAZZI`); `TimerBar` expiry → `onLose` if not already resolved.
+- **Full game design setup (tuning, fantasy, UX, constants):** [Paparazzi Flash — Game Design Setup](./2026-04-22-paparazzi-flash-game-design.md)
+- **Setup:** Green (good angle) and red (bad angle) viewfinder buttons spawn at random positions on an interval.
+- **Click red → instant `onLose()`.** Miss **a** green (lifetime expires before tap) **or** timer ends → `onLose()`. **8** successful green taps, no reds → `onWin()`.
+- **Implementation:** `setInterval` spawn cadence + per-target timeouts; `resolvedRef` single resolution.
 
 ### 4. Coat Check — `CoatCheckGame` (Aristocrat, BANNED)
 
 - **Quote (EN):** *"If Duchess touches the floor, you are finished."*
 - **Mechanic:** Catching / horizontal tracking
-- **Duration:** 12s
+- **Duration:** **20s** play window from `DURATIONS.COAT_CHECK` (items spawn until elapsed ≥ `durationMs`; **timer bar hitting zero counts as WIN** for this mini-game — see `BossEncounterOverlay` `onTimerExpire` routing).
 - **Setup:** Basket at bottom tracks `pointermove` X position. 4 items fall from top in sequence (mink coat, diamond cane, top hat, neon poodle).
 - **Collision:** Item bottom Y overlaps basket top Y within ±basket half-width.
 - **Any item missed → `onLose()` (poodle miss = game over flag passed to penalty).** All 4 caught → `onWin()`.

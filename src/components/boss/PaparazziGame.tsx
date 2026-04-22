@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MiniGameProps } from './miniGameTypes';
+import {
+  playPaparazziGreenCaptureSfx,
+  playPaparazziGreenExpiredSfx,
+  playPaparazziGreenUrgentSfx,
+  playPaparazziRedMisfireSfx,
+  playPaparazziWinRoundSfx,
+} from '../../audio/gameSfx';
+import { bossArenaSurface, bossHudEyebrow, bossInteractiveFocus } from './bossMiniGameChrome';
 
 type Viewfinder = {
   id: string;
@@ -28,7 +36,7 @@ function makeViewfinder(): Viewfinder {
   };
 }
 
-export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
+export function PaparazziGame({ onWin, onLose, durationMs: _durationMs }: MiniGameProps) {
   const { t } = useTranslation('game');
   const [viewfinders, setViewfinders] = useState<Viewfinder[]>([]);
   const [goodTaps, setGoodTaps] = useState(0);
@@ -95,6 +103,7 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
       if (spawned.isGreen) {
         const blinkTimeoutId = setTimeout(() => {
           blinkTimersRef.current.delete(spawned!.id);
+          playPaparazziGreenUrgentSfx();
           setViewfinders(prev => {
             const next = prev.map(v => (v.id === spawned.id ? { ...v, isBlinking: true } : v));
             viewfindersRef.current = next;
@@ -108,6 +117,7 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
           setViewfinders(prev => {
             const existing = prev.find(v => v.id === spawned.id);
             if (!existing) return prev;
+            playPaparazziGreenExpiredSfx();
             resolve('LOSE');
             const next = prev.filter(v => v.id !== spawned.id);
             viewfindersRef.current = next;
@@ -142,13 +152,17 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
         return next;
       });
       if (!viewfinder.isGreen) {
+        playPaparazziRedMisfireSfx();
         resolve('LOSE');
         return;
       }
       setGoodTaps(prev => {
         const next = prev + 1;
         if (next >= TARGET_GOOD_TAPS) {
+          playPaparazziWinRoundSfx();
           resolve('WIN');
+        } else {
+          playPaparazziGreenCaptureSfx();
         }
         return next;
       });
@@ -159,9 +173,11 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
   return (
     <div
       data-testid="paparazzi-arena"
-      className="relative flex h-full min-h-[280px] w-full flex-1 flex-col overflow-hidden rounded-xl bg-black/65"
+      role="region"
+      aria-label={t('boss.paparazzi.ariaArena')}
+      className={`relative flex h-full min-h-[280px] w-full flex-1 flex-col overflow-hidden ${bossArenaSurface}`}
     >
-      <p className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-xs uppercase tracking-[0.22em] text-white/45">
+      <p className={`absolute left-1/2 top-2 max-w-[90%] -translate-x-1/2 text-center ${bossHudEyebrow}`}>
         {t('boss.paparazzi.arenaHint', { defaultValue: 'Only the good angles.' })}
       </p>
 
@@ -170,16 +186,17 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
           key={viewfinder.id}
           type="button"
           data-testid={viewfinder.isGreen ? 'viewfinder-green' : 'viewfinder'}
-          aria-label={viewfinder.isGreen ? 'Good angle' : 'Bad angle'}
+          aria-label={viewfinder.isGreen ? t('boss.paparazzi.ariaGreen') : t('boss.paparazzi.ariaRed')}
           onClick={() => onTap(viewfinder)}
           className={[
             'absolute flex h-12 w-12 items-center justify-center rounded-full border-4 text-lg',
-            'cursor-crosshair transition-transform hover:scale-110',
+            bossInteractiveFocus,
+            'cursor-crosshair transition-transform hover:scale-110 active:scale-95',
             'animate-[paparazziPopIn_150ms_ease-out]',
             viewfinder.isBlinking ? 'animate-pulse' : '',
             viewfinder.isGreen
-              ? 'border-emerald-400 bg-emerald-400/10 text-emerald-300'
-              : 'border-rose-500 bg-rose-500/10 text-rose-300',
+              ? 'border-emerald-400/95 bg-emerald-500/10 text-emerald-200'
+              : 'border-rose-500/95 bg-rose-950/30 text-rose-200',
           ].join(' ')}
           style={{
             left: `calc(${viewfinder.x}% - 24px)`,
@@ -190,7 +207,7 @@ export function PaparazziGame({ onWin, onLose }: MiniGameProps) {
         </button>
       ))}
 
-      <p className="pointer-events-none absolute bottom-2 right-3 text-xs text-white/45">{progressLabel}</p>
+      <p className={`absolute bottom-2 right-3 ${bossHudEyebrow}`}>{progressLabel}</p>
 
       <style>{`
         @keyframes paparazziPopIn {

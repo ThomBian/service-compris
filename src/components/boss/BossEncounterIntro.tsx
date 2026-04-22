@@ -151,6 +151,7 @@ export function BossEncounterIntro({
                   {t('boss.speaking')}
                 </p>
                 <p
+                  aria-live="polite"
                   className="min-h-18 whitespace-pre-wrap text-base leading-relaxed text-[#e8e4dc]/95 sm:text-lg sm:leading-relaxed"
                   style={{ fontFamily: INTRO_SERIF_FONT }}
                 >

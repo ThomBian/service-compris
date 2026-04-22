@@ -170,8 +170,8 @@
       "livesAria": "{{remaining}} of {{max}} hearts remaining. {{lost}} lost."
     },
     "handshake": {
-      "instruction": "Repeat the sequence correctly. Reach 8 steps in a row to win.",
-      "placeholder": "Handshake - coming soon",
+      "instruction": "Repeat the sequence correctly. Reach 8 steps in a row to win. There is no countdown — only wrong inputs end the run.",
+      "ariaRegion": "Handshake memory challenge",
       "watchSequence": "Watch the sequence...",
       "repeatSteps": "Repeat - {{count}} steps",
       "items": {
@@ -182,8 +182,8 @@
       }
     },
     "whiteGlove": {
-      "instruction": "Align both utensils with their outlines. Complete 5 perfect settings in 20 seconds.",
-      "placeholder": "White Glove - coming soon",
+      "instruction": "Align fork and knife on each table to the dashed outlines. Finish all 5 tables before the bar empties (20 seconds). WASD or arrows move, Q/E rotate, Tab cycles utensil, 1–5 jump tables.",
+      "ariaArena": "White glove table alignment challenge",
       "alignHint": "W/A/S/D or arrows move, Q/E rotate, TAB cycles items, 1-5 jumps table.",
       "comboProgress": "{{current}} / {{target}} settings",
       "forkLabel": "Fork",
@@ -191,10 +191,12 @@
       "snapped": "Snapped"
     },
     "paparazzi": {
-      "instruction": "Tap only green frames. Avoid red frames. Reach 8 good shots in 20 seconds. A red tap or a missed green frame ends the run.",
-      "placeholder": "Paparazzi - coming soon",
+      "instruction": "Tap only green viewfinders before they expire. Avoid red ones. Collect 8 good taps before time runs out (20 seconds). Tapping red, or letting a green viewfinder time out, loses the encounter.",
+      "ariaArena": "Paparazzi flash challenge",
+      "ariaGreen": "Good angle — photograph",
+      "ariaRed": "Bad angle — avoid",
       "arenaHint": "Only the good angles.",
-      "progress": "{{current}} / {{target}}"
+      "progress": "{{current}} / {{target}} good shots"
     }
   }
 }

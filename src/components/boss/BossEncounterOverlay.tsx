@@ -16,35 +16,6 @@ import type { MiniGameProps } from './miniGameTypes';
 
 export type { MiniGameProps } from './miniGameTypes';
 
-// Populated by each mini-game plan. Placeholder stubs for now.
-const miniGamePlaceholderClass =
-  'flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 sm:p-8';
-
-function PlaceholderMiniGame({
-  titleKey,
-  onWin,
-  onLose,
-}: {
-  titleKey: string;
-  onWin: () => void;
-  onLose: () => void;
-}) {
-  const { t } = useTranslation('game');
-  return (
-    <div className={miniGamePlaceholderClass}>
-      <p className="text-white/60 text-sm tracking-widest uppercase">{t(titleKey)}</p>
-      <div className="flex gap-4">
-        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
-          {t('boss.devWin')}
-        </button>
-        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
-          {t('boss.devLose')}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   HANDSHAKE: HandshakeGame,
   WHITE_GLOVE: WhiteGloveGame,
@@ -52,12 +23,16 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   COAT_CHECK: CoatCheckGame,
 };
 
-// Duration (ms) per mini-game
+/**
+ * Countdown duration (ms) shown in `TimerBar`. `0` hides meaningful progress for HANDSHAKE only
+ * (no bar). Expiration is routed per game: COAT_CHECK timer ends as WIN; others as LOSE except
+ * HANDSHAKE which has no expire callback.
+ */
 const DURATIONS: Record<MiniGameId, number> = {
   HANDSHAKE: 0,
   WHITE_GLOVE: 20_000,
   PAPARAZZI: 20_000,
-  COAT_CHECK: 20000,
+  COAT_CHECK: 20_000,
 };
 
 export function BossEncounterOverlay() {

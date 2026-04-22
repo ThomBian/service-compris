@@ -5,6 +5,7 @@ import { Heart, HeartCrack } from 'lucide-react';
 import { playCoatParrySfx, playToastSound } from '../../audio/gameSfx';
 import { PixelAvatar } from '../scene/PixelAvatar';
 import type { MiniGameProps } from './miniGameTypes';
+import { bossArenaSurface, bossHudEyebrow } from './bossMiniGameChrome';
 
 const EMOJIS = ['🧥', '🪄', '🎩', '🐩', '🪭', '📇', '💎', '👜'] as const;
 
@@ -292,7 +293,7 @@ export function CoatCheckGame({ onWin, onLose, durationMs, bossVisualTraits }: M
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
       <div
         ref={containerRef}
-        className="relative min-h-0 flex-1 touch-none select-none overflow-hidden rounded-xl bg-black/40"
+        className={`relative min-h-0 flex-1 touch-none select-none overflow-hidden ${bossArenaSurface}`}
         style={{ cursor: 'crosshair', minHeight: '12rem' }}
         onPointerDown={handlePointerDown}
       >
@@ -346,7 +347,7 @@ export function CoatCheckGame({ onWin, onLose, durationMs, bossVisualTraits }: M
               })}
 
               <p
-                className="pointer-events-none absolute left-3 max-w-[85%] text-xs uppercase leading-snug tracking-widest text-white/40"
+                className={`absolute left-3 max-w-[85%] leading-snug ${bossHudEyebrow}`}
                 style={{ top: DUCHESS_STRIP_H + 10 }}
               >
                 {t('boss.coatCheck.instruction')}

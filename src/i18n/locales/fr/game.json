@@ -170,8 +170,8 @@
       "livesAria": "{{remaining}} cœurs sur {{max}} restants. {{lost}} perdus."
     },
     "handshake": {
-      "instruction": "Reproduisez correctement la séquence. Atteignez 8 étapes d'affilée pour gagner.",
-      "placeholder": "Poignée de main - bientôt disponible",
+      "instruction": "Reproduisez correctement la séquence. Atteignez 8 étapes d'affilée pour gagner. Pas de compte à rebours — seules les erreurs de saisie font perdre.",
+      "ariaRegion": "Défi de mémoire — poignée de main",
       "watchSequence": "Observez la séquence...",
       "repeatSteps": "Reproduisez - {{count}} étapes",
       "items": {
@@ -182,19 +182,21 @@
       }
     },
     "whiteGlove": {
-      "instruction": "Alignez les deux ustensiles sur leurs contours. Terminez 5 dressages parfaits en 20 secondes.",
-      "placeholder": "Gant blanc - bientôt disponible",
-      "alignHint": "W/A/S/D ou fleches deplace, Q/E pivote, TAB fait defiler, 1-5 change de table.",
+      "instruction": "Alignez fourchette et couteau sur les contours en pointillés à chaque table. Terminez les 5 tables avant la fin du temps (20 secondes). W/A/S/D ou flèches pour déplacer, Q/E pour pivoter, Tab pour changer d'ustensile, 1–5 pour changer de table.",
+      "ariaArena": "Défi d'alignement des couverts",
+      "alignHint": "W/A/S/D ou flèches pour déplacer, Q/E pour pivoter, Tab pour changer d'ustensile, 1-5 pour changer de table.",
       "comboProgress": "{{current}} / {{target}} dressages",
       "forkLabel": "Fourchette",
       "knifeLabel": "Couteau",
-      "snapped": "Aligne"
+      "snapped": "Aligné"
     },
     "paparazzi": {
-      "instruction": "Tapez uniquement les cadres verts. Evitez les cadres rouges. Atteignez 8 bonnes prises en 20 secondes. Un tap rouge ou un cadre vert manqué met fin à la manche.",
-      "placeholder": "Paparazzi - bientôt disponible",
+      "instruction": "Tapez uniquement les viseurs verts avant qu'ils n'expirent. Évitez les rouges. Atteignez 8 bons taps avant la fin du temps (20 secondes). Un tap sur le rouge, ou laisser expirer un vert, fait perdre la rencontre.",
+      "ariaArena": "Défi des flashes paparazzi",
+      "ariaGreen": "Bon angle — photographier",
+      "ariaRed": "Mauvais angle — éviter",
       "arenaHint": "Uniquement les bons angles.",
-      "progress": "{{current}} / {{target}}"
+      "progress": "{{current}} / {{target}} bonnes prises"
     }
   }
 }

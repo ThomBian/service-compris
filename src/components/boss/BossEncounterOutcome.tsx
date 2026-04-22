@@ -86,7 +86,7 @@ export function BossEncounterOutcome({
           ref={continueRef}
           type="button"
           onClick={onContinue}
-          className="rounded-xl border-2 border-[#e8c97a]/80 bg-[#e8c97a]/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.25em] text-[#f5e6bc] shadow-[0_0_24px_rgba(232,201,122,0.2)] transition-colors hover:bg-[#e8c97a]/25"
+          className="rounded-xl border-2 border-[#e8c97a]/80 bg-[#e8c97a]/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.25em] text-[#f5e6bc] shadow-[0_0_24px_rgba(232,201,122,0.2)] transition-colors hover:bg-[#e8c97a]/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8c97a] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           {t('boss.fallbackContinue')}
         </button>

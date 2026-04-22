@@ -2,6 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { playHandshakeItemSfx, playToastSound } from '../../audio/gameSfx';
 import type { MiniGameProps } from './miniGameTypes';
+import {
+  bossEmeraldReveal,
+  bossGoldAttention,
+  bossGridTileBase,
+  bossGridTileIdle,
+  bossHudEyebrow,
+  bossInteractiveFocus,
+  bossRoseReveal,
+} from './bossMiniGameChrome';
 
 const ITEMS = [
   { id: 'LEDGER', icon: '📖' },
@@ -32,7 +41,8 @@ function generateSequence(length: number): ItemId[] {
   return Array.from({ length }, () => nextRandomItem());
 }
 
-export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
+/** No countdown bar in overlay (`DURATIONS.HANDSHAKE === 0`); win/lose come only from sequence play. */
+export function HandshakeGame({ onWin, onLose, durationMs: _durationMs }: MiniGameProps) {
   const { t } = useTranslation('game');
   const [sequence, setSequence] = useState<ItemId[]>(() =>
     generateSequence(INITIAL_SEQUENCE_LENGTH),
@@ -146,14 +156,18 @@ export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col items-center justify-center gap-6">
-      <p className="text-white/40 text-xs tracking-[3px] uppercase">
+    <div
+      role="region"
+      aria-label={t('boss.handshake.ariaRegion')}
+      className="flex h-full min-h-0 flex-col items-center justify-center gap-6"
+    >
+      <p className={`text-center ${bossHudEyebrow}`}>
         {phase === 'SHOWING'
           ? t('boss.handshake.watchSequence')
           : t('boss.handshake.repeatSteps', { count: sequence.length })}
       </p>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {ITEMS.map(item => {
           const isActive = activeItemId === item.id;
           const isGoodPick = feedback?.id === item.id && feedback.status === 'good';
@@ -166,19 +180,19 @@ export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
               type="button"
               onClick={() => handleClick(item.id)}
               className={[
-                'h-16 w-16 rounded-xl text-2xl flex items-center justify-center',
-                'border-2 transition-all duration-100 select-none',
+                bossGridTileBase,
+                bossInteractiveFocus,
                 isActive
-                  ? 'border-[#e8c97a] bg-[#e8c97a22] scale-110 shadow-[0_0_20px_#e8c97a66]'
+                  ? bossGoldAttention
                   : isFailExpected
-                    ? 'border-emerald-400 bg-emerald-500/20 scale-110 shadow-[0_0_20px_rgba(52,211,153,0.45)]'
+                    ? bossEmeraldReveal
                     : isFailWrong
-                      ? 'border-red-400 bg-red-500/20 scale-110 shadow-[0_0_20px_rgba(248,113,113,0.45)]'
-                  : isGoodPick
-                    ? 'border-emerald-400 bg-emerald-500/20 scale-110 shadow-[0_0_20px_rgba(52,211,153,0.45)]'
-                    : isBadPick
-                      ? 'border-red-400 bg-red-500/20 scale-110 shadow-[0_0_20px_rgba(248,113,113,0.45)]'
-                      : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10',
+                      ? bossRoseReveal
+                      : isGoodPick
+                        ? bossEmeraldReveal
+                        : isBadPick
+                          ? bossRoseReveal
+                          : bossGridTileIdle,
                 phase === 'SHOWING' ? 'cursor-default' : 'cursor-pointer',
               ].join(' ')}
             >
@@ -191,13 +205,13 @@ export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
         })}
       </div>
 
-      <div className="flex gap-2" aria-hidden>
+      <div className="flex gap-1.5 sm:gap-2" aria-hidden>
         {sequence.map((_, i) => (
           <span
             key={`progress-${i}`}
             className={[
               'h-2 w-2 rounded-full transition-colors',
-              i < playerInput.length ? 'bg-[#e8c97a]' : 'bg-white/20',
+              i < playerInput.length ? 'bg-[#e8c97a] shadow-[0_0_8px_rgba(232,201,122,0.45)]' : 'bg-white/15',
             ].join(' ')}
           />
         ))}
