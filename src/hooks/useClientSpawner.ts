@@ -397,6 +397,8 @@ export function useClientSpawner(
     bypassChars.forEach(c => spawnBypassCharacter(c));
 
     // BOSS CHARACTERS — warn first, spawn after delay
+    const pendingTimers: Array<{ id: ReturnType<typeof setTimeout>; bossId: string }> = [];
+
     BOSS_ROSTER.forEach(boss => {
       const spawnKey = 'char-walkin-' + boss.id;
       if (gameState.spawnedReservationIds.includes(spawnKey)) return;
@@ -405,15 +407,22 @@ export function useClientSpawner(
 
       warnedBossIdsRef.current.add(boss.id);
       onBossWarning?.(boss);
-      setTimeout(() => spawnCharacterWalkIn(boss), BOSS_WARN_DELAY_MS);
+      const id = setTimeout(() => spawnCharacterWalkIn(boss), BOSS_WARN_DELAY_MS);
+      pendingTimers.push({ id, bossId: boss.id });
     });
+
+    return () => {
+      pendingTimers.forEach(({ id, bossId }) => {
+        clearTimeout(id);
+        warnedBossIdsRef.current.delete(bossId);
+      });
+    };
   }, [
     gameState.inGameMinutes,
     gameState.timeMultiplier,
     gameState.reservations,
     gameState.spawnedReservationIds,
     gameState.queue,
-    gameState.queue.length,
     gameState.dailyCharacterIds,
     gameState.grid,
     gameState.cash,
