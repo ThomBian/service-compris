@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
-import { GameState, type MiniGameId } from '../types';
+import { GameState, type MiniGameId, type BossDefinition } from '../types';
 import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
 
 interface GameContextType {
@@ -29,6 +29,7 @@ interface GameProviderProps {
   pathScores?: PathScores;
   nightConfig?: NightConfig;
   onShowDialogue?: (lines: string[]) => void;
+  onBossWarning?: (boss: BossDefinition) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -39,8 +40,9 @@ export function GameProvider({
   pathScores,
   nightConfig,
   onShowDialogue,
+  onBossWarning,
 }: GameProviderProps) {
-  const engine = useGameEngine(incrementPathScore, pathScores, nightConfig, onShowDialogue);
+  const engine = useGameEngine(incrementPathScore, pathScores, nightConfig, onShowDialogue, onBossWarning);
 
   return (
     <GameContext.Provider value={engine}>
