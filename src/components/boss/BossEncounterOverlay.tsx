@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { BOSS_ROSTER } from '../../data/bossRoster';
 import { Z_INDEX } from '../../zIndex';
 import { CoatCheckGame } from './CoatCheckGame';
+import { HandshakeGame } from './HandshakeGame';
 import { BossEncounterIntro } from './BossEncounterIntro';
 import { BossEncounterOutcome } from './BossEncounterOutcome';
 import { PixelAvatar } from '../scene/PixelAvatar';
@@ -43,9 +44,7 @@ function PlaceholderMiniGame({
 }
 
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
-  HANDSHAKE: ({ onWin, onLose }) => (
-    <PlaceholderMiniGame titleKey="boss.handshake.placeholder" onWin={onWin} onLose={onLose} />
-  ),
+  HANDSHAKE: HandshakeGame,
   WHITE_GLOVE: ({ onWin, onLose }) => (
     <PlaceholderMiniGame titleKey="boss.whiteGlove.placeholder" onWin={onWin} onLose={onLose} />
   ),
@@ -57,7 +56,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
 
 // Duration (ms) per mini-game
 const DURATIONS: Record<MiniGameId, number> = {
-  HANDSHAKE: 10000,
+  HANDSHAKE: 0,
   WHITE_GLOVE: 4000,
   PAPARAZZI: 4000,
   COAT_CHECK: 20000,
@@ -101,7 +100,11 @@ export function BossEncounterOverlay() {
   const boss = BOSS_ROSTER.find(b => b.id === encounter.bossId);
   const Game = MINI_GAMES[encounter.miniGame];
   const onTimerExpire =
-    encounter.miniGame === 'COAT_CHECK' ? onGameWin : onGameLose;
+    encounter.miniGame === 'COAT_CHECK'
+      ? onGameWin
+      : encounter.miniGame === 'HANDSHAKE'
+        ? undefined
+        : onGameLose;
 
   return (
     <div
@@ -153,7 +156,9 @@ export function BossEncounterOverlay() {
               />
             </div>
           </div>
-          <TimerBar durationMs={durationMs} onExpire={onTimerExpire} />
+          {encounter.miniGame !== 'HANDSHAKE' ? (
+            <TimerBar durationMs={durationMs} onExpire={onTimerExpire} />
+          ) : null}
         </>
       ) : null}
 

@@ -3,6 +3,7 @@ import { TYPEWRITER_SOUND_MIN_MS } from '@/src/audio/audioConstants';
 
 /** Matches `Toast['variant']` — keep in sync with `ToastContext`. */
 export type ToastSoundVariant = 'success' | 'error' | 'warning' | 'info';
+export type HandshakeItemSfx = 'LEDGER' | 'BELL' | 'COIN' | 'WHISKEY';
 
 export interface GameToastSounds {
   success: Howl;
@@ -12,15 +13,22 @@ export interface GameToastSounds {
 }
 
 /**
- * Files in `public/audio/game/` (URLs `/audio/game/...`).
+ * Files in `public/audio/shared` and `public/audio/boss` (URLs `/audio/...`).
  * Howler accepts wav / mp3 / ogg per clip; extensions must match the files on disk.
  */
 const PATH = {
-  success: '/audio/game/toast-success.wav',
-  error: '/audio/game/toast-error.wav',
-  warning: '/audio/game/toast-warning.ogg',
-  info: '/audio/game/toast-info.wav',
+  success: '/audio/shared/toast/toast-success.wav',
+  error: '/audio/shared/toast/toast-error.wav',
+  warning: '/audio/shared/toast/toast-warning.ogg',
+  info: '/audio/shared/toast/toast-info.wav',
 } as const;
+
+const HANDSHAKE_ITEM_PATH: Record<HandshakeItemSfx, string> = {
+  LEDGER: '/audio/boss/handshake/ledger.wav',
+  BELL: '/audio/boss/handshake/bell.wav',
+  COIN: '/audio/boss/handshake/coin.wav',
+  WHISKEY: '/audio/boss/handshake/whiskey.wav',
+};
 
 const devLoadErr =
   import.meta.env.DEV && typeof console !== 'undefined'
@@ -73,6 +81,49 @@ export function playToastSound(variant: ToastSoundVariant): void {
   const howl = s[variant];
   howl.stop();
   howl.play();
+}
+
+// --- Boss mini-game: handshake item taps (placeholder paths) ---
+
+let handshakeItemSounds: Record<HandshakeItemSfx, Howl> | null = null;
+
+function ensureHandshakeItemSounds(): Record<HandshakeItemSfx, Howl> {
+  if (!handshakeItemSounds) {
+    handshakeItemSounds = {
+      LEDGER: new Howl({
+        src: [HANDSHAKE_ITEM_PATH.LEDGER],
+        volume: 0.42,
+        preload: true,
+        onloaderror: devLoadErr('handshake-ledger'),
+      }),
+      BELL: new Howl({
+        src: [HANDSHAKE_ITEM_PATH.BELL],
+        volume: 0.42,
+        preload: true,
+        onloaderror: devLoadErr('handshake-bell'),
+      }),
+      COIN: new Howl({
+        src: [HANDSHAKE_ITEM_PATH.COIN],
+        volume: 0.42,
+        preload: true,
+        onloaderror: devLoadErr('handshake-coin'),
+      }),
+      WHISKEY: new Howl({
+        src: [HANDSHAKE_ITEM_PATH.WHISKEY],
+        volume: 0.42,
+        preload: true,
+        onloaderror: devLoadErr('handshake-whiskey'),
+      }),
+    };
+  }
+  return handshakeItemSounds;
+}
+
+export function playHandshakeItemSfx(item: HandshakeItemSfx): void {
+  void Howler.ctx?.resume?.();
+  const h = ensureHandshakeItemSounds()[item];
+  h.stop();
+  h.play();
 }
 
 // --- Typewriter click (reused for in-game MrV dialogue) ---
@@ -179,14 +230,14 @@ export function playPaperSwish(): void {
   h.play();
 }
 
-// --- Boss mini-game: coat check parry (`public/audio/game/coat-parry.wav`) ---
+// --- Boss mini-game: coat check parry (`public/audio/boss/coat-check/parry.wav`) ---
 
 let coatParryHowl: Howl | null = null;
 
 function ensureCoatParryHowl(): Howl {
   if (!coatParryHowl) {
     coatParryHowl = new Howl({
-      src: ['/audio/game/coat-parry.wav'],
+      src: ['/audio/boss/coat-check/parry.wav'],
       volume: 0.46,
       preload: true,
       onloaderror: devLoadErr('coat-parry'),

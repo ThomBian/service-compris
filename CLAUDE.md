@@ -17,13 +17,15 @@ npm run clean      # Remove dist/
 
 The dev **command palette** is the single entry point for test helpers (mock corkboard jumps, boss mini-games while a shift is running). It is omitted from production builds.
 
-- **Open / close:** **Cmd+Shift+K** (macOS) or **Ctrl+Shift+K** (Windows/Linux). A small **Dev** corner button can also open it when enabled; uncheck “Show Dev button when closed” in the palette footer to hide that button — preference is stored in **`localStorage`** under `service-compris-dev-palette-ui`.
-- **Implementation:** [`src/components/dev/DevCommandPalette.tsx`](src/components/dev/DevCommandPalette.tsx), [`src/dev/DevPlayApiContext.tsx`](src/dev/DevPlayApiContext.tsx), mock ledger in [`src/dev/devMockLedger.ts`](src/dev/devMockLedger.ts).
-- **`VITE_DEV_START_NIGHT`:** Optional `.env` value (integer **≥ 2**): starting a new game from the landing page skips the intro and jumps to that night (see `DEV_START_NIGHT` in [`src/App.tsx`](src/App.tsx)). Unrelated to the palette.
+- **Open / close:** **Cmd+Shift+K** (macOS) or **Ctrl+Shift+K** (Windows/Linux). A small **Dev** corner button can also open it when enabled; uncheck “Show Dev button when closed” in the palette footer to hide that button — preference is stored in `**localStorage`** under `service-compris-dev-palette-ui`.
+- **Implementation:** `[src/components/dev/DevCommandPalette.tsx](src/components/dev/DevCommandPalette.tsx)`, `[src/dev/DevPlayApiContext.tsx](src/dev/DevPlayApiContext.tsx)`, mock ledger in `[src/dev/devMockLedger.ts](src/dev/devMockLedger.ts)`.
+- `**VITE_DEV_START_NIGHT`:** Optional `.env` value (integer **≥ 2**): starting a new game from the landing page skips the intro and jumps to that night (see `DEV_START_NIGHT` in `[src/App.tsx](src/App.tsx)`). Unrelated to the palette.
 
 ## How we work
 
 - **Bilingual product (EN + FR):** Treat the game as localized by default. User-facing copy lives in **i18n JSON** (`src/i18n/locales/{en,fr}/`), not hard-coded in components—add or update keys in **both** languages when you introduce or change text. Use `useTranslation` in React and `i18n.t()` in non-React code (pure logic, hooks that build strings). Persisted strings (e.g. activity logs) should be resolved at write time with `i18n.t(...)` unless we explicitly re-localize on read later.
+- **Boss mini-game UX contract:** Any new boss mini-game must reuse the same presentation flow: intro/dramatic beat, stakes block, short “How to play” explanation, then challenge, then outcome summary + Continue. Treat this as a product pattern, not per-game improvisation.
+- **Mini-game copy checklist:** When adding a `MiniGameId`, add matching `game.boss.*` keys in **both** locales for at least: placeholder label (if WIP), instruction text, and any game-specific HUD labels/aria strings. Keep fallback keys (`boss.genericInstruction`, generic win/lose lines) intact so incomplete content degrades gracefully.
 - **Architecture at scale:** Prefer **clear boundaries**: pure functions in `src/logic/` (testable, no React), side effects and orchestration in hooks (`src/hooks/`), a single game state pipe through `GameContext` / `useGameEngine`, and thin UI components. When adding features, extend existing subsystems (spawner, queue, actions) instead of duplicating state or bypassing context. Large or cross-cutting work is often specced first under `docs/` (see below).
 - **Docs and specs:** Design notes and plans live in `docs/` (`docs/game-concept.md`, `docs/specs/`, `docs/superpowers/`). Use them to align behavior before rewriting core loops.
 
@@ -69,7 +71,7 @@ High-level flow:
 
 ### State management
 
-All game state flows through `**GameContext`** (`src/context/GameContext.tsx`), which wraps `**useGameEngine**` — a hook that composes subsystems:
+All game state flows through `**GameContext`** (`src/context/GameContext.tsx`), which wraps `**useGameEngine`** — a hook that composes subsystems:
 
 ```
 useGameEngine
@@ -115,7 +117,7 @@ Pure functions: grid creation, client generation (lies / identities), greetings,
 ## Docs
 
 - `**docs/game-concept.md`** — core loop and win/lose framing.
-- `**docs/specs/**` — layouts, time/queue, investigation UX, lore notes.
+- `**docs/specs/`** — layouts, time/queue, investigation UX, lore notes.
 - `**docs/superpowers/**` — dated plans and design specs for larger features (tour, campaign, i18n, etc.).
 - Specs are coming from Obsidian, whenever you plan something take them from the obsidian vault
 - When a plan is executed, update the spec file in Obsidian to show what is done and what is not

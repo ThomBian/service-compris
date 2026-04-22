@@ -170,8 +170,16 @@
       "livesAria": "{{remaining}} cœurs sur {{max}} restants. {{lost}} perdus."
     },
     "handshake": {
-      "instruction": "Suivez le signal et validez votre réponse au bon moment. Un mauvais timing vous fait perdre l'échange.",
-      "placeholder": "Poignée de main - bientôt disponible"
+      "instruction": "Reproduisez correctement la séquence. Atteignez 8 étapes d'affilée pour gagner.",
+      "placeholder": "Poignée de main - bientôt disponible",
+      "watchSequence": "Observez la séquence...",
+      "repeatSteps": "Reproduisez - {{count}} étapes",
+      "items": {
+        "ledger": "Registre",
+        "bell": "Cloche",
+        "coin": "Pièce",
+        "whiskey": "Whisky"
+      }
     },
     "whiteGlove": {
       "instruction": "Réagissez vite aux consignes d'inspection. Gardez un rythme propre pour éviter l'erreur fatale.",

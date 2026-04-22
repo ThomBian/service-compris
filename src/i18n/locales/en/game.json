@@ -170,8 +170,16 @@
       "livesAria": "{{remaining}} of {{max}} hearts remaining. {{lost}} lost."
     },
     "handshake": {
-      "instruction": "Watch the cue and lock in your response at the right moment. Mistime it, and you lose the exchange.",
-      "placeholder": "Handshake - coming soon"
+      "instruction": "Repeat the sequence correctly. Reach 8 steps in a row to win.",
+      "placeholder": "Handshake - coming soon",
+      "watchSequence": "Watch the sequence...",
+      "repeatSteps": "Repeat - {{count}} steps",
+      "items": {
+        "ledger": "Ledger",
+        "bell": "Bell",
+        "coin": "Coin",
+        "whiskey": "Whiskey"
+      }
     },
     "whiteGlove": {
       "instruction": "React quickly to the inspection prompts. Keep your rhythm clean to avoid a fatal error.",
