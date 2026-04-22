@@ -17,45 +17,40 @@ export type { MiniGameProps } from './miniGameTypes';
 const miniGamePlaceholderClass =
   'flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 sm:p-8';
 
+function PlaceholderMiniGame({
+  titleKey,
+  onWin,
+  onLose,
+}: {
+  titleKey: string;
+  onWin: () => void;
+  onLose: () => void;
+}) {
+  const { t } = useTranslation('game');
+  return (
+    <div className={miniGamePlaceholderClass}>
+      <p className="text-white/60 text-sm tracking-widest uppercase">{t(titleKey)}</p>
+      <div className="flex gap-4">
+        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
+          {t('boss.devWin')}
+        </button>
+        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
+          {t('boss.devLose')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   HANDSHAKE: ({ onWin, onLose }) => (
-    <div className={miniGamePlaceholderClass}>
-      <p className="text-white/60 text-sm tracking-widest uppercase">Handshake — coming soon</p>
-      <div className="flex gap-4">
-        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
-          Win
-        </button>
-        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
-          Lose
-        </button>
-      </div>
-    </div>
+    <PlaceholderMiniGame titleKey="boss.handshake.placeholder" onWin={onWin} onLose={onLose} />
   ),
   WHITE_GLOVE: ({ onWin, onLose }) => (
-    <div className={miniGamePlaceholderClass}>
-      <p className="text-white/60 text-sm tracking-widest uppercase">White Glove — coming soon</p>
-      <div className="flex gap-4">
-        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
-          Win
-        </button>
-        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
-          Lose
-        </button>
-      </div>
-    </div>
+    <PlaceholderMiniGame titleKey="boss.whiteGlove.placeholder" onWin={onWin} onLose={onLose} />
   ),
   PAPARAZZI: ({ onWin, onLose }) => (
-    <div className={miniGamePlaceholderClass}>
-      <p className="text-white/60 text-sm tracking-widest uppercase">Paparazzi — coming soon</p>
-      <div className="flex gap-4">
-        <button type="button" onClick={onWin} className="px-4 py-2 bg-green-700 text-white rounded">
-          Win
-        </button>
-        <button type="button" onClick={onLose} className="px-4 py-2 bg-red-700 text-white rounded">
-          Lose
-        </button>
-      </div>
-    </div>
+    <PlaceholderMiniGame titleKey="boss.paparazzi.placeholder" onWin={onWin} onLose={onLose} />
   ),
   COAT_CHECK: CoatCheckGame,
 };
@@ -116,6 +111,7 @@ export function BossEncounterOverlay() {
       {phase === 'intro' && boss ? (
         <BossEncounterIntro
           boss={boss}
+          miniGame={encounter.miniGame}
           interceptedAction={encounter.interceptedAction}
           onBegin={() => setPhase('game')}
         />

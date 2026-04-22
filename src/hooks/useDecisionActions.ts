@@ -5,7 +5,10 @@ import {
   PhysicalState,
   CellState,
   ClientType,
+  DialogueState,
   LieType,
+  type BossDefinition,
+  type Client,
   type MiniGameId,
 } from "../types";
 import { mealDurationForPartySize, LAST_CALL_RATING_PENALTY } from "../constants";
@@ -25,6 +28,28 @@ import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { tGame, tCharacter } from '../i18n/tGame';
 import { BOSS_ROSTER, bossForMiniGame } from '../data/bossRoster';
 import { createCharacter } from '../logic/characters/factory';
+
+function deskClientForBossEncounter(prev: GameState, boss: BossDefinition): Client {
+  return {
+    id: `dev-boss-${boss.id}-${Math.random().toString(36).slice(2, 9)}`,
+    type: ClientType.WALK_IN,
+    patience: 100,
+    physicalState: PhysicalState.AT_DESK,
+    dialogueState: DialogueState.OPENING_GAMBIT,
+    spawnTime: prev.inGameMinutes,
+    trueFirstName: boss.name,
+    trueLastName: '',
+    truePartySize: boss.expectedPartySize,
+    isLate: false,
+    lieType: LieType.NONE,
+    hasLied: false,
+    visualTraits: boss.visualTraits,
+    isCaught: false,
+    characterId: boss.id,
+    lastMessage: '',
+    chatHistory: [],
+  };
+}
 
 type ShowToast = (
   title: string,
@@ -241,6 +266,7 @@ export function useDecisionActions(
               ];
               return {
                 ...base,
+                grid: clearFloorplanSelection(prev.grid),
                 currentClient: prev.currentClient
                   ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
                   : null,
@@ -266,21 +292,18 @@ export function useDecisionActions(
             });
           }
           if (interceptedAction === 'SEAT') {
-            const charOutcome = ch.onRefused(prev);
             toastArgs = [
               tGame('boss.loseSeat', { name: boss.name }),
               undefined,
               'error',
             ];
-            return applyMoraleGameOver({
+            return {
               ...base,
-              ...charOutcome,
-              currentClient: null,
-              logs: [
-                tGame('boss.stormedOut', { name: boss.name }),
-                ...base.logs,
-              ].slice(0, 50),
-            });
+              grid: clearFloorplanSelection(prev.grid),
+              currentClient: prev.currentClient
+                ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
+                : null,
+            };
           }
           toastArgs = [
             tGame('boss.loseRefuse', { name: boss.name }),
@@ -289,6 +312,7 @@ export function useDecisionActions(
           ];
           return {
             ...base,
+            grid: clearFloorplanSelection(prev.grid),
             currentClient: prev.currentClient
               ? { ...prev.currentClient, physicalState: PhysicalState.SEATING }
               : null,
@@ -548,8 +572,13 @@ export function useDecisionActions(
     setGameState(prev => {
       const boss = bossForMiniGame(miniGame);
       const interceptedAction = boss.role === "VIP" ? ("SEAT" as const) : ("REFUSE" as const);
+      const needsDesk =
+        !prev.currentClient || prev.currentClient.characterId !== boss.id;
       return {
         ...prev,
+        currentClient: needsDesk
+          ? deskClientForBossEncounter(prev, boss)
+          : prev.currentClient,
         activeBossEncounter: {
           bossId: boss.id,
           interceptedAction,

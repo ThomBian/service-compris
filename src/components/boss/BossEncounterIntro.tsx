@@ -12,6 +12,7 @@ import { playDialogueTypewriterClick } from '../../audio/gameSfx';
 
 interface BossEncounterIntroProps {
   boss: BossDefinition;
+  miniGame: BossDefinition['miniGame'];
   interceptedAction: 'SEAT' | 'REFUSE';
   onBegin: () => void;
 }
@@ -22,10 +23,21 @@ interface BossEncounterIntroProps {
  */
 export function BossEncounterIntro({
   boss,
+  miniGame,
   interceptedAction,
   onBegin,
 }: BossEncounterIntroProps) {
   const { t } = useTranslation('game');
+  const instructionKeyByMiniGame: Record<BossDefinition['miniGame'], string> = {
+    HANDSHAKE: 'boss.handshake.instruction',
+    WHITE_GLOVE: 'boss.whiteGlove.instruction',
+    PAPARAZZI: 'boss.paparazzi.instruction',
+    COAT_CHECK: 'boss.coatCheck.instruction',
+  };
+  const instructionKey = instructionKeyByMiniGame[miniGame];
+  const instructionText = t(instructionKey, {
+    defaultValue: t('boss.genericInstruction'),
+  });
 
   const stakeKeys =
     interceptedAction === 'SEAT'
@@ -193,6 +205,20 @@ export function BossEncounterIntro({
                       {t('boss.stakesFailLabel')}{' '}
                     </span>
                     {t(stakeKeys.lose, { name: boss.name })}
+                  </p>
+                </div>
+                <div className="mt-5 rounded-lg border border-[#e8c97a]/35 bg-[#e8c97a]/8 p-3.5 text-left">
+                  <p
+                    className="text-[10px] font-bold uppercase tracking-[0.35em] text-[#e8c97a]/80"
+                    style={{ fontFamily: INTRO_SERIF_FONT }}
+                  >
+                    {t('boss.howToPlay')}
+                  </p>
+                  <p
+                    className="mt-2 text-sm leading-relaxed text-[#f3ead2] sm:text-[15px]"
+                    style={{ fontFamily: INTRO_SERIF_FONT }}
+                  >
+                    {instructionText}
                   </p>
                 </div>
                 <button

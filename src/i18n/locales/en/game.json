@@ -124,6 +124,10 @@
     "stakesSeatLose": "{{name}} storms out — you lose the table and eat the consequences.",
     "stakesRefuseWin": "{{name}} is turned away and stays off the floor.",
     "stakesRefuseLose": "{{name}} forces their way in — you'll have to bring them to a table.",
+    "howToPlay": "How to play",
+    "genericInstruction": "Complete the challenge before time runs out. One decisive mistake can cost you the encounter.",
+    "devWin": "Win",
+    "devLose": "Lose",
     "beginTrial": "Begin trial",
     "fallbackContinue": "Continue",
     "outcomeHeadingWin": "Victory",
@@ -164,6 +168,18 @@
     "coatCheck": {
       "instruction": "Tap each thrown item before it reaches the line. Three misses and you lose.",
       "livesAria": "{{remaining}} of {{max}} hearts remaining. {{lost}} lost."
+    },
+    "handshake": {
+      "instruction": "Watch the cue and lock in your response at the right moment. Mistime it, and you lose the exchange.",
+      "placeholder": "Handshake - coming soon"
+    },
+    "whiteGlove": {
+      "instruction": "React quickly to the inspection prompts. Keep your rhythm clean to avoid a fatal error.",
+      "placeholder": "White Glove - coming soon"
+    },
+    "paparazzi": {
+      "instruction": "Control the scene and avoid getting caught off-guard. Let the pressure build too far, and the room turns on you.",
+      "placeholder": "Paparazzi - coming soon"
     }
   }
 }

@@ -124,6 +124,10 @@
     "stakesSeatLose": "{{name}} repart en colère — vous perdez la table et subissez les conséquences.",
     "stakesRefuseWin": "{{name}} repart — il ne met pas les pieds en salle.",
     "stakesRefuseLose": "{{name}} s'impose — vous devrez le placer à une table.",
+    "howToPlay": "Comment jouer",
+    "genericInstruction": "Réussissez l'épreuve avant la fin du temps. Une seule erreur décisive peut vous coûter la rencontre.",
+    "devWin": "Gagner",
+    "devLose": "Perdre",
     "beginTrial": "Commencer l'épreuve",
     "fallbackContinue": "Continuer",
     "outcomeHeadingWin": "Victoire",
@@ -164,6 +168,18 @@
     "coatCheck": {
       "instruction": "Tapez chaque objet lancé avant qu'il n'atteigne la ligne. Trois ratés et vous perdez.",
       "livesAria": "{{remaining}} cœurs sur {{max}} restants. {{lost}} perdus."
+    },
+    "handshake": {
+      "instruction": "Suivez le signal et validez votre réponse au bon moment. Un mauvais timing vous fait perdre l'échange.",
+      "placeholder": "Poignée de main - bientôt disponible"
+    },
+    "whiteGlove": {
+      "instruction": "Réagissez vite aux consignes d'inspection. Gardez un rythme propre pour éviter l'erreur fatale.",
+      "placeholder": "Gant blanc - bientôt disponible"
+    },
+    "paparazzi": {
+      "instruction": "Gardez le contrôle de la scène et évitez de vous faire surprendre. Si la pression monte trop, la salle se retourne contre vous.",
+      "placeholder": "Paparazzi - bientôt disponible"
     }
   }
 }
