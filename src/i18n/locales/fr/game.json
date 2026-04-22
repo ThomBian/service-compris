@@ -186,8 +186,10 @@
       "placeholder": "Gant blanc - bientôt disponible"
     },
     "paparazzi": {
-      "instruction": "Gardez le contrôle de la scène et évitez de vous faire surprendre. Si la pression monte trop, la salle se retourne contre vous.",
-      "placeholder": "Paparazzi - bientôt disponible"
+      "instruction": "Tapez uniquement les cadres verts. Evitez les cadres rouges. Atteignez 8 bonnes prises en 20 secondes. Un tap rouge ou un cadre vert manqué met fin à la manche.",
+      "placeholder": "Paparazzi - bientôt disponible",
+      "arenaHint": "Uniquement les bons angles.",
+      "progress": "{{current}} / {{target}}"
     }
   }
 }

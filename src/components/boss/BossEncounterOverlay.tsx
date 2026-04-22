@@ -7,6 +7,7 @@ import { BOSS_ROSTER } from '../../data/bossRoster';
 import { Z_INDEX } from '../../zIndex';
 import { CoatCheckGame } from './CoatCheckGame';
 import { HandshakeGame } from './HandshakeGame';
+import { PaparazziGame } from './PaparazziGame';
 import { BossEncounterIntro } from './BossEncounterIntro';
 import { BossEncounterOutcome } from './BossEncounterOutcome';
 import { PixelAvatar } from '../scene/PixelAvatar';
@@ -48,9 +49,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
   WHITE_GLOVE: ({ onWin, onLose }) => (
     <PlaceholderMiniGame titleKey="boss.whiteGlove.placeholder" onWin={onWin} onLose={onLose} />
   ),
-  PAPARAZZI: ({ onWin, onLose }) => (
-    <PlaceholderMiniGame titleKey="boss.paparazzi.placeholder" onWin={onWin} onLose={onLose} />
-  ),
+  PAPARAZZI: PaparazziGame,
   COAT_CHECK: CoatCheckGame,
 };
 
@@ -58,7 +57,7 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
 const DURATIONS: Record<MiniGameId, number> = {
   HANDSHAKE: 0,
   WHITE_GLOVE: 4000,
-  PAPARAZZI: 4000,
+  PAPARAZZI: 20_000,
   COAT_CHECK: 20000,
 };
 
