@@ -83,6 +83,28 @@ export function playToastSound(variant: ToastSoundVariant): void {
   howl.play();
 }
 
+let bossWarningSting: Howl | null = null;
+
+function ensureBossWarningSting(): Howl {
+  if (!bossWarningSting) {
+    bossWarningSting = new Howl({
+      src: ['/audio/boss/shared/boss-warning-sting.wav', '/audio/shared/toast/toast-warning.ogg'],
+      volume: 0.65,
+      preload: true,
+      onloaderror: devLoadErr('boss-warning-sting'),
+    });
+  }
+  return bossWarningSting;
+}
+
+/** Dramatic sting played when a boss spawn condition is first met. */
+export function playBossWarningSting(): void {
+  void Howler.ctx?.resume?.();
+  const howl = ensureBossWarningSting();
+  howl.stop();
+  howl.play();
+}
+
 // --- Boss mini-game: handshake item taps (placeholder paths) ---
 
 let handshakeItemSounds: Record<HandshakeItemSfx, Howl> | null = null;

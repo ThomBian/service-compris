@@ -1,4 +1,7 @@
 {
+  "boss": {
+    "warningLabel": "Heads up"
+  },
   "landing": {
     "tagline": "The Maitre D' Simulator",
     "blurb": "You are the Maitre D' at a ruthless restaurant. Manage the door, spot the liars, survive the shift.",

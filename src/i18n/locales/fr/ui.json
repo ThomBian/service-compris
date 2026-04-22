@@ -1,4 +1,7 @@
 {
+  "boss": {
+    "warningLabel": "Attention"
+  },
   "landing": {
     "tagline": "Simulateur de maître d’hôtel",
     "blurb": "Vous êtes le maître d’hôtel d’un restaurant impitoyable. Gérez la porte, démasquez les menteurs, survivez au service.",

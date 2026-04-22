@@ -24,6 +24,8 @@ export const DOORS_CLOSE_TIME = 22 * 60 + 30;
 export const TICK_RATE = 1500; // 1 in-game minute = 1 real-world seconds (at 1x)
 /** Patience lost per clock tick for each client still in the queue (× strike multiplier when strike is active). */
 export const QUEUE_PATIENCE_DRAIN_PER_TICK = 6;
+/** Real-time ms between boss-warning toast and boss entering the queue. */
+export const BOSS_WARN_DELAY_MS = 45_000;
 
 export const FIRST_NAMES = [
   "James",
