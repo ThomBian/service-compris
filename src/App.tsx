@@ -24,6 +24,9 @@ import type { LedgerData } from './types/campaign';
 import type { VisualTraits } from './types';
 import { Z_INDEX } from './zIndex';
 import { BossEncounterOverlay } from './components/boss/BossEncounterOverlay';
+import { BossWarningToast } from './components/boss/BossWarningToast';
+import { AnimatePresence } from 'motion/react';
+import type { BossDefinition } from './types';
 import { DevPlayApiProvider, useDevPlayApi } from './dev/DevPlayApiContext';
 import { DevCommandPalette } from './components/dev/DevCommandPalette';
 import { DEV_MOCK_LEDGER } from './dev/devMockLedger';
@@ -263,6 +266,15 @@ export default function App() {
 
   const [dialogueQueue, setDialogueQueue] = React.useState<string[][]>([]);
   const [activeDialogue, setActiveDialogue] = React.useState<string[] | null>(null);
+  const [bossWarning, setBossWarning] = React.useState<BossDefinition | null>(null);
+
+  const onBossWarning = React.useCallback((boss: BossDefinition) => {
+    setBossWarning(boss);
+  }, []);
+
+  const onBossWarningDismiss = React.useCallback(() => {
+    setBossWarning(null);
+  }, []);
 
   const onShowDialogue = React.useCallback((lines: string[]) => {
     setDialogueQueue(prev => [...prev, lines]);
@@ -283,6 +295,10 @@ export default function App() {
   React.useEffect(() => {
     setDialogueQueue([]);
     setActiveDialogue(null);
+  }, [phase]);
+
+  React.useEffect(() => {
+    setBossWarning(null);
   }, [phase]);
 
   const handleShiftEnd = React.useCallback((ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => {
@@ -380,21 +396,29 @@ export default function App() {
         />
       )}
       {phase === 'PLAYING' && (
-        <GameProvider
-          incrementPathScore={campaign.incrementPathScore}
-          pathScores={campaign.campaignState.pathScores}
-          nightConfig={campaign.activeNightConfig}
-          onShowDialogue={onShowDialogue}
-        >
-          <GameContent
-            initialDifficulty={difficulty}
-            persist={persist}
-            onShiftEnd={handleShiftEnd}
-            playerIdentity={playerIdentity}
-            activeDialogue={activeDialogue}
-            onDialogueDismiss={onDialogueDismiss}
-          />
-        </GameProvider>
+        <>
+          <GameProvider
+            incrementPathScore={campaign.incrementPathScore}
+            pathScores={campaign.campaignState.pathScores}
+            nightConfig={campaign.activeNightConfig}
+            onShowDialogue={onShowDialogue}
+            onBossWarning={onBossWarning}
+          >
+            <GameContent
+              initialDifficulty={difficulty}
+              persist={persist}
+              onShiftEnd={handleShiftEnd}
+              playerIdentity={playerIdentity}
+              activeDialogue={activeDialogue}
+              onDialogueDismiss={onDialogueDismiss}
+            />
+          </GameProvider>
+          <AnimatePresence>
+            {bossWarning && (
+              <BossWarningToast key={bossWarning.id} boss={bossWarning} onDismiss={onBossWarningDismiss} />
+            )}
+          </AnimatePresence>
+        </>
       )}
       {import.meta.env.DEV && (
         <DevCommandPalette
