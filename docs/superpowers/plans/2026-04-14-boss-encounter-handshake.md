@@ -6,23 +6,42 @@
 
 **Goal:** Implement the Syndicate Don boss encounter — a Simon Says sequence memory game where the player must repeat a 4-step sequence on desk objects, with sequences growing longer each loop until time (10s) runs out.
 
+**Mini-game UX contract (must match existing boss flow):**
+
+- Keep the standardized phases: `intro` (dramatic beat + stakes + **How to play**) -> `game` -> `outcome`.
+- Do not hardcode user-facing copy in component code. Add keys in `game.boss.*` for **both** locales.
+- Reuse generic fallbacks where needed (`boss.genericInstruction`, generic win/lose lines) so incomplete game content still degrades safely.
+
 **Architecture:** `HandshakeGame` is a pure React component with `useState` for sequence and player input tracking. Phase 1 animates the sequence (highlight each item for 400ms). Phase 2 accepts clicks and compares to the sequence. On full match, the sequence grows by one item and Phase 1 replays. Wrong click → instant lose. The outer overlay timer drives the 10s window.
 
 **Tech Stack:** React 19, TypeScript, Tailwind CSS 4, Vitest, CSS animations
 
 ---
 
-### Task 1: Add i18n keys for the Syndicate Don
+### Task 1: Add i18n keys for Handshake mini-game presentation
 
 **Files:**
+
 - Modify: `src/i18n/locales/en/game.json`
 - Modify: `src/i18n/locales/fr/game.json`
-
-- [ ] **Step 1: Add boss quote keys inside the existing `"boss"` object**
+- **Step 1: Add/confirm Handshake presentation keys inside the existing `"boss"` object**
 
 `src/i18n/locales/en/game.json`:
+
 ```json
 "boss": {
+  "handshake": {
+    "placeholder": "Handshake - coming soon",
+    "instruction": "Watch the cue and lock in your response at the right moment. Mistime it, and you lose the exchange.",
+    "watchSequence": "Watch the sequence...",
+    "repeatSteps": "Repeat - {{count}} steps",
+    "items": {
+      "ledger": "Ledger",
+      "bell": "Bell",
+      "inkwell": "Inkwell",
+      "stamp": "Stamp"
+    }
+  },
   "syndicateDon": {
     "quote": "You know the moves, or you don't."
   },
@@ -31,8 +50,21 @@
 ```
 
 `src/i18n/locales/fr/game.json`:
+
 ```json
 "boss": {
+  "handshake": {
+    "placeholder": "Poignée de main - bientôt disponible",
+    "instruction": "Suivez le signal et validez votre réponse au bon moment. Un mauvais timing vous fait perdre l'échange.",
+    "watchSequence": "Observez la séquence...",
+    "repeatSteps": "Reproduisez - {{count}} étapes",
+    "items": {
+      "ledger": "Registre",
+      "bell": "Cloche",
+      "inkwell": "Encrier",
+      "stamp": "Tampon"
+    }
+  },
   "syndicateDon": {
     "quote": "On connaît les gestes, ou on ne les connaît pas."
   },
@@ -40,11 +72,11 @@
 }
 ```
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add src/i18n/locales/en/game.json src/i18n/locales/fr/game.json
-git commit -m "feat(i18n): add Syndicate Don boss quote"
+git commit -m "feat(i18n): add Handshake mini-game presentation keys"
 ```
 
 ---
@@ -52,9 +84,9 @@ git commit -m "feat(i18n): add Syndicate Don boss quote"
 ### Task 2: Write tests for `HandshakeGame` logic
 
 **Files:**
-- Create: `src/components/boss/__tests__/HandshakeGame.test.tsx`
 
-- [ ] **Step 1: Write the failing tests**
+- Create: `src/components/boss/__tests__/HandshakeGame.test.tsx`
+- **Step 1: Write the failing tests**
 
 ```tsx
 // src/components/boss/__tests__/HandshakeGame.test.tsx
@@ -104,11 +136,12 @@ describe('HandshakeGame', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- **Step 2: Run tests — expect FAIL**
 
 ```bash
 npm run test -- src/components/boss/__tests__/HandshakeGame.test.tsx
 ```
+
 Expected: FAIL — cannot find module `../HandshakeGame`
 
 ---
@@ -116,14 +149,15 @@ Expected: FAIL — cannot find module `../HandshakeGame`
 ### Task 3: Implement `HandshakeGame`
 
 **Files:**
-- Create: `src/components/boss/HandshakeGame.tsx`
 
-- [ ] **Step 1: Create the component**
+- Create: `src/components/boss/HandshakeGame.tsx`
+- **Step 1: Create the component**
 
 ```tsx
 // src/components/boss/HandshakeGame.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import type { MiniGameProps } from './BossEncounterOverlay';
+import { useTranslation } from 'react-i18next';
+import type { MiniGameProps } from './miniGameTypes';
 
 const ITEMS = [
   { id: 'LEDGER',  label: 'Ledger',  emoji: '📖' },
@@ -141,6 +175,7 @@ function generateSequence(length: number): ItemId[] {
 }
 
 export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
+  const { t } = useTranslation('game');
   const [sequence, setSequence] = useState<ItemId[]>(() => generateSequence(4));
   const [playerInput, setPlayerInput] = useState<ItemId[]>([]);
   const [phase, setPhase] = useState<Phase>('SHOWING');
@@ -196,7 +231,9 @@ export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
   return (
     <div className="flex flex-col items-center gap-6">
       <p className="text-white/40 text-xs tracking-[3px] uppercase">
-        {phase === 'SHOWING' ? 'Watch the sequence...' : `Repeat — ${sequence.length} steps`}
+        {phase === 'SHOWING'
+          ? t('boss.handshake.watchSequence')
+          : t('boss.handshake.repeatSteps', { count: sequence.length })}
       </p>
 
       <div className="flex gap-4">
@@ -239,14 +276,15 @@ export function HandshakeGame({ onWin, onLose }: MiniGameProps) {
 }
 ```
 
-- [ ] **Step 2: Run tests — expect PASS**
+- **Step 2: Run tests — expect PASS**
 
 ```bash
 npm run test -- src/components/boss/__tests__/HandshakeGame.test.tsx
 ```
+
 Expected: all tests pass.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/components/boss/HandshakeGame.tsx src/components/boss/__tests__/HandshakeGame.test.tsx
@@ -258,9 +296,9 @@ git commit -m "feat: implement HandshakeGame (Simon Says) for Syndicate Don"
 ### Task 4: Register `HandshakeGame` in the overlay
 
 **Files:**
-- Modify: `src/components/boss/BossEncounterOverlay.tsx`
 
-- [ ] **Step 1: Replace the `HANDSHAKE` placeholder in `MINI_GAMES`**
+- Modify: `src/components/boss/BossEncounterOverlay.tsx`
+- **Step 1: Replace the `HANDSHAKE` placeholder in `MINI_GAMES`**
 
 ```tsx
 // Add import at the top:
@@ -275,30 +313,32 @@ const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
 };
 ```
 
-- [ ] **Step 2: Run type-check**
+- **Step 2: Run type-check**
 
 ```bash
 npm run lint
 ```
+
 Expected: no errors.
 
-- [ ] **Step 3: Manual smoke test**
+- **Step 3: Manual smoke test**
 
 ```bash
 npm run dev
 ```
 
-Trigger Syndicate Don (lower cash threshold temporarily to 0 in bossRoster.ts). Verify:
-- Black screen appears with "SEAT." and Don's quote
+Trigger Syndicate Don from the dev command palette (do not modify spawn thresholds in source). Verify:
+
+- Intro shows Don presentation + stakes + **How to play** block before challenge starts
 - 4 items highlight in sequence (one at a time)
 - Player can click items to repeat sequence
 - Wrong click → overlay closes with penalty toast
 - Correct full sequence → sequence grows + replays
 - Timer bar drains over 10s; if expired → penalty
-
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/components/boss/BossEncounterOverlay.tsx
 git commit -m "feat: register HandshakeGame in BossEncounterOverlay"
 ```
+

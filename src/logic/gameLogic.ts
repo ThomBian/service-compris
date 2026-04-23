@@ -862,5 +862,6 @@ export function buildInitialState(
         ? []
         : (['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'] as ToolReveal[]),
     nightEndPending: false,
+    activeBossEncounter: null,
   };
 }

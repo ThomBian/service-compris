@@ -1,4 +1,69 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-04-22T21:05:59.388Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/components/boss/BossWarningToast.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→13 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-22T21:05:59.388Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-04-22T21:07:56.616Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/hooks/useClientSpawner.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-22T21:07:56.616Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-04-22T21:11:05.415Z",
+      "error_message": "Wrong reference: queue should be dailyCharacterIds",
+      "file": "src/hooks/useClientSpawner.ts",
+      "root_cause": "Used \"queue\" instead of \"dailyCharacterIds\"",
+      "fix": "Changed queue → dailyCharacterIds",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-22T21:11:05.415Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-04-22T21:15:05.019Z",
+      "error_message": "Type error",
+      "file": "src/App.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-22T21:15:05.019Z"
+    }
+  ]
 }

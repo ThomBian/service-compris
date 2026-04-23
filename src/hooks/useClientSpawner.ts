@@ -1,4 +1,4 @@
-import { useCallback, useEffect, Dispatch, SetStateAction } from 'react';
+import { useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import React from 'react';
 import {
   GameState,
@@ -14,15 +14,19 @@ import {
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 import { generateClientData, createNewClient } from '../logic/gameLogic';
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
-import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME } from '../constants';
+import { BOSS_ROSTER } from '../data/bossRoster';
+import { START_TIME, FIRST_NAMES, LAST_NAMES, DOORS_CLOSE_TIME, BOSS_WARN_DELAY_MS } from '../constants';
+import type { BossDefinition } from '../types';
 import { getRule } from '../logic/nightRules';
 import { tGame } from '../i18n/tGame';
 
 export function useClientSpawner(
   gameState: GameState,
   setGameState: Dispatch<SetStateAction<GameState>>,
-  characters: React.RefObject<Map<string, SpecialCharacter>>
+  characters: React.RefObject<Map<string, SpecialCharacter>>,
+  onBossWarning?: (boss: BossDefinition) => void,
 ) {
+  const warnedBossIdsRef = useRef<Set<string>>(new Set());
   const spawnClient = useCallback((res?: Reservation) => {
     setGameState(prev => {
       const dailyCharsFromRoster = prev.dailyCharacterIds
@@ -391,7 +395,38 @@ export function useClientSpawner(
       gameState.grid.flat().filter(cell => cell.state === CellState.EMPTY).length <= 4
     );
     bypassChars.forEach(c => spawnBypassCharacter(c));
-  }, [gameState.inGameMinutes, gameState.timeMultiplier, gameState.reservations, gameState.spawnedReservationIds, gameState.queue.length, gameState.dailyCharacterIds, gameState.grid, spawnClient, spawnCharacterWalkIn, spawnBypassCharacter]);
+
+    // BOSS CHARACTERS — warn first, spawn after delay
+    // warnedBossIdsRef persists across re-runs (ticks) to prevent re-warning.
+    // Post-unmount setTimeout is benign in React 18 (state update silently dropped),
+    // and spawnCharacterWalkIn has its own spawnedReservationIds idempotency guard.
+    BOSS_ROSTER.forEach(boss => {
+      const spawnKey = 'char-walkin-' + boss.id;
+      if (gameState.spawnedReservationIds.includes(spawnKey)) return;
+      if (warnedBossIdsRef.current.has(boss.id)) return;
+      if (!boss.spawnCondition(gameState)) return;
+
+      warnedBossIdsRef.current.add(boss.id);
+      onBossWarning?.(boss);
+      setTimeout(() => spawnCharacterWalkIn(boss), BOSS_WARN_DELAY_MS);
+    });
+  }, [
+    gameState.inGameMinutes,
+    gameState.timeMultiplier,
+    gameState.reservations,
+    gameState.spawnedReservationIds,
+    gameState.queue,
+    gameState.dailyCharacterIds,
+    gameState.grid,
+    gameState.cash,
+    gameState.rating,
+    gameState.shiftRevenue,
+    gameState.morale,
+    onBossWarning,
+    spawnClient,
+    spawnCharacterWalkIn,
+    spawnBypassCharacter,
+  ]);
 
   return { spawnClient, spawnCharacterWalkIn, spawnScriptedCharacter };
 }

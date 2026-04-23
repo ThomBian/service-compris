@@ -112,6 +112,7 @@ const makeGameState = (overrides?: Partial<GameState>): GameState => ({
   firedEventIds: [],
   revealedTools: ['LEDGER', 'PARTY_TICKET', 'CLIPBOARD_VIP', 'CLIPBOARD_BANNED'],
   nightEndPending: false,
+  activeBossEncounter: null,
   ...overrides,
 });
 

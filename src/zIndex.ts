@@ -13,6 +13,10 @@ export const Z_INDEX = {
   gameHeader: 50,
   /** Toasts (portal); content is pointer-events-none. */
   toast: 5000,
+  /** Boss spawn warning toast — above regular toasts, below dev HUD. */
+  bossWarning: 5500,
+  /** Dev command palette + corner chip — below global mute. */
+  devHud: 5900,
   /** Global mute — above toasts. */
   globalChrome: 6000,
 } as const;

@@ -1,4 +1,7 @@
 {
+  "boss": {
+    "warningLabel": "Heads up"
+  },
   "landing": {
     "tagline": "The Maitre D' Simulator",
     "blurb": "You are the Maitre D' at a ruthless restaurant. Manage the door, spot the liars, survive the shift.",
@@ -89,7 +92,11 @@
     "cashFine": "Cash fine",
     "moraleHit": "Morale hit",
     "ratingLoss": "Rating loss",
-    "slippedThrough": "Slipped through"
+    "slippedThrough": "Slipped through",
+    "bossBadge": "Boss",
+    "bossStatusPending": "Not due yet — keep an eye on conditions.",
+    "bossStatusLooming": "Due tonight — expect a walk-in.",
+    "bossStatusInHouse": "On the floor — queue or desk."
   },
   "floorplan": {
     "title": "Floorplan",

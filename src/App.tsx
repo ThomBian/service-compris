@@ -23,6 +23,22 @@ import { getSharedAmbienceSounds } from './audio/introAudio';
 import type { LedgerData } from './types/campaign';
 import type { VisualTraits } from './types';
 import { Z_INDEX } from './zIndex';
+import { BossEncounterOverlay } from './components/boss/BossEncounterOverlay';
+import { BossWarningToast } from './components/boss/BossWarningToast';
+import { AnimatePresence } from 'motion/react';
+import type { BossDefinition } from './types';
+import { DevPlayApiProvider, useDevPlayApi } from './dev/DevPlayApiContext';
+import { DevCommandPalette } from './components/dev/DevCommandPalette';
+import { DEV_MOCK_LEDGER } from './dev/devMockLedger';
+
+/** Dev + VITE_DEV_START_NIGHT>=2: "New game" skips intro and night 1 onboarding. Build-time in Vite. */
+const DEV_START_NIGHT: number = (() => {
+  if (!import.meta.env.DEV) return 0;
+  const raw = import.meta.env.VITE_DEV_START_NIGHT;
+  if (raw === undefined || raw === '') return 0;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 2 ? n : 0;
+})();
 
 type GamePhase = 'LANDING' | 'INTRO' | 'CORKBOARD' | 'PLAYING';
 
@@ -44,7 +60,8 @@ function GameContent({
   onDialogueDismiss,
 }: GameContentProps) {
   const { t } = useTranslation('ui');
-  const { gameState, seatParty, setTimeMultiplier, resetGame } = useGame();
+  const { gameState, seatParty, setTimeMultiplier, resetGame, devStartBossEncounter } = useGame();
+  const { setLaunchMiniGame } = useDevPlayApi();
   const [view, setView] = React.useState<'desk' | 'floorplan'>('desk');
 
   const closeTime = getRule<number>(gameState.activeRules, 'SHIFT_END_TIME', DOORS_CLOSE_TIME);
@@ -80,6 +97,16 @@ function GameContent({
   }, []);
 
   React.useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (devStartBossEncounter) {
+      setLaunchMiniGame(devStartBossEncounter);
+    } else {
+      setLaunchMiniGame(null);
+    }
+    return () => setLaunchMiniGame(null);
+  }, [devStartBossEncounter, setLaunchMiniGame]);
+
+  React.useEffect(() => {
     if (isOvertime && !shiftEnded) {
       setView('floorplan');
       return;
@@ -88,6 +115,16 @@ function GameContent({
       setView('desk');
     }
   }, [view, gameState.currentClient?.physicalState, isOvertime, shiftEnded]);
+
+  // After boss encounter clears with SEAT WIN, currentClient is in SEATING state → show floorplan
+  React.useEffect(() => {
+    if (
+      !gameState.activeBossEncounter &&
+      gameState.currentClient?.physicalState === PhysicalState.SEATING
+    ) {
+      setView('floorplan');
+    }
+  }, [gameState.activeBossEncounter, gameState.currentClient?.physicalState]);
 
   // Fire onShiftEnd exactly once when shift ends
   const shiftEndFiredRef = React.useRef(false);
@@ -130,7 +167,6 @@ function GameContent({
 
   const handleSeatParty = () => {
     seatParty();
-    setView('floorplan');
   };
 
   const showDeskBottomBar =
@@ -154,7 +190,10 @@ function GameContent({
           )}
         </div>
       </div>
-      {gameState.timeMultiplier === 0 && !shiftEnded && typeof document !== 'undefined'
+      {gameState.timeMultiplier === 0 &&
+        !gameState.activeBossEncounter &&
+        !shiftEnded &&
+        typeof document !== 'undefined'
         ? createPortal(
             <button
               type="button"
@@ -201,6 +240,7 @@ function GameContent({
       {activeDialogue && (
         <MrVDialogue lines={activeDialogue} onDismiss={onDialogueDismiss} />
       )}
+      <BossEncounterOverlay />
     </div>
   );
 }
@@ -226,6 +266,15 @@ export default function App() {
 
   const [dialogueQueue, setDialogueQueue] = React.useState<string[][]>([]);
   const [activeDialogue, setActiveDialogue] = React.useState<string[] | null>(null);
+  const [bossWarning, setBossWarning] = React.useState<BossDefinition | null>(null);
+
+  const onBossWarning = React.useCallback((boss: BossDefinition) => {
+    setBossWarning(boss);
+  }, []);
+
+  const onBossWarningDismiss = React.useCallback(() => {
+    setBossWarning(null);
+  }, []);
 
   const onShowDialogue = React.useCallback((lines: string[]) => {
     setDialogueQueue(prev => [...prev, lines]);
@@ -246,6 +295,7 @@ export default function App() {
   React.useEffect(() => {
     setDialogueQueue([]);
     setActiveDialogue(null);
+    setBossWarning(null);
   }, [phase]);
 
   const handleShiftEnd = React.useCallback((ledger: LedgerData, lossReason: 'MORALE' | 'VIP' | 'BANNED' | null) => {
@@ -280,6 +330,20 @@ export default function App() {
   }, [campaign]);
 
   const handleStartFromLanding = React.useCallback(() => {
+    if (DEV_START_NIGHT >= 2) {
+      campaign.setDevCampaignNight(DEV_START_NIGHT);
+      setPersist({
+        cash: 0,
+        rating: 5,
+        morale: 100,
+        nightNumber: DEV_START_NIGHT,
+      });
+      setDifficulty(1);
+      setPlayerName('');
+      setPlayerAvatarIndex(0);
+      setPhase('PLAYING');
+      return;
+    }
     campaign.resetCampaign();
     setPersist(undefined);
     setPhase('INTRO');
@@ -297,41 +361,19 @@ export default function App() {
     [campaign],
   );
 
-  // DEV ONLY — Shift+C jumps to corkboard with mock data; Shift+F jumps to fired screen
-  React.useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const DEV_LEDGER: LedgerData = {
-      cash: 1240, netProfit: 340, rating: 4.2, morale: 72,
-      coversSeated: 18, shiftRevenue: 1440, salaryCost: 800,
-      electricityCost: 200, foodCost: 100,
-      logs: [
-        'Party of 2 seated (reservation).',
-        'Walk-in refused — no tables available.',
-        'Scammer caught and removed.',
-        'VIP Marcel Dupont seated.',
-        'Last call — table cleared early.',
-        'Party of 4 seated.',
-        'Reservation no-show marked.',
-        'Rush hour — 3 parties in queue.',
-      ],
-    };
-    const handler = (e: KeyboardEvent) => {
-      if (!e.shiftKey) return;
-      if (e.key === 'C') {
-        campaign.advanceNight(DEV_LEDGER);
-        setPhase('CORKBOARD');
-      }
-      if (e.key === 'F') {
-        campaign.fireCorkboard('MORALE', DEV_LEDGER);
-        setPhase('CORKBOARD');
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+  const handleDevAdvanceCorkboard = React.useCallback(() => {
+    campaign.advanceNight(DEV_MOCK_LEDGER);
+    setPhase('CORKBOARD');
+  }, [campaign]);
+
+  const handleDevFiredCorkboard = React.useCallback(() => {
+    campaign.fireCorkboard('MORALE', DEV_MOCK_LEDGER);
+    setPhase('CORKBOARD');
   }, [campaign]);
 
   return (
-    <>
+    <DevPlayApiProvider>
+      <>
       <AudioMuteButton />
       {phase === 'LANDING' && (
         <LandingPage onStartGame={handleStartFromLanding} />
@@ -351,22 +393,37 @@ export default function App() {
         />
       )}
       {phase === 'PLAYING' && (
-        <GameProvider
-          incrementPathScore={campaign.incrementPathScore}
-          pathScores={campaign.campaignState.pathScores}
-          nightConfig={campaign.activeNightConfig}
-          onShowDialogue={onShowDialogue}
-        >
-          <GameContent
-            initialDifficulty={difficulty}
-            persist={persist}
-            onShiftEnd={handleShiftEnd}
-            playerIdentity={playerIdentity}
-            activeDialogue={activeDialogue}
-            onDialogueDismiss={onDialogueDismiss}
-          />
-        </GameProvider>
+        <>
+          <GameProvider
+            incrementPathScore={campaign.incrementPathScore}
+            pathScores={campaign.campaignState.pathScores}
+            nightConfig={campaign.activeNightConfig}
+            onShowDialogue={onShowDialogue}
+            onBossWarning={onBossWarning}
+          >
+            <GameContent
+              initialDifficulty={difficulty}
+              persist={persist}
+              onShiftEnd={handleShiftEnd}
+              playerIdentity={playerIdentity}
+              activeDialogue={activeDialogue}
+              onDialogueDismiss={onDialogueDismiss}
+            />
+          </GameProvider>
+          <AnimatePresence>
+            {bossWarning && (
+              <BossWarningToast key={bossWarning.id} boss={bossWarning} onDismiss={onBossWarningDismiss} />
+            )}
+          </AnimatePresence>
+        </>
       )}
-    </>
+      {import.meta.env.DEV && (
+        <DevCommandPalette
+          onAdvanceCorkboard={handleDevAdvanceCorkboard}
+          onFiredCorkboard={handleDevFiredCorkboard}
+        />
+      )}
+      </>
+    </DevPlayApiProvider>
   );
 }

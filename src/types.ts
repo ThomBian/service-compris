@@ -136,6 +136,44 @@ export interface Client {
 
 export type GameOverReason = 'MORALE' | 'VIP' | 'BANNED' | 'COVERS_TARGET' | null;
 
+// --- Boss Encounters ---
+
+export type MiniGameId = 'HANDSHAKE' | 'WHITE_GLOVE' | 'PAPARAZZI' | 'COAT_CHECK';
+
+/** Ledger hits for refusing a roster VIP boss or seating a roster banned boss (wrong house policy). */
+export interface BossPolicyPenalty {
+  ratingLoss: number;
+  moraleLoss: number;
+  cashLoss: number;
+}
+
+export interface BossDefinition extends CharacterDefinition {
+  miniGame: MiniGameId;
+  /** i18n key in the 'game' namespace — boss taunt shown during intro */
+  quoteKey: string;
+  /** Optional extra lines (game namespace keys), shown before `quoteKey` during the dramatic intro */
+  introLineKeys?: readonly string[];
+  spawnCondition: (state: GameState) => boolean;
+  /**
+   * Refusing this VIP boss is always wrong for the house — applied after a REFUSE encounter
+   * (mini-game win or lose). Stacks on top of any narrative outcome.
+   */
+  vipRefusalWrongPolicy?: Partial<BossPolicyPenalty>;
+  /**
+   * Seating this banned boss is wrong — applied when a SEAT encounter still sends them
+   * toward the floor (win or lose). Stacks after `onSeated` consequences from the boss def.
+   */
+  bannedSeatWrongPolicy?: Partial<BossPolicyPenalty>;
+}
+
+export interface ActiveBossEncounter {
+  bossId: string;
+  interceptedAction: 'SEAT' | 'REFUSE';
+  miniGame: MiniGameId;
+  /** Restored when encounter ends so the clock resumes at the same speed */
+  previousTimeMultiplier: number;
+}
+
 // --- Scripted Events ---
 
 export type ToolReveal = 'LEDGER' | 'PARTY_TICKET' | 'CLIPBOARD_VIP' | 'CLIPBOARD_BANNED';
@@ -188,4 +226,6 @@ export interface GameState {
   firedEventIds: string[];
   revealedTools: ToolReveal[];
   nightEndPending: boolean;
+  /** Non-null while a boss mini-game overlay is active. Pauses the clock. */
+  activeBossEncounter: ActiveBossEncounter | null;
 }

@@ -106,5 +106,105 @@
   "characters.fake-influencer.refusalDescription": "No free meals, no hit pieces. Well handled.",
   "characters.the-dictator.clueText": "Extremely dangerous. Do not seat under any circumstances.",
   "characters.the-dictator.consequenceDescription": "Didn't like the food. Attacked the restaurant.",
-  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided."
+  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided.",
+  "boss": {
+    "encounterLabel": "⚡ Rencontre de boss",
+    "speaking": "Parole",
+    "roleVIP": "Client très important",
+    "roleBanned": "Liste noire — ne pas placer",
+    "skipTyping": "Afficher toute la phrase",
+    "nextLine": "Phrase suivante",
+    "toChallenge": "Affronter l'épreuve",
+    "advanceHint": "Entrée ou clic sur le bouton",
+    "interceptLabel": "Interception",
+    "stakesEyebrow": "Ce qui se joue",
+    "stakesSucceedLabel": "Si vous réussissez",
+    "stakesFailLabel": "Si vous échouez",
+    "stakesSeatWin": "Vous placez {{name}} et le service continue.",
+    "stakesSeatLose": "{{name}} repart en colère — vous perdez la table et subissez les conséquences.",
+    "stakesRefuseWin": "{{name}} repart — il ne met pas les pieds en salle.",
+    "stakesRefuseLose": "{{name}} s'impose — vous devrez le placer à une table.",
+    "howToPlay": "Comment jouer",
+    "genericInstruction": "Réussissez l'épreuve avant la fin du temps. Une seule erreur décisive peut vous coûter la rencontre.",
+    "devWin": "Gagner",
+    "devLose": "Perdre",
+    "beginTrial": "Commencer l'épreuve",
+    "fallbackContinue": "Continuer",
+    "outcomeHeadingWin": "Victoire",
+    "outcomeHeadingLose": "Défaite",
+    "winSeat": "{{name}} est satisfait. Passez à la table.",
+    "winRefuse": "Bien géré. {{name}} renvoyé.",
+    "loseSeat": "{{name}} est furieux.",
+    "loseRefuse": "Vous avez échoué. {{name}} s'impose.",
+    "outcomeHeadingPolicy": "Règle maison brisée",
+    "policyOutcomeVipRefused": "La protection VIP existe pour une raison. Renvoyer {{name}} frappe la maison aussi fort qu’ouvrir la porte au chaos — carnet et salle en subissent le coût.",
+    "policyOutcomeBannedSeated": "La liste noire n’est pas décorative. Avoir {{name}} au plancher était la mauvaise décision — le rituel importe peu face aux dégâts réels.",
+    "toastWrongPolicyVipRefused": "VIP refusé — lourdes conséquences",
+    "toastWrongPolicyBannedSeated": "Client interdit placé — lourdes conséquences",
+    "logBossPolicyVipRefused": "Rupture de règle : VIP protégé refusé ({{name}}).",
+    "logBossPolicyVipRefusedForced": "Rupture de règle : {{name}} refusé, puis situation perdue — fallout dans tous les cas.",
+    "logBossPolicyBannedSeated": "Rupture de règle : client interdit placé ({{name}}).",
+    "stormedOut": "{{name}} est parti en furie.",
+    "syndicateDon": {
+      "intro1": "Vous avez hésité en voyant mon nom sur la liste.",
+      "intro2": "Il n'y a qu'une seule réponse que j'accepte ce soir.",
+      "quote": "Vous savez comment ça se passe. Ne me décevez pas.",
+      "summaryWin": "Le Don vous accorde un lent signe de tête — vous avez tenu à l'entrée.",
+      "summaryLose": "Le Don s'en va sans un mot. Ce qui a cédé dans cette salle, ce n'était pas le mobilier."
+    },
+    "grandInquisitor": {
+      "intro1": "Tenez-vous droit. J'examine chaque personne dans cette salle.",
+      "intro2": "Vos registres, vos yeux, votre sang-froid — tout est noté.",
+      "quote": "La maison sera jugée ce soir.",
+      "summaryWin": "L'Inquisition referme son livre — ce soir, le verdict vous est favorable.",
+      "summaryLose": "L'Inquisition laisse une trace sur le registre qu'aucun chiffon n'effacera."
+    },
+    "influencer": {
+      "intro1": "Lumières. Caméra. Vous.",
+      "intro2": "Si ce moment n'est pas iconique, votre réputation non plus.",
+      "quote": "Mes abonnés regardent. Rendez ça iconique.",
+      "summaryWin": "Le fil d'actualité passe à la suite : pas de scandale, pas de spirale — juste une story restée en brouillon.",
+      "summaryLose": "Le montage se fait tout seul. Votre soirée vient de devenir du contenu."
+    },
+    "aristocrat": {
+      "intro1": "Vous osez me refuser à l'entrée ?",
+      "intro2": "Mon entourage regarde. Un faux pas, et ce sol devient votre CV.",
+      "quote": "Si la Duchesse touche le sol, vous êtes renvoyé.",
+      "summaryWin": "La Duchesse relève le menton et se retire — le sol est encore à vous, pour l'instant.",
+      "summaryLose": "Le sol se souvient de chaque faux pas. Elle aussi."
+    },
+    "coatCheck": {
+      "instruction": "Tapez chaque objet lancé avant qu'il n'atteigne la ligne. Trois ratés et vous perdez.",
+      "livesAria": "{{remaining}} cœurs sur {{max}} restants. {{lost}} perdus."
+    },
+    "handshake": {
+      "instruction": "Reproduisez correctement la séquence. Atteignez 8 étapes d'affilée pour gagner. Pas de compte à rebours — seules les erreurs de saisie font perdre.",
+      "ariaRegion": "Défi de mémoire — poignée de main",
+      "watchSequence": "Observez la séquence...",
+      "repeatSteps": "Reproduisez - {{count}} étapes",
+      "items": {
+        "ledger": "Registre",
+        "bell": "Cloche",
+        "coin": "Pièce",
+        "whiskey": "Whisky"
+      }
+    },
+    "whiteGlove": {
+      "instruction": "Alignez fourchette et couteau sur les contours en pointillés à chaque table. Terminez les 5 tables avant la fin du temps (20 secondes). W/A/S/D ou flèches pour déplacer, Q/E pour pivoter, Tab pour changer d'ustensile, 1–5 pour changer de table.",
+      "ariaArena": "Défi d'alignement des couverts",
+      "alignHint": "W/A/S/D ou flèches pour déplacer, Q/E pour pivoter, Tab pour changer d'ustensile, 1-5 pour changer de table.",
+      "comboProgress": "{{current}} / {{target}} dressages",
+      "forkLabel": "Fourchette",
+      "knifeLabel": "Couteau",
+      "snapped": "Aligné"
+    },
+    "paparazzi": {
+      "instruction": "Tapez uniquement les viseurs verts avant qu'ils n'expirent. Évitez les rouges. Atteignez 8 bons taps avant la fin du temps (20 secondes). Un tap sur le rouge, ou laisser expirer un vert, fait perdre la rencontre.",
+      "ariaArena": "Défi des flashes paparazzi",
+      "ariaGreen": "Bon angle — photographier",
+      "ariaRed": "Mauvais angle — éviter",
+      "arenaHint": "Uniquement les bons angles.",
+      "progress": "{{current}} / {{target}} bonnes prises"
+    }
+  }
 }

@@ -106,5 +106,105 @@
   "characters.fake-influencer.refusalDescription": "No free meals, no hit pieces. Well handled.",
   "characters.the-dictator.clueText": "Extremely dangerous. Do not seat under any circumstances.",
   "characters.the-dictator.consequenceDescription": "Didn't like the food. Attacked the restaurant.",
-  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided."
+  "characters.the-dictator.refusalDescription": "Dictator turned away — catastrophic reputation damage avoided.",
+  "boss": {
+    "encounterLabel": "⚡ Boss encounter",
+    "speaking": "Speaking",
+    "roleVIP": "Very important guest",
+    "roleBanned": "Banned — do not seat",
+    "skipTyping": "Show full line",
+    "nextLine": "Next line",
+    "toChallenge": "Face the challenge",
+    "advanceHint": "Enter or click the button",
+    "interceptLabel": "Intercepted",
+    "stakesEyebrow": "What's at stake",
+    "stakesSucceedLabel": "Succeed",
+    "stakesFailLabel": "Fail",
+    "stakesSeatWin": "You seat {{name}} and the shift moves forward.",
+    "stakesSeatLose": "{{name}} storms out — you lose the table and eat the consequences.",
+    "stakesRefuseWin": "{{name}} is turned away and stays off the floor.",
+    "stakesRefuseLose": "{{name}} forces their way in — you'll have to bring them to a table.",
+    "howToPlay": "How to play",
+    "genericInstruction": "Complete the challenge before time runs out. One decisive mistake can cost you the encounter.",
+    "devWin": "Win",
+    "devLose": "Lose",
+    "beginTrial": "Begin trial",
+    "fallbackContinue": "Continue",
+    "outcomeHeadingWin": "Victory",
+    "outcomeHeadingLose": "Defeat",
+    "winSeat": "{{name}} is satisfied. Proceed to seating.",
+    "winRefuse": "Well handled. {{name}} turned away.",
+    "loseSeat": "{{name}} is furious.",
+    "loseRefuse": "You failed. {{name}} forces their way in.",
+    "outcomeHeadingPolicy": "House policy broken",
+    "policyOutcomeVipRefused": "VIP protection exists for a reason. Turning {{name}} away hits the house as hard as letting trouble in — the books and the room both feel it.",
+    "policyOutcomeBannedSeated": "The banned list is not decorative. Getting {{name}} onto the floor was the wrong call — whatever the ritual looked like, the damage is real.",
+    "toastWrongPolicyVipRefused": "VIP refused — major fallout",
+    "toastWrongPolicyBannedSeated": "Banned guest seated — major fallout",
+    "logBossPolicyVipRefused": "Policy breach: refused protected VIP {{name}}.",
+    "logBossPolicyVipRefusedForced": "Policy breach: refused {{name}}, then lost control — fallout either way.",
+    "logBossPolicyBannedSeated": "Policy breach: seated banned guest {{name}}.",
+    "stormedOut": "{{name}} stormed out in fury.",
+    "syndicateDon": {
+      "intro1": "You hesitated when you saw my name on the list.",
+      "intro2": "There is only one answer I accept tonight.",
+      "quote": "You understand how this works. Don't disappoint me.",
+      "summaryWin": "The Don gives you a single, slow nod — you held the line at the door.",
+      "summaryLose": "The Don leaves without a word. Whatever broke in that room, it wasn't the furniture."
+    },
+    "grandInquisitor": {
+      "intro1": "Straighten up. I am reviewing everyone in this room.",
+      "intro2": "Your ledgers, your eyes, your nerve — all on the record.",
+      "quote": "The house will be judged tonight.",
+      "summaryWin": "The Inquisition closes its book — tonight's verdict reads in your favor.",
+      "summaryLose": "The Inquisition leaves a mark on the ledger you cannot buff out."
+    },
+    "influencer": {
+      "intro1": "Lights. Camera. You.",
+      "intro2": "If this moment is not iconic, neither is your reputation.",
+      "quote": "My followers are watching. Make it iconic.",
+      "summaryWin": "The feed moves on: no scandal, no spiral — just a story that died in drafts.",
+      "summaryLose": "The clip is already cutting itself. Your night just became content."
+    },
+    "aristocrat": {
+      "intro1": "You dare refuse me at the door?",
+      "intro2": "My entourage is watching. One slip, and this floor becomes your résumé.",
+      "quote": "If the Duchess touches the floor, you are finished.",
+      "summaryWin": "The Duchess lifts her chin and withdraws — the floor stays yours, for now.",
+      "summaryLose": "The floor remembers every slip. So does she."
+    },
+    "coatCheck": {
+      "instruction": "Tap each thrown item before it reaches the line. Three misses and you lose.",
+      "livesAria": "{{remaining}} of {{max}} hearts remaining. {{lost}} lost."
+    },
+    "handshake": {
+      "instruction": "Repeat the sequence correctly. Reach 8 steps in a row to win. There is no countdown — only wrong inputs end the run.",
+      "ariaRegion": "Handshake memory challenge",
+      "watchSequence": "Watch the sequence...",
+      "repeatSteps": "Repeat - {{count}} steps",
+      "items": {
+        "ledger": "Ledger",
+        "bell": "Bell",
+        "coin": "Coin",
+        "whiskey": "Whiskey"
+      }
+    },
+    "whiteGlove": {
+      "instruction": "Align fork and knife on each table to the dashed outlines. Finish all 5 tables before the bar empties (20 seconds). WASD or arrows move, Q/E rotate, Tab cycles utensil, 1–5 jump tables.",
+      "ariaArena": "White glove table alignment challenge",
+      "alignHint": "W/A/S/D or arrows move, Q/E rotate, TAB cycles items, 1-5 jumps table.",
+      "comboProgress": "{{current}} / {{target}} settings",
+      "forkLabel": "Fork",
+      "knifeLabel": "Knife",
+      "snapped": "Snapped"
+    },
+    "paparazzi": {
+      "instruction": "Tap only green viewfinders before they expire. Avoid red ones. Collect 8 good taps before time runs out (20 seconds). Tapping red, or letting a green viewfinder time out, loses the encounter.",
+      "ariaArena": "Paparazzi flash challenge",
+      "ariaGreen": "Good angle — photograph",
+      "ariaRed": "Bad angle — avoid",
+      "arenaHint": "Only the good angles.",
+      "progress": "{{current}} / {{target}} good shots"
+    }
+  }
 }

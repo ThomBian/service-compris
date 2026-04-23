@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { GameState } from "../types";
+import { GameState, type BossDefinition } from "../types";
 import { buildInitialState, PersistState } from "../logic/gameLogic";
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
 import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
@@ -20,6 +20,7 @@ export function useGameEngine(
   pathScores?: PathScores,
   nightConfig?: NightConfig,
   onShowDialogue?: (lines: string[]) => void,
+  onBossWarning?: (boss: BossDefinition) => void,
 ) {
   const [gameState, setGameState] = useState<GameState>(() => buildInitialState(0));
 
@@ -53,7 +54,7 @@ export function useGameEngine(
 
   const { showToast } = useToast();
   const { setTimeMultiplier } = useGameClock(gameState, setGameState);
-  const { spawnScriptedCharacter } = useClientSpawner(gameState, setGameState, characters);
+  const { spawnScriptedCharacter } = useClientSpawner(gameState, setGameState, characters, onBossWarning);
   useQueueManager(gameState, setGameState, showToast, characters);
 
   useScriptedEvents(
@@ -74,6 +75,8 @@ export function useGameEngine(
     confirmSeating,
     refuseSeatedParty,
     lastCallTable,
+    clearBossEncounter,
+    devStartBossEncounter,
   } = useDecisionActions(setGameState, showToast, characters, incrementPathScore);
   const { toggleReservationArrived } = useReservationActions(setGameState);
 
@@ -92,5 +95,7 @@ export function useGameEngine(
     setTimeMultiplier,
     resetGame,
     lastCallTable,
+    clearBossEncounter,
+    ...(import.meta.env.DEV ? { devStartBossEncounter } : {}),
   };
 }

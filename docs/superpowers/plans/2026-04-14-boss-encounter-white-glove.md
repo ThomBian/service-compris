@@ -2,383 +2,180 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Prerequisite:** `2026-04-14-boss-encounters-foundation.md` must be complete and merged.
+**Prerequisites:**
 
-**Goal:** Implement the Grand Inquisitor boss encounter — a precision drag-and-drop game where the player must drag a fork and knife into exact dashed outlines (±8px position, ±5° rotation) within 4 seconds.
+- `2026-04-14-boss-encounters-foundation.md` must be complete and merged.
+- **Design source of truth:** [Boss Encounters & Mini-Games — Design Spec](../specs/2026-04-13-boss-encounters-design.md) — **Section 2, White Glove** (`WhiteGloveGame`, Grand Inquisitor, BANNED).
 
-**Architecture:** `WhiteGloveGame` uses a `useDrag` hook that tracks pointer capture for each utensil. Each utensil has a random start position and rotation. Target zones have dashed CSS outlines. On pointer-up, snap logic checks if the utensil is within tolerance. When both utensils are snapped, `onWin()` is called. Timer expiry → `onLose()`.
-
-**Tech Stack:** React 19, TypeScript, Tailwind CSS 4, Vitest, Pointer Events API
+**Timer:** **20s** — `DURATIONS.WHITE_GLOVE` in `BossEncounterOverlay` should be `20_000`.
 
 ---
 
-### Task 1: Add i18n keys for the Grand Inquisitor
+## Mini-game concept (summary)
+
+White Glove is a **precision keyboard placement** challenge across **five tables** (shipped):
+
+| Element                 | Spec                                                                                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Duration**            | **20s** (shell `DURATIONS.WHITE_GLOVE` = `20_000`; timer expiry handled by overlay `TimerBar` + `onExpire` → `onLose`)                                                                   |
+| **Presentation**        | Five plate slots (normalized coordinates) scale with arena bounds (`ResizeObserver`); per table: fork + knife at imperfect positions/angles; dashed outlines show exact targets          |
+| **Lose**                | Timer expires before **5/5** tables are complete (fork **and** knife snapped on each)                                                                                                   |
+| **Win**                 | All **5** tables fully aligned within the timer                                                                                                                                          |
+| **Controls**            | **WASD** or **arrow** keys move selection; **Q/E** rotate; **Tab** cycles fork → knife → next unsnapped item; **1–5** jumps table / toggles utensil on same table                         |
+| **Implementation note** | No pointer-drag in shipped build. `resolvedRef` prevents double `onWin`/`onLose`. Exported helpers: `isSnapped`, `nextSelectableItem`, `slotCentersForBounds`, `createTableState`, `TABLE_SLOT_FRACS`. |
+
+
+**Shell integration:** `MiniGameProps` lives in `src/components/boss/miniGameTypes.ts`. Import from there (not from `BossEncounterOverlay`).
+
+---
+
+**Goal:** Replace `WHITE_GLOVE` placeholder in `BossEncounterOverlay` with a real `WhiteGloveGame` that matches a **20s, multi-combo precision spec** (minimum 5 alignments) and existing intro copy (`boss.whiteGlove.instruction` + `boss.grandInquisitor.`*).
+
+**Tech stack:** React 19, TypeScript, Tailwind CSS 4, Vitest, ResizeObserver for responsive arena
+
+---
+
+### Task 1: i18n — `boss.whiteGlove` gameplay copy polish
 
 **Files:**
+
 - Modify: `src/i18n/locales/en/game.json`
 - Modify: `src/i18n/locales/fr/game.json`
 
-- [ ] **Step 1: Add quote key inside the existing `"boss"` object**
+Notes:
 
-`src/i18n/locales/en/game.json`:
-```json
-"boss": {
-  "grandInquisitor": {
-    "quote": "Mediocrity is an insult to the craft."
-  },
-  ...existing keys...
-}
-```
-
-`src/i18n/locales/fr/game.json`:
-```json
-"boss": {
-  "grandInquisitor": {
-    "quote": "La médiocrité est une insulte au métier."
-  },
-  ...existing keys...
-}
-```
-
-- [ ] **Step 2: Commit**
+- `boss.grandInquisitor.quote` already exists in current locales; do **not** duplicate quote work.
+- `boss.whiteGlove.instruction` already exists; tighten it if needed for clarity.
+- **Step 1: Update / add white-glove-specific UI strings** under `boss.whiteGlove`:
+  - keep `instruction` aligned with actual rules (complete at least 5 fork+knife alignments in 20s)
+  - add optional keys for in-game labels, e.g. `alignHint`, `forkLabel`, `knifeLabel`, `snapped`, `comboProgress`
+- **Step 2: Commit**
 
 ```bash
 git add src/i18n/locales/en/game.json src/i18n/locales/fr/game.json
-git commit -m "feat(i18n): add Grand Inquisitor boss quote"
+git commit -m "feat(i18n): refine White Glove mini-game copy"
 ```
 
 ---
 
-### Task 2: Create `useDrag` hook
+### Task 2: Write tests for snap logic
 
 **Files:**
-- Create: `src/hooks/useDrag.ts`
-- Create: `src/hooks/__tests__/useDrag.test.ts`
 
-- [ ] **Step 1: Write failing tests**
-
-```ts
-// src/hooks/__tests__/useDrag.test.ts
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useDrag } from '../useDrag';
-
-describe('useDrag', () => {
-  it('returns initial position unchanged before drag', () => {
-    const { result } = renderHook(() =>
-      useDrag({ x: 50, y: 50, rotation: 0 })
-    );
-    expect(result.current.pos.x).toBe(50);
-    expect(result.current.pos.y).toBe(50);
-    expect(result.current.pos.rotation).toBe(0);
-  });
-
-  it('isDragging starts false', () => {
-    const { result } = renderHook(() =>
-      useDrag({ x: 0, y: 0, rotation: 0 })
-    );
-    expect(result.current.isDragging).toBe(false);
-  });
-
-  it('updates position on move', () => {
-    const { result } = renderHook(() =>
-      useDrag({ x: 100, y: 100, rotation: 0 })
-    );
-    // Simulate pointer down then move
-    act(() => {
-      result.current.handlers.onPointerDown({ clientX: 100, clientY: 100, currentTarget: { setPointerCapture: vi.fn() } } as any);
-    });
-    act(() => {
-      result.current.handlers.onPointerMove({ clientX: 120, clientY: 110 } as any);
-    });
-    expect(result.current.pos.x).toBe(120);
-    expect(result.current.pos.y).toBe(110);
-  });
-});
-```
-
-- [ ] **Step 2: Run tests — expect FAIL**
-
-```bash
-npm run test -- src/hooks/__tests__/useDrag.test.ts
-```
-
-- [ ] **Step 3: Implement `useDrag`**
-
-```ts
-// src/hooks/useDrag.ts
-import { useState, useCallback } from 'react';
-
-interface DragPos {
-  x: number;
-  y: number;
-  rotation: number;
-}
-
-interface UseDragResult {
-  pos: DragPos;
-  isDragging: boolean;
-  handlers: {
-    onPointerDown: (e: React.PointerEvent) => void;
-    onPointerMove: (e: React.PointerEvent) => void;
-    onPointerUp: () => void;
-  };
-}
-
-export function useDrag(initial: DragPos): UseDragResult {
-  const [pos, setPos] = useState<DragPos>(initial);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    setIsDragging(true);
-  }, []);
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging) return;
-    setPos(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
-  }, [isDragging]);
-
-  const onPointerUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  return { pos, isDragging, handlers: { onPointerDown, onPointerMove, onPointerUp } };
-}
-```
-
-- [ ] **Step 4: Run tests — expect PASS**
-
-```bash
-npm run test -- src/hooks/__tests__/useDrag.test.ts
-```
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/hooks/useDrag.ts src/hooks/__tests__/useDrag.test.ts
-git commit -m "feat: add useDrag hook for pointer-capture dragging"
-```
-
----
-
-### Task 3: Write tests for snap logic
-
-**Files:**
 - Create: `src/components/boss/__tests__/WhiteGloveGame.test.ts`
-
-- [ ] **Step 1: Write tests for the snap helper (pure function)**
+- **Step 1: Write tests for exported snap helper** (`isSnapped`), including boundaries:
 
 ```ts
-// src/components/boss/__tests__/WhiteGloveGame.test.ts
 import { describe, it, expect } from 'vitest';
 import { isSnapped } from '../WhiteGloveGame';
 
 describe('isSnapped', () => {
   const target = { x: 200, y: 300, rotation: 0 };
 
-  it('returns true when within position and rotation tolerance', () => {
+  it('returns true within tolerance', () => {
     expect(isSnapped({ x: 204, y: 296, rotation: 3 }, target)).toBe(true);
   });
 
-  it('returns false when position is too far', () => {
+  it('returns false when too far in position', () => {
     expect(isSnapped({ x: 220, y: 300, rotation: 0 }, target)).toBe(false);
   });
 
-  it('returns false when rotation is too far', () => {
+  it('returns false when too far in rotation', () => {
     expect(isSnapped({ x: 200, y: 300, rotation: 10 }, target)).toBe(false);
   });
 
   it('is exact on boundary', () => {
     expect(isSnapped({ x: 208, y: 308, rotation: 5 }, target)).toBe(true);
-    expect(isSnapped({ x: 209, y: 300, rotation: 0 }, target)).toBe(false);
   });
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- **Step 2: Run tests — expect FAIL**
 
 ```bash
 npm run test -- src/components/boss/__tests__/WhiteGloveGame.test.ts
 ```
+
+- **Step 3: Add combo progression tests** (pure helpers or component-level):
+  - successful fork+knife snap increments completed combinations
+  - game resolves `onWin()` once completed combinations reaches **5**
+  - unresolved state at timer expiry leads to `onLose()` (shell-level behavior can be smoke-tested)
 
 ---
 
-### Task 4: Implement `WhiteGloveGame`
+### Task 3: Implement `WhiteGloveGame`
 
 **Files:**
+
 - Create: `src/components/boss/WhiteGloveGame.tsx`
-
-- [ ] **Step 1: Create the component and export `isSnapped`**
-
-```tsx
-// src/components/boss/WhiteGloveGame.tsx
-import React, { useState, useCallback } from 'react';
-import type { MiniGameProps } from './BossEncounterOverlay';
-import { useDrag } from '../../hooks/useDrag';
-
-interface SnapTarget {
-  x: number;
-  y: number;
-  rotation: number;
-}
-
-const POS_TOLERANCE = 8;  // px
-const ROT_TOLERANCE = 5;  // degrees
-
-export function isSnapped(
-  pos: { x: number; y: number; rotation: number },
-  target: SnapTarget,
-): boolean {
-  return (
-    Math.abs(pos.x - target.x) <= POS_TOLERANCE &&
-    Math.abs(pos.y - target.y) <= POS_TOLERANCE &&
-    Math.abs(pos.rotation - target.rotation) <= ROT_TOLERANCE
-  );
-}
-
-// Fixed target positions (center of screen area)
-const FORK_TARGET: SnapTarget  = { x: 260, y: 280, rotation: 0 };
-const KNIFE_TARGET: SnapTarget = { x: 340, y: 280, rotation: 0 };
-
-export function WhiteGloveGame({ onWin, onLose }: MiniGameProps) {
-  const fork  = useDrag({ x: 160, y: 350, rotation: -30 });
-  const knife = useDrag({ x: 440, y: 220, rotation: 20 });
-
-  const [forkSnapped,  setForkSnapped]  = useState(false);
-  const [knifeSnapped, setKnifeSnapped] = useState(false);
-
-  const checkSnap = useCallback((
-    item: 'fork' | 'knife',
-    pos: { x: number; y: number; rotation: number },
-  ) => {
-    const target = item === 'fork' ? FORK_TARGET : KNIFE_TARGET;
-    const snapped = isSnapped(pos, target);
-    if (item === 'fork')  setForkSnapped(snapped);
-    if (item === 'knife') setKnifeSnapped(snapped);
-
-    const otherSnapped = item === 'fork' ? knifeSnapped : forkSnapped;
-    if (snapped && otherSnapped) onWin();
-  }, [forkSnapped, knifeSnapped, onWin]);
-
-  const renderUtensil = (
-    label: string,
-    emoji: string,
-    drag: ReturnType<typeof useDrag>,
-    target: SnapTarget,
-    snapped: boolean,
-    item: 'fork' | 'knife',
-  ) => (
-    <div
-      {...drag.handlers}
-      style={{
-        position: 'absolute',
-        left: snapped ? target.x - 24 : drag.pos.x - 24,
-        top:  snapped ? target.y - 24 : drag.pos.y - 24,
-        transform: `rotate(${snapped ? target.rotation : drag.pos.rotation}deg)`,
-        cursor: drag.isDragging ? 'grabbing' : 'grab',
-        userSelect: 'none',
-        transition: snapped ? 'all 0.15s ease' : 'none',
-      }}
-      onPointerUp={() => {
-        drag.handlers.onPointerUp();
-        checkSnap(item, drag.pos);
-      }}
-      className={[
-        'w-12 h-12 rounded-lg text-2xl flex items-center justify-center',
-        'border-2 touch-none',
-        snapped ? 'border-[#e8c97a] bg-[#e8c97a22]' : 'border-white/30 bg-white/10',
-      ].join(' ')}
-      title={label}
-    >
-      {emoji}
-    </div>
-  );
-
-  return (
-    <div className="relative w-full" style={{ height: 320 }}>
-      {/* Plate */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-                      w-32 h-32 rounded-full border-4 border-white/20 bg-white/5" />
-
-      {/* Target outlines */}
-      {[FORK_TARGET, KNIFE_TARGET].map((t, i) => (
-        <div
-          key={i}
-          className="absolute w-12 h-12 rounded-lg border-2 border-dashed border-[#e8c97a44]"
-          style={{ left: t.x - 24, top: t.y - 24, transform: `rotate(${t.rotation}deg)` }}
-        />
-      ))}
-
-      {/* Utensils */}
-      {renderUtensil('Fork',  '🍴', fork,  FORK_TARGET,  forkSnapped,  'fork')}
-      {renderUtensil('Knife', '🔪', knife, KNIFE_TARGET, knifeSnapped, 'knife')}
-
-      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white/30 text-xs tracking-widest uppercase">
-        Drag to align
-      </p>
-    </div>
-  );
-}
-```
-
-- [ ] **Step 2: Run tests — expect PASS**
+- **Step 1: Build component** (keyboard-first shipped build; original drag sketch below is **not** what shipped)
+  - import props from `./miniGameTypes`
+  - define tolerances (`POS_TOLERANCE = 8`, `ROT_TOLERANCE = 5`)
+  - **five** `TableState` entries (fork + knife each): positions clamped to measured arena `w/h`
+  - keyboard handler updates selected fork/knife; snap on move/rotate when within tolerance; **Tab** / **1–5** navigation per `nextSelectableItem`
+  - when `completedCombos >= 5` (tables where both fork and knife snapped), call `onWin()` once
+  - keep `resolvedRef` guard so `onWin`/`onLose` cannot double-fire
+  - rely on shell timer for timeout loss (no duplicate internal 20s timer)
+  - visible combo progress via `boss.whiteGlove.comboProgress`
+  - include `data-testid="white-glove-arena"`, `white-glove-fork-{i}`, `white-glove-knife-{i}`
+- **Step 2: Run tests — expect PASS**
 
 ```bash
 npm run test -- src/components/boss/__tests__/WhiteGloveGame.test.ts
 ```
-Expected: all `isSnapped` tests pass.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/components/boss/WhiteGloveGame.tsx src/components/boss/__tests__/WhiteGloveGame.test.ts
-git commit -m "feat: implement WhiteGloveGame (drag-and-drop) for Grand Inquisitor"
+git commit -m "feat(boss): implement WhiteGloveGame precision drag challenge"
 ```
 
 ---
 
-### Task 5: Register `WhiteGloveGame` in the overlay
+### Task 4: Register `WhiteGloveGame` in overlay
 
 **Files:**
+
 - Modify: `src/components/boss/BossEncounterOverlay.tsx`
-
-- [ ] **Step 1: Replace the `WHITE_GLOVE` placeholder**
-
-```tsx
-import { WhiteGloveGame } from './WhiteGloveGame';
-
-const MINI_GAMES: Record<MiniGameId, React.FC<MiniGameProps>> = {
-  HANDSHAKE:   HandshakeGame,
-  WHITE_GLOVE: WhiteGloveGame,
-  PAPARAZZI:   ({ onWin, onLose }) => ( /* placeholder */ ),
-  COAT_CHECK:  ({ onWin, onLose }) => ( /* placeholder */ ),
-};
-```
-
-- [ ] **Step 2: Run type-check**
+- **Step 1: Import and register** `WhiteGloveGame` for `WHITE_GLOVE` in `MINI_GAMES` (remove placeholder).
+- **Step 2: Set and confirm** `DURATIONS.WHITE_GLOVE === 20_000`.
+- **Step 3: Run type-check**
 
 ```bash
 npm run lint
 ```
 
-- [ ] **Step 3: Manual smoke test**
+- **Step 4: Manual smoke**
 
 ```bash
 npm run dev
 ```
 
-Lower Grand Inquisitor spawn condition temporarily: `(s) => s.rating >= 0`. Verify:
-- Inquisitor appears in queue as BANNED character
-- Click REFUSE → full-screen black overlay, "REFUSE." command
-- Fork and knife appear draggable at haphazard positions
-- Dashed outlines show target positions
-- Drag both into position → overlay closes with success toast
-- Timer expires → overlay closes with fail toast, rating penalty
+Use dev mini-game launch (command palette) or spawn-condition override to trigger quickly. Verify:
 
-- [ ] **Step 4: Commit**
+- Grand Inquisitor intro appears with white-glove instruction
+- Fork and knife move with **keyboard**; dashed targets visible on all five tables
+- **Tab** / **1–5** change selection; completing all **5** tables (both utensils per table) within **20s** resolves to win
+- Timer expiry before 5/5 resolves to lose
+- **Step 5: Commit**
 
 ```bash
 git add src/components/boss/BossEncounterOverlay.tsx
-git commit -m "feat: register WhiteGloveGame in BossEncounterOverlay"
+git commit -m "feat(boss): register WhiteGloveGame in BossEncounterOverlay"
 ```
+
+---
+
+## Review notes (this revision)
+
+- Standardized with newer boss plans:
+  - explicit design-source section
+  - concept summary table (duration/presentation/win/lose)
+  - `miniGameTypes` import guidance
+  - practical smoke path using dev launch tools
+- Removed stale work:
+  - quote-add task that is already completed in locales
+  - mandatory global `useDrag` extraction (now optional, only if justified)
+- Aligned test naming to current repo conventions (`.test.ts` for non-TSX helper tests).
+

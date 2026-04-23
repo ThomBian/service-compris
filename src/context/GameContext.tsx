@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useGameEngine } from '../hooks/useGameEngine';
-import { GameState } from '../types';
+import { GameState, type MiniGameId, type BossDefinition } from '../types';
 import type { CampaignPath, NightConfig, PathScores } from '../types/campaign';
 
 interface GameContextType {
@@ -18,6 +18,9 @@ interface GameContextType {
   setTimeMultiplier: (m: number) => void;
   resetGame: (difficulty: number, persist?: { cash: number; rating: number; morale: number; nightNumber: number }) => void;
   lastCallTable: (partyId: string) => void;
+  clearBossEncounter: (outcome: 'WIN' | 'LOSE') => void;
+  /** Dev only — set via `useGameEngine` when `import.meta.env.DEV`. */
+  devStartBossEncounter?: (miniGame: MiniGameId) => void;
 }
 
 interface GameProviderProps {
@@ -26,6 +29,7 @@ interface GameProviderProps {
   pathScores?: PathScores;
   nightConfig?: NightConfig;
   onShowDialogue?: (lines: string[]) => void;
+  onBossWarning?: (boss: BossDefinition) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -36,8 +40,9 @@ export function GameProvider({
   pathScores,
   nightConfig,
   onShowDialogue,
+  onBossWarning,
 }: GameProviderProps) {
-  const engine = useGameEngine(incrementPathScore, pathScores, nightConfig, onShowDialogue);
+  const engine = useGameEngine(incrementPathScore, pathScores, nightConfig, onShowDialogue, onBossWarning);
 
   return (
     <GameContext.Provider value={engine}>

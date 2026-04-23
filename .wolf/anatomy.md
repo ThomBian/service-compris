@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-22T20:24:31.889Z
-> Files: 354 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-22T21:26:42.759Z
+> Files: 359 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -197,6 +197,7 @@
 ## .superpowers/brainstorm/73980-1776889133/content/
 
 - `boss-warning-options.html` — Boss Warning — Visual Options (~3528 tok)
+- `waiting.html` (~39 tok)
 
 ## .superpowers/brainstorm/73980-1776889133/state/
 
@@ -324,6 +325,7 @@
 - `2026-04-14-boss-encounter-paparazzi.md` — Boss Encounter — Paparazzi Flash (Influencer Megastar) Implementation Plan (~2294 tok)
 - `2026-04-14-boss-encounter-white-glove.md` — Boss Encounter — White Glove (Grand Inquisitor) Implementation Plan (~2789 tok)
 - `2026-04-14-boss-encounters-foundation.md` — Boss Encounters — Foundation Implementation Plan (~7794 tok)
+- `2026-04-22-boss-spawn-warning.md` — Boss Spawn Warning Implementation Plan (~3753 tok)
 
 ## docs/superpowers/specs/
 
@@ -355,6 +357,7 @@
 - `2026-03-31-first-night-design.md` — Night 1 — Scripted Tutorial Shift (~2910 tok)
 - `2026-04-01-night-summary-carousel-design.md` — Design Spec: Night Summary Carousel ("Shift Summary Juice") (~1496 tok)
 - `2026-04-13-boss-encounters-design.md` — Boss Encounters & Mini-Games — Design Spec (~1853 tok)
+- `2026-04-22-boss-spawn-warning-design.md` — Boss Spawn Warning Design (~836 tok)
 
 ## public/
 
@@ -392,21 +395,21 @@
 
 ## src/
 
-- `App.tsx` — GameContent (~4118 tok)
-- `constants.ts` — In-game minutes between scripted beats. (~2569 tok)
+- `App.tsx` — Dev + VITE_DEV_START_NIGHT>=2: "New game" skips intro and night 1 onboarding. Build-time in Vite. (~4678 tok)
+- `constants.ts` — In-game minutes between scripted beats. (~2603 tok)
 - `index.css` — Styles: 3 rules, 2 animations (~58 tok)
 - `main.tsx` (~104 tok)
 - `storageKeys.ts` — localStorage keys — single source of truth to avoid typos and ease refactors. (~72 tok)
 - `types.ts` — True after this booking's party was seated at least once (still dining or finished). (~1643 tok)
 - `utils.ts` — Exports formatTime, getRandom (~88 tok)
-- `vite-env.d.ts` — / <reference types="vite/client" /> (~11 tok)
-- `zIndex.ts` — Stacking order for fixed/absolute UI. Mute stays above toasts so it stays reachable. (~191 tok)
+- `vite-env.d.ts` — /  (~11 tok)
+- `zIndex.ts` — Stacking order for fixed/absolute UI. Mute stays above toasts so it stays reachable. (~241 tok)
 
 ## src/audio/
 
 - `ambienceShiftGate.ts` — Blocks in-shift ambience (`useGameAmbience`) until intro exit fade + stop completes. (~183 tok)
 - `audioConstants.ts` — Min ms between typewriter strike SFX plays (intro, corkboard, in-game Mr. V). (~37 tok)
-- `gameSfx.ts` — Matches `Toast['variant']` — keep in sync with `ToastContext`. (~1524 tok)
+- `gameSfx.ts` — Matches `Toast['variant']` — keep in sync with `ToastContext`. (~3857 tok)
 - `introAudio.ts` — Rain + jazz loops only — shared by intro and in-shift ambience (`useGameAmbience`). (~938 tok)
 
 ## src/components/
@@ -420,6 +423,14 @@
 - `ScenePanel.tsx` — When the desk bottom bar is hidden (no tools yet), let the street scene grow into the space below. (~367 tok)
 - `ToastContainer.tsx` — VARIANT_CLASSES (~516 tok)
 - `TopBar.tsx` — TopBar (~1254 tok)
+
+## src/components/boss/
+
+- `BossWarningToast.tsx` — DISMISS_DELAY_MS (~537 tok)
+
+## src/components/boss/**tests**/
+
+- `BossWarningToast.test.ts` — Declares mockBoss (~579 tok)
 
 ## src/components/corkboard/
 
@@ -448,7 +459,7 @@
 - `IntroSequence.tsx` — Returning players only on screen 0: jump to paperwork (skip M. V. line). No skip on screen 1+ (must sign, then no skip after). (~7925 tok)
 - `MonsieurVDialogue.tsx` — Shared “he’s talking to you” layout: face chip + name + dialogue column. (~713 tok)
 
-## src/components/intro/__tests__/
+## src/components/intro/**tests**/
 
 - `introAvatars.test.ts` — SKIN_MAX: assertInRange (~707 tok)
 
@@ -461,7 +472,7 @@
 - `pixelSprites.ts` — Exports PixelRect, PixelLayer, SKIN_TONES, HAIR_COLORS + 13 more (~2225 tok)
 - `StreetSceneBackground.tsx` — src/components/scene/StreetSceneBackground.tsx (~972 tok)
 
-## src/components/scene/__tests__/
+## src/components/scene/**tests**/
 
 - `pixelRenderer.test.ts` — Declares mockCtx (~696 tok)
 - `pixelSprites.test.ts` — Declares h0 (~1082 tok)
@@ -469,7 +480,7 @@
 
 ## src/context/
 
-- `GameContext.tsx` — GameContext — uses useContext (~500 tok)
+- `GameContext.tsx` — Dev only — set via `useGameEngine` when `import.meta.env.DEV`. (~587 tok)
 - `ToastContext.tsx` — ToastContext — renders map — uses useCallback, useEffect, useContext (~483 tok)
 
 ## src/data/
@@ -483,12 +494,12 @@
 - `useAccusationActions.ts` — Exports useAccusationActions (~962 tok)
 - `useCampaign.ts` — Exports UseCampaignReturn, useCampaign (~655 tok)
 - `useCarouselSummary.ts` — Exports CarouselStep, UseCarouselSummaryResult, useCarouselSummary (~914 tok)
-- `useClientSpawner.ts` — Exports useClientSpawner (~4086 tok)
+- `useClientSpawner.ts` — Exports useClientSpawner (~4402 tok)
 - `useContainerSize.ts` — Exports useContainerSize (~145 tok)
 - `useDecisionActions.ts` — Exports useDecisionActions (~3997 tok)
 - `useGameAmbience.ts` — Loops intro rain + jazz during a shift (shared Howls with `IntroSequence`). (~812 tok)
 - `useGameClock.ts` — Exports useGameClock (~819 tok)
-- `useGameEngine.ts` — Exports useGameEngine (~943 tok)
+- `useGameEngine.ts` — Exports useGameEngine (~1007 tok)
 - `useIntroEnterKeys.ts` — Enter-to-advance for intro screen 0 (prologue paragraphs). (~674 tok)
 - `useQuestionActions.ts` — Exports useQuestionActions (~700 tok)
 - `useQueueManager.ts` — Exports useQueueManager (~767 tok)
@@ -496,7 +507,7 @@
 - `useScriptedEvents.ts` — Returns true if this event should fire right now. (~1196 tok)
 - `useTypewriter.ts` — Instantly show the full string and mark done (no-op if already done or text empty). (~767 tok)
 
-## src/hooks/__tests__/
+## src/hooks/**tests**/
 
 - `useCampaign.test.ts` — @vitest-environment jsdom (~996 tok)
 - `useCarouselSummary.test.ts` — @vitest-environment jsdom (~1606 tok)
@@ -504,7 +515,7 @@
 
 ## src/i18n/
 
-- `campaignNightKey.ts` — Segment under `campaign:nights.*` (e.g. `1`, `3.default`). (~89 tok)
+- `campaignNightKey.ts` — Segment under `campaign:nights.`* (e.g. `1`, `3.default`). (~89 tok)
 - `index.ts` — Exports I18N_STORAGE_KEY (~503 tok)
 - `tGame.ts` — Exports tGame, randomGreeting, tCharacter (~198 tok)
 - `vitestSetup.ts` (~18 tok)
@@ -515,7 +526,7 @@
 - `common.json` (~92 tok)
 - `game.json` (~1942 tok)
 - `intro.json` (~587 tok)
-- `ui.json` (~1027 tok)
+- `ui.json` (~1101 tok)
 
 ## src/i18n/locales/fr/
 
@@ -523,7 +534,7 @@
 - `common.json` (~98 tok)
 - `game.json` (~1974 tok)
 - `intro.json` (~636 tok)
-- `ui.json` (~1086 tok)
+- `ui.json` (~1166 tok)
 
 ## src/logic/
 
@@ -532,7 +543,7 @@
 - `nightRules.ts` — Casts internally — call sites do not need type guards. (~80 tok)
 - `reservationGenerator.ts` — Exports generateReservations (~798 tok)
 
-## src/logic/__tests__/
+## src/logic/**tests**/
 
 - `characterRoster.test.ts` — Declares def (~2638 tok)
 - `characters.test.ts` — makeState: makeDef, makeClient (~2249 tok)
@@ -557,6 +568,6 @@
 
 - `campaign.ts` — Exports CampaignPath, CorkboardVariant, RuleKey, ActiveRule + 4 more (~329 tok)
 
-## src/types/__tests__/
+## src/types/**tests**/
 
 - `campaign.test.ts` — Declares numRule (~626 tok)
