@@ -12,30 +12,32 @@
 
 ## File Map
 
-| Action | File | What changes |
-|--------|------|-------------|
-| Modify | `src/types.ts` | `factionPath?` on `CharacterDefinition`; `neckwear: 3` on `VisualTraits` |
-| Modify | `src/constants.ts` | Add `FACTION_BOOST`, `MAX_PATH_SCORE` |
-| Create | `src/logic/characters/OversizeVip.ts` | New behavior class |
-| Modify | `src/logic/characters/factory.ts` | Register `OVERSIZE_VIP` |
-| Modify | `src/components/scene/ClientAvatar.tsx` | Render `neckwear === 3` |
-| Modify | `src/logic/characterRoster.ts` | `factionPath` on all entries; 6 new definitions; updated `generateDailyCharacters` signature |
-| Modify | `src/logic/gameLogic.ts` | Pass `pathScores` to `generateDailyCharacters` in `buildInitialState` |
-| Modify | `src/context/GameContext.tsx` | Add `pathScores` to context |
-| Modify | `src/hooks/useGameEngine.ts` | Accept `pathScores` param; pass to `buildInitialState` |
-| Modify | `src/App.tsx` | Pass `pathScores` to `GameProvider` |
-| Modify | `src/components/desk/Clipboard.tsx` | Factions tab with intensity indicator |
-| Modify | `src/logic/__tests__/characterRoster.test.ts` | Tests for faction spawn bias and new characters |
+
+| Action | File                                          | What changes                                                                                 |
+| ------ | --------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Modify | `src/types.ts`                                | `factionPath?` on `CharacterDefinition`; `neckwear: 3` on `VisualTraits`                     |
+| Modify | `src/constants.ts`                            | Add `FACTION_BOOST`, `MAX_PATH_SCORE`                                                        |
+| Create | `src/logic/characters/OversizeVip.ts`         | New behavior class                                                                           |
+| Modify | `src/logic/characters/factory.ts`             | Register `OVERSIZE_VIP`                                                                      |
+| Modify | `src/components/scene/ClientAvatar.tsx`       | Render `neckwear === 3`                                                                      |
+| Modify | `src/logic/characterRoster.ts`                | `factionPath` on all entries; 6 new definitions; updated `generateDailyCharacters` signature |
+| Modify | `src/logic/gameLogic.ts`                      | Pass `pathScores` to `generateDailyCharacters` in `buildInitialState`                        |
+| Modify | `src/context/GameContext.tsx`                 | Add `pathScores` to context                                                                  |
+| Modify | `src/hooks/useGameEngine.ts`                  | Accept `pathScores` param; pass to `buildInitialState`                                       |
+| Modify | `src/App.tsx`                                 | Pass `pathScores` to `GameProvider`                                                          |
+| Modify | `src/components/desk/Clipboard.tsx`           | Factions tab with intensity indicator                                                        |
+| Modify | `src/logic/__tests__/characterRoster.test.ts` | Tests for faction spawn bias and new characters                                              |
+
 
 ---
 
 ## Task 1: Extend types and constants
 
 **Files:**
+
 - Modify: `src/types.ts`
 - Modify: `src/constants.ts`
-
-- [ ] **Step 1: Add `factionPath` to `CharacterDefinition` and expand `neckwear` union in `src/types.ts`**
+- **Step 1: Add `factionPath` to `CharacterDefinition` and expand `neckwear` union in `src/types.ts`**
 
 Find the `CharacterDefinition` interface. Add `factionPath` after `consequenceDescription`:
 
@@ -53,7 +55,7 @@ neckwear?:   0 | 1 | 2;  // 0=red tie, 1=gold cravat, 2=red scarf
 neckwear?:   0 | 1 | 2 | 3;  // 0=red tie, 1=gold cravat, 2=red scarf, 3=long red tie
 ```
 
-- [ ] **Step 2: Add faction constants to `src/constants.ts`**
+- **Step 2: Add faction constants to `src/constants.ts`**
 
 Add at the end, before the closing of `INITIAL_RESERVATIONS` (after `LAST_CALL_RATING_PENALTY`):
 
@@ -64,7 +66,7 @@ export const FACTION_BOOST = 0.4;
 export const MAX_PATH_SCORE = 10;
 ```
 
-- [ ] **Step 3: Run type-check to verify no regressions**
+- **Step 3: Run type-check to verify no regressions**
 
 ```bash
 npm run lint
@@ -72,7 +74,7 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/types.ts src/constants.ts
@@ -84,11 +86,11 @@ git commit -m "feat: add factionPath to CharacterDefinition, extend neckwear uni
 ## Task 2: OversizeVip class + factory registration
 
 **Files:**
+
 - Create: `src/logic/characters/OversizeVip.ts`
 - Modify: `src/logic/characters/factory.ts`
 - Test: `src/logic/__tests__/characterRoster.test.ts`
-
-- [ ] **Step 1: Write the failing test**
+- **Step 1: Write the failing test**
 
 Add to `src/logic/__tests__/characterRoster.test.ts`, inside `describe('createCharacter factory', ...)`:
 
@@ -103,7 +105,7 @@ it('creates OversizeVip for OVERSIZE_VIP behaviorType', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- **Step 2: Run test to confirm it fails**
 
 ```bash
 npm run test -- characterRoster
@@ -111,7 +113,7 @@ npm run test -- characterRoster
 
 Expected: FAIL — `OversizeVip` module not found or factory throws unknown behaviorType.
 
-- [ ] **Step 3: Create `src/logic/characters/OversizeVip.ts`**
+- **Step 3: Create `src/logic/characters/OversizeVip.ts`**
 
 ```ts
 import { type GameState } from '../../types';
@@ -131,7 +133,7 @@ export class OversizeVip extends VipCharacter {
 }
 ```
 
-- [ ] **Step 4: Register in `src/logic/characters/factory.ts`**
+- **Step 4: Register in `src/logic/characters/factory.ts`**
 
 ```ts
 import type { CharacterDefinition } from '../../types';
@@ -154,7 +156,7 @@ export function createCharacter(def: CharacterDefinition): SpecialCharacter {
 }
 ```
 
-- [ ] **Step 5: Simplify the test to not use `require`**
+- **Step 5: Simplify the test to not use `require`**
 
 Replace the test written in Step 1 with:
 
@@ -170,7 +172,7 @@ it('creates OversizeVip for OVERSIZE_VIP behaviorType', () => {
 
 Add the import at the top of the test file alongside the existing imports.
 
-- [ ] **Step 6: Run tests to confirm passing**
+- **Step 6: Run tests to confirm passing**
 
 ```bash
 npm run test -- characterRoster
@@ -178,7 +180,7 @@ npm run test -- characterRoster
 
 Expected: all factory tests pass.
 
-- [ ] **Step 7: Add unit tests for OversizeVip behavior**
+- **Step 7: Add unit tests for OversizeVip behavior**
 
 Add a new `describe` block to `src/logic/__tests__/characterRoster.test.ts`:
 
@@ -222,7 +224,7 @@ describe('OversizeVip', () => {
 });
 ```
 
-- [ ] **Step 8: Run tests to confirm all pass**
+- **Step 8: Run tests to confirm all pass**
 
 ```bash
 npm run test -- characterRoster
@@ -230,7 +232,7 @@ npm run test -- characterRoster
 
 Expected: all tests pass.
 
-- [ ] **Step 9: Commit**
+- **Step 9: Commit**
 
 ```bash
 git add src/logic/characters/OversizeVip.ts src/logic/characters/factory.ts src/logic/__tests__/characterRoster.test.ts
@@ -242,11 +244,12 @@ git commit -m "feat: add OversizeVip behavior class and factory registration"
 ## Task 3: Add neckwear:3 to ClientAvatar
 
 **Files:**
+
 - Modify: `src/components/scene/ClientAvatar.tsx`
 
 This must be done before Task 4 adds Donny Tromp to the roster, otherwise `visualTraits: { neckwear: 3 }` would silently render nothing.
 
-- [ ] **Step 1: Update `Accessories` function signature and render `neckwear === 3`**
+- **Step 1: Update `Accessories` function signature and render `neckwear === 3`**
 
 Find the `Accessories` function in `src/components/scene/ClientAvatar.tsx`. Change the `neckwear` prop type and add the new render block after the `neckwear === 2` block:
 
@@ -264,7 +267,7 @@ neckwear?: 0 | 1 | 2 | 3;
 )}
 ```
 
-- [ ] **Step 2: Run type-check**
+- **Step 2: Run type-check**
 
 ```bash
 npm run lint
@@ -272,7 +275,7 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/components/scene/ClientAvatar.tsx
@@ -284,10 +287,10 @@ git commit -m "feat: add neckwear:3 (long red tie) to ClientAvatar"
 ## Task 4: Expand CHARACTER_ROSTER with 6 lore characters and factionPath
 
 **Files:**
+
 - Modify: `src/logic/characterRoster.ts`
 - Test: `src/logic/__tests__/characterRoster.test.ts`
-
-- [ ] **Step 1: Write failing tests for new characters**
+- **Step 1: Write failing tests for new characters**
 
 Add to `src/logic/__tests__/characterRoster.test.ts`, inside `describe('CHARACTER_ROSTER', ...)`:
 
@@ -321,7 +324,7 @@ it('gordon-angry is michelin, mr-feast and sodium-bae are viral', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- characterRoster
@@ -329,7 +332,7 @@ npm run test -- characterRoster
 
 Expected: FAIL on the four new tests.
 
-- [ ] **Step 3: Update `src/logic/characterRoster.ts` — add `factionPath` to existing characters**
+- **Step 3: Update `src/logic/characterRoster.ts` — add `factionPath` to existing characters**
 
 For each existing character definition, add `factionPath` as specified:
 
@@ -354,7 +357,7 @@ factionPath: 'michelin',
 factionPath: 'viral',
 ```
 
-- [ ] **Step 4: Add the 6 new character definitions to `CHARACTER_ROSTER`**
+- **Step 4: Add the 6 new character definitions to `CHARACTER_ROSTER`**
 
 Append after the last existing `BANNED` entry (after `the-dictator`):
 
@@ -459,7 +462,7 @@ Append after the last existing `BANNED` entry (after `the-dictator`):
 },
 ```
 
-- [ ] **Step 5: Run tests to confirm all pass**
+- **Step 5: Run tests to confirm all pass**
 
 ```bash
 npm run test -- characterRoster
@@ -467,7 +470,7 @@ npm run test -- characterRoster
 
 Expected: all tests pass including the 4 new ones.
 
-- [ ] **Step 6: Commit**
+- **Step 6: Commit**
 
 ```bash
 git add src/logic/characterRoster.ts src/logic/__tests__/characterRoster.test.ts
@@ -479,10 +482,10 @@ git commit -m "feat: add 6 lore characters and factionPath to CHARACTER_ROSTER"
 ## Task 5: Faction spawn bias in generateDailyCharacters
 
 **Files:**
+
 - Modify: `src/logic/characterRoster.ts`
 - Test: `src/logic/__tests__/characterRoster.test.ts`
-
-- [ ] **Step 1: Write failing tests for faction spawn bias**
+- **Step 1: Write failing tests for faction spawn bias**
 
 Add to `src/logic/__tests__/characterRoster.test.ts`:
 
@@ -532,7 +535,7 @@ describe('generateDailyCharacters — faction spawn bias', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- characterRoster
@@ -540,7 +543,7 @@ npm run test -- characterRoster
 
 Expected: FAIL — `generateDailyCharacters` doesn't accept a third argument yet.
 
-- [ ] **Step 3: Update `generateDailyCharacters` in `src/logic/characterRoster.ts`**
+- **Step 3: Update `generateDailyCharacters` in `src/logic/characterRoster.ts`**
 
 Add the `PathScores` import at the top of the file:
 
@@ -570,7 +573,7 @@ export function generateDailyCharacters(
 }
 ```
 
-- [ ] **Step 4: Run all tests to confirm they pass**
+- **Step 4: Run all tests to confirm they pass**
 
 ```bash
 npm run test -- characterRoster
@@ -578,7 +581,7 @@ npm run test -- characterRoster
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/logic/characterRoster.ts src/logic/__tests__/characterRoster.test.ts
@@ -590,12 +593,12 @@ git commit -m "feat: faction spawn bias in generateDailyCharacters via pathScore
 ## Task 6: Thread pathScores to buildInitialState
 
 **Files:**
+
 - Modify: `src/logic/gameLogic.ts`
 - Modify: `src/hooks/useGameEngine.ts`
 - Modify: `src/context/GameContext.tsx`
 - Modify: `src/App.tsx`
-
-- [ ] **Step 1: Update `buildInitialState` in `src/logic/gameLogic.ts`**
+- **Step 1: Update `buildInitialState` in `src/logic/gameLogic.ts`**
 
 The function signature currently is:
 
@@ -630,7 +633,7 @@ export function buildInitialState(
   // ... rest unchanged
 ```
 
-- [ ] **Step 2: Update `useGameEngine` in `src/hooks/useGameEngine.ts`**
+- **Step 2: Update `useGameEngine` in `src/hooks/useGameEngine.ts`**
 
 Add `pathScores` to the function signature and pass it to `buildInitialState`. The hook currently takes one optional `incrementPathScore` param:
 
@@ -650,7 +653,7 @@ export function useGameEngine(
   // rest unchanged...
 ```
 
-- [ ] **Step 3: Update `GameContext` to accept and expose `pathScores`**
+- **Step 3: Update `GameContext` to accept and expose `pathScores`**
 
 In `src/context/GameContext.tsx`:
 
@@ -697,7 +700,7 @@ return {
 };
 ```
 
-- [ ] **Step 4: Pass `pathScores` from `useCampaign` in `src/App.tsx`**
+- **Step 4: Pass `pathScores` from `useCampaign` in `src/App.tsx`**
 
 Find the `<GameProvider>` usage (line ~278). Pass `pathScores`:
 
@@ -708,7 +711,7 @@ Find the `<GameProvider>` usage (line ~278). Pass `pathScores`:
 >
 ```
 
-- [ ] **Step 5: Run type-check**
+- **Step 5: Run type-check**
 
 ```bash
 npm run lint
@@ -716,7 +719,7 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Step 6: Run all tests**
+- **Step 6: Run all tests**
 
 ```bash
 npm run test
@@ -724,7 +727,7 @@ npm run test
 
 Expected: all existing tests pass (the signature change is backward-compatible — `pathScores` is optional).
 
-- [ ] **Step 7: Commit**
+- **Step 7: Commit**
 
 ```bash
 git add src/logic/gameLogic.ts src/hooks/useGameEngine.ts src/context/GameContext.tsx src/App.tsx
@@ -736,9 +739,9 @@ git commit -m "feat: thread pathScores through GameProvider to buildInitialState
 ## Task 7: Factions tab in Clipboard
 
 **Files:**
-- Modify: `src/components/desk/Clipboard.tsx`
 
-- [ ] **Step 1: Add `"Factions"` to the `TABS` constant**
+- Modify: `src/components/desk/Clipboard.tsx`
+- **Step 1: Add `"Factions"` to the `TABS` constant**
 
 ```ts
 const TABS = [
@@ -749,7 +752,7 @@ const TABS = [
 ] as const;
 ```
 
-- [ ] **Step 2: Add the `FACTION_DISPLAY` static registry and `factionIntensity` helper inside the file, before the `Clipboard` component**
+- **Step 2: Add the `FACTION_DISPLAY` static registry and `factionIntensity` helper inside the file, before the `Clipboard` component**
 
 Add these imports at the top of the file:
 
@@ -816,7 +819,7 @@ function intensityLabel(level: 0 | 1 | 2 | 3): string {
 }
 ```
 
-- [ ] **Step 3: Read `pathScores` from context inside the `Clipboard` component**
+- **Step 3: Read `pathScores` from context inside the `Clipboard` component**
 
 The `Clipboard` component uses `useGame()`. `pathScores` is now on the context:
 
@@ -827,7 +830,7 @@ export const Clipboard: React.FC = () => {
   // ... rest unchanged
 ```
 
-- [ ] **Step 4: Add the Factions tab render block**
+- **Step 4: Add the Factions tab render block**
 
 In the `Clipboard` return, after the `{activeTab === "Banned" && ...}` block and before `{activeTab === "Log" && ...}`, add:
 
@@ -866,7 +869,7 @@ In the `Clipboard` return, after the `{activeTab === "Banned" && ...}` block and
 )}
 ```
 
-- [ ] **Step 5: Run type-check**
+- **Step 5: Run type-check**
 
 ```bash
 npm run lint
@@ -874,18 +877,18 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Step 6: Start dev server and manually verify Factions tab appears**
+- **Step 6: Start dev server and manually verify Factions tab appears**
 
 ```bash
 npm run dev
 ```
 
 Open `http://localhost:3000`, start a game, open the Clipboard. Confirm:
+
 - A "Factions" tab appears between "Banned" and "Log"
 - All three factions are listed
 - At campaign start (path scores all 0), all show "QUIET ○○○" at 45% opacity
-
-- [ ] **Step 7: Commit**
+- **Step 7: Commit**
 
 ```bash
 git add src/components/desk/Clipboard.tsx
@@ -896,7 +899,7 @@ git commit -m "feat: add Factions tab to Clipboard with intensity indicator"
 
 ## Task 8: Run full test suite and verify
 
-- [ ] **Step 1: Run all tests**
+- **Step 1: Run all tests**
 
 ```bash
 npm run test
@@ -904,7 +907,7 @@ npm run test
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Run type-check**
+- **Step 2: Run type-check**
 
 ```bash
 npm run lint
@@ -912,7 +915,7 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Step 3: Commit if any outstanding changes**
+- **Step 3: Commit if any outstanding changes**
 
 ```bash
 git status
@@ -929,3 +932,4 @@ If clean, proceed. If there are any unstaged fixes, commit them now.
 - `GameContextType` needs `pathScores?: PathScores` added — this is a non-breaking addition (optional field).
 - All new characters reference `neckwear: 3` (Donny Tromp) — Task 3 handles that before Task 4 adds the roster entry.
 - `chef-balzac` uses `reservedPartySize: 3` with `expectedPartySize: 4` — same pattern as `manu-macaroon`, handled by existing `injectCharacterReservations` logic.
+

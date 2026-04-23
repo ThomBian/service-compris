@@ -1,12 +1,63 @@
 {
   "session_id": "session-2026-04-23-0825",
   "started": "2026-04-23T06:25:02.445Z",
-  "files_read": {},
+  "files_read": {
+    "/Users/tbianchini/workspace/service-compris/src/constants.ts": {
+      "count": 1,
+      "tokens": 2603,
+      "first_read": "2026-04-23T06:34:13.479Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/hooks/useDecisionActions.ts": {
+      "count": 1,
+      "tokens": 3997,
+      "first_read": "2026-04-23T06:34:13.499Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/logic/__tests__/gameLogic.test.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-04-23T06:34:13.817Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/logic/reservationGenerator.ts": {
+      "count": 3,
+      "tokens": 798,
+      "first_read": "2026-04-23T06:34:13.840Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/types.ts": {
+      "count": 1,
+      "tokens": 1643,
+      "first_read": "2026-04-23T06:34:13.861Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts": {
+      "count": 1,
+      "tokens": 1007,
+      "first_read": "2026-04-23T06:34:13.878Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/vitest.config.ts": {
+      "count": 3,
+      "tokens": 91,
+      "first_read": "2026-04-23T06:34:13.903Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/logic/__tests__/bossRoster.test.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-04-23T06:35:12.548Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/src/logic/gameLogic.ts": {
+      "count": 2,
+      "tokens": 6860,
+      "first_read": "2026-04-23T06:35:12.639Z"
+    },
+    "/Users/tbianchini/workspace/service-compris/DOES_NOT_EXIST.ipynb": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-04-23T06:35:16.939Z"
+    }
+  },
   "files_written": [],
   "edit_counts": {},
-  "anatomy_hits": 0,
-  "anatomy_misses": 0,
-  "repeated_reads_warned": 0,
+  "anatomy_hits": 4,
+  "anatomy_misses": 3,
+  "repeated_reads_warned": 5,
   "cerebrum_warnings": 0,
   "stop_count": 2
 }

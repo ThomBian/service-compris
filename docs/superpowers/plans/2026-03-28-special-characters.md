@@ -13,43 +13,50 @@
 ## File Map
 
 ### Created
-| File | Responsibility |
-|------|----------------|
-| `src/logic/characters/SpecialCharacter.ts` | Abstract base with lifecycle hooks |
-| `src/logic/characters/VipCharacter.ts` | Abstract VIP mid-layer |
-| `src/logic/characters/BannedCharacter.ts` | Abstract Banned mid-layer |
-| `src/logic/characters/StandardVip.ts` | Translates old flat-tier VIP behavior |
-| `src/logic/characters/StandardBanned.ts` | Translates old flat-tier Banned behavior |
-| `src/logic/characters/BypassQueueVip.ts` | The Syndicate — queue bypass |
-| `src/logic/characters/AuraDrainVip.ts` | Manu Macaroon — patience drain aura |
-| `src/logic/characters/factory.ts` | `createCharacter(def)` factory |
-| `src/logic/characterRoster.ts` | `CHARACTER_ROSTER` + `generateDailyCharacters` + `injectCharacterReservations` |
-| `src/logic/__tests__/characters.test.ts` | Tests for all character classes |
-| `src/logic/__tests__/characterRoster.test.ts` | Tests for roster/factory/generation |
+
+
+| File                                          | Responsibility                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/logic/characters/SpecialCharacter.ts`    | Abstract base with lifecycle hooks                                             |
+| `src/logic/characters/VipCharacter.ts`        | Abstract VIP mid-layer                                                         |
+| `src/logic/characters/BannedCharacter.ts`     | Abstract Banned mid-layer                                                      |
+| `src/logic/characters/StandardVip.ts`         | Translates old flat-tier VIP behavior                                          |
+| `src/logic/characters/StandardBanned.ts`      | Translates old flat-tier Banned behavior                                       |
+| `src/logic/characters/BypassQueueVip.ts`      | The Syndicate — queue bypass                                                   |
+| `src/logic/characters/AuraDrainVip.ts`        | Manu Macaroon — patience drain aura                                            |
+| `src/logic/characters/factory.ts`             | `createCharacter(def)` factory                                                 |
+| `src/logic/characterRoster.ts`                | `CHARACTER_ROSTER` + `generateDailyCharacters` + `injectCharacterReservations` |
+| `src/logic/__tests__/characters.test.ts`      | Tests for all character classes                                                |
+| `src/logic/__tests__/characterRoster.test.ts` | Tests for roster/factory/generation                                            |
+
 
 ### Modified
-| File | What changes |
-|------|-------------|
-| `src/types.ts` | Add `CharacterDefinition`; update `Client` (`characterId?`); update `GameState` (unified fields + `strikeActive`) |
-| `src/logic/gameLogic.ts` | `processQueueTick`: `strikeActive` multiplier + return `stormedOutClientIds`; `applyMoraleGameOver`: use `gameOverCharacterId` |
-| `src/hooks/useGameEngine.ts` | Create `characters` ref; use `generateDailyCharacters`; pass ref to hooks |
-| `src/hooks/useClientSpawner.ts` | Accept `characters` ref; use `characterId`; add BYPASS spawn path |
-| `src/hooks/useQueueManager.ts` | Accept `characters` ref; call `onStormOut` after `processQueueTick` |
-| `src/hooks/useDecisionActions.ts` | Use `characterId`; call `character.onRefused()`/`onSeated()` via ref |
-| `src/hooks/useAccusationActions.ts` | Accept `characters` ref; call `character.onRefused()` when `characterId` is set |
-| `src/components/desk/Clipboard.tsx` | Render from `dailyCharacterIds` + `CHARACTER_ROSTER` |
-| `src/App.tsx` | Use `gameOverCharacterId` instead of `gameOverVipId`/`gameOverBannedId` |
+
+
+| File                                | What changes                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/types.ts`                      | Add `CharacterDefinition`; update `Client` (`characterId?`); update `GameState` (unified fields + `strikeActive`)              |
+| `src/logic/gameLogic.ts`            | `processQueueTick`: `strikeActive` multiplier + return `stormedOutClientIds`; `applyMoraleGameOver`: use `gameOverCharacterId` |
+| `src/hooks/useGameEngine.ts`        | Create `characters` ref; use `generateDailyCharacters`; pass ref to hooks                                                      |
+| `src/hooks/useClientSpawner.ts`     | Accept `characters` ref; use `characterId`; add BYPASS spawn path                                                              |
+| `src/hooks/useQueueManager.ts`      | Accept `characters` ref; call `onStormOut` after `processQueueTick`                                                            |
+| `src/hooks/useDecisionActions.ts`   | Use `characterId`; call `character.onRefused()`/`onSeated()` via ref                                                           |
+| `src/hooks/useAccusationActions.ts` | Accept `characters` ref; call `character.onRefused()` when `characterId` is set                                                |
+| `src/components/desk/Clipboard.tsx` | Render from `dailyCharacterIds` + `CHARACTER_ROSTER`                                                                           |
+| `src/App.tsx`                       | Use `gameOverCharacterId` instead of `gameOverVipId`/`gameOverBannedId`                                                        |
+
 
 ---
 
 ## Task 1: Add `CharacterDefinition` to types.ts and update `Client` + `GameState`
 
 **Files:**
+
 - Modify: `src/types.ts`
 
 This is a pure type change. No runtime behavior changes yet — the goal is a green build with the new schema in place alongside the old one temporarily.
 
-- [ ] **Step 1: Add `CharacterDefinition` interface after the existing `Banned` interface**
+- **Step 1: Add `CharacterDefinition` interface after the existing `Banned` interface**
 
 ```ts
 export interface CharacterDefinition {
@@ -74,9 +81,10 @@ export interface CharacterDefinition {
 }
 ```
 
-- [ ] **Step 2: Update `Client` — replace `vipId?` and `bannedId?` with `characterId?`**
+- **Step 2: Update `Client` — replace `vipId?` and `bannedId?` with `characterId?`**
 
 Find and replace in `src/types.ts`:
+
 ```ts
 // Remove:
   vipId?: string;
@@ -86,7 +94,7 @@ Find and replace in `src/types.ts`:
   characterId?: string;
 ```
 
-- [ ] **Step 3: Update `GameState` — replace old VIP/Banned fields**
+- **Step 3: Update `GameState` — replace old VIP/Banned fields**
 
 ```ts
 // Remove these 6 fields:
@@ -104,11 +112,12 @@ Find and replace in `src/types.ts`:
   strikeActive:        boolean;
 ```
 
-- [ ] **Step 4: Verify the build fails with expected TypeScript errors**
+- **Step 4: Verify the build fails with expected TypeScript errors**
 
 ```bash
 npm run lint
 ```
+
 Expected: errors in `useGameEngine.ts`, `useClientSpawner.ts`, `useDecisionActions.ts`, `Clipboard.tsx`, `App.tsx`, `gameLogic.ts` — all referencing the old fields. This confirms the type change landed correctly.
 
 ---
@@ -116,6 +125,7 @@ Expected: errors in `useGameEngine.ts`, `useClientSpawner.ts`, `useDecisionActio
 ## Task 2: Create the `SpecialCharacter` class hierarchy
 
 **Files:**
+
 - Create: `src/logic/characters/SpecialCharacter.ts`
 - Create: `src/logic/characters/VipCharacter.ts`
 - Create: `src/logic/characters/BannedCharacter.ts`
@@ -124,8 +134,7 @@ Expected: errors in `useGameEngine.ts`, `useClientSpawner.ts`, `useDecisionActio
 - Create: `src/logic/characters/BypassQueueVip.ts`
 - Create: `src/logic/characters/AuraDrainVip.ts`
 - Create: `src/logic/__tests__/characters.test.ts`
-
-- [ ] **Step 1: Write the failing tests first**
+- **Step 1: Write the failing tests first**
 
 `src/logic/__tests__/characters.test.ts`:
 
@@ -360,14 +369,15 @@ describe('StandardBanned', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- characters.test.ts
 ```
+
 Expected: multiple import errors (files don't exist yet).
 
-- [ ] **Step 3: Create `SpecialCharacter.ts`**
+- **Step 3: Create `SpecialCharacter.ts`**
 
 ```ts
 // src/logic/characters/SpecialCharacter.ts
@@ -383,7 +393,7 @@ export abstract class SpecialCharacter {
 }
 ```
 
-- [ ] **Step 4: Create `VipCharacter.ts` and `BannedCharacter.ts`**
+- **Step 4: Create `VipCharacter.ts` and `BannedCharacter.ts`**
 
 ```ts
 // src/logic/characters/VipCharacter.ts
@@ -397,7 +407,7 @@ import { SpecialCharacter } from './SpecialCharacter';
 export abstract class BannedCharacter extends SpecialCharacter {}
 ```
 
-- [ ] **Step 5: Create `BypassQueueVip.ts`**
+- **Step 5: Create `BypassQueueVip.ts`**
 
 ```ts
 // src/logic/characters/BypassQueueVip.ts
@@ -424,7 +434,7 @@ export class BypassQueueVip extends VipCharacter {
 }
 ```
 
-- [ ] **Step 6: Create `AuraDrainVip.ts`**
+- **Step 6: Create `AuraDrainVip.ts`**
 
 ```ts
 // src/logic/characters/AuraDrainVip.ts
@@ -448,7 +458,7 @@ export class AuraDrainVip extends VipCharacter {
 }
 ```
 
-- [ ] **Step 7: Create `StandardVip.ts`**
+- **Step 7: Create `StandardVip.ts`**
 
 ```ts
 // src/logic/characters/StandardVip.ts
@@ -477,7 +487,7 @@ export class StandardVip extends VipCharacter {
 }
 ```
 
-- [ ] **Step 8: Create `StandardBanned.ts`**
+- **Step 8: Create `StandardBanned.ts`**
 
 ```ts
 // src/logic/characters/StandardBanned.ts
@@ -508,14 +518,15 @@ export class StandardBanned extends BannedCharacter {
 }
 ```
 
-- [ ] **Step 9: Run tests — expect them to pass**
+- **Step 9: Run tests — expect them to pass**
 
 ```bash
 npm run test -- characters.test.ts
 ```
+
 Expected: all tests pass.
 
-- [ ] **Step 10: Commit**
+- **Step 10: Commit**
 
 ```bash
 git add src/logic/characters/ src/logic/__tests__/characters.test.ts
@@ -527,11 +538,11 @@ git commit -m "feat: add SpecialCharacter class hierarchy with BypassQueueVip an
 ## Task 3: Create the factory and character roster
 
 **Files:**
+
 - Create: `src/logic/characters/factory.ts`
 - Create: `src/logic/characterRoster.ts`
 - Create: `src/logic/__tests__/characterRoster.test.ts`
-
-- [ ] **Step 1: Write failing tests**
+- **Step 1: Write failing tests**
 
 `src/logic/__tests__/characterRoster.test.ts`:
 
@@ -638,14 +649,15 @@ describe('injectCharacterReservations', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test -- characterRoster.test.ts
 ```
+
 Expected: import errors.
 
-- [ ] **Step 3: Create `factory.ts`**
+- **Step 3: Create `factory.ts`**
 
 ```ts
 // src/logic/characters/factory.ts
@@ -667,7 +679,7 @@ export function createCharacter(def: CharacterDefinition): SpecialCharacter {
 }
 ```
 
-- [ ] **Step 4: Create `characterRoster.ts`**
+- **Step 4: Create `characterRoster.ts`**
 
 ```ts
 // src/logic/characterRoster.ts
@@ -846,14 +858,15 @@ export function injectCharacterReservations(
 }
 ```
 
-- [ ] **Step 5: Run tests — expect them to pass**
+- **Step 5: Run tests — expect them to pass**
 
 ```bash
 npm run test -- characterRoster.test.ts
 ```
+
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- **Step 6: Commit**
 
 ```bash
 git add src/logic/characters/factory.ts src/logic/characterRoster.ts src/logic/__tests__/characterRoster.test.ts
@@ -865,12 +878,13 @@ git commit -m "feat: add character factory and unified CHARACTER_ROSTER"
 ## Task 4: Update `processQueueTick` and `applyMoraleGameOver` in `gameLogic.ts`
 
 **Files:**
+
 - Modify: `src/logic/gameLogic.ts`
 - Modify: `src/logic/__tests__/gameLogic.test.ts`
 
 Queue patience drain already exists in `processQueueTick` via `updateQueuePatience`. This task adds the `strikeActive` multiplier and extends the return type to include `stormedOutClientIds`.
 
-- [ ] **Step 1: Write failing tests**
+- **Step 1: Write failing tests**
 
 Add to `src/logic/__tests__/gameLogic.test.ts` (or the existing bannedLogic/vipLogic test files if that's where QueueTick tests live — check first):
 
@@ -912,16 +926,18 @@ describe('processQueueTick — stormedOutClientIds', () => {
 
 Check `src/logic/__tests__/gameLogic.test.ts` for existing test helpers (`makeState`, `makeClient`) before writing new ones — reuse them.
 
-- [ ] **Step 2: Run existing gameLogic tests to confirm green baseline**
+- **Step 2: Run existing gameLogic tests to confirm green baseline**
 
 ```bash
 npm run test -- gameLogic.test.ts
 ```
+
 Expected: all existing tests pass (baseline before changes).
 
-- [ ] **Step 3: Update `updateQueuePatience` to accept and apply `strikeMultiplier`**
+- **Step 3: Update `updateQueuePatience` to accept and apply `strikeMultiplier`**
 
 In `src/logic/gameLogic.ts`, change:
+
 ```ts
 function updateQueuePatience(queue: Client[]): Client[] {
   return queue.map((c) => ({
@@ -930,7 +946,9 @@ function updateQueuePatience(queue: Client[]): Client[] {
   }));
 }
 ```
+
 To:
+
 ```ts
 function updateQueuePatience(queue: Client[], strikeMultiplier = 1): Client[] {
   return queue.map((c) => ({
@@ -940,7 +958,7 @@ function updateQueuePatience(queue: Client[], strikeMultiplier = 1): Client[] {
 }
 ```
 
-- [ ] **Step 4: Update `handleStormOuts` to return `stormedOutClientIds`**
+- **Step 4: Update `handleStormOuts` to return `stormedOutClientIds`**
 
 ```ts
 function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
@@ -960,7 +978,7 @@ function handleStormOuts(queue: Client[], rating: number, logs: string[]) {
 }
 ```
 
-- [ ] **Step 5: Update `QueueTickResult` and `processQueueTick` to pass through both changes**
+- **Step 5: Update `QueueTickResult` and `processQueueTick` to pass through both changes**
 
 ```ts
 export interface QueueTickResult {
@@ -989,7 +1007,7 @@ export function processQueueTick(prev: GameState): QueueTickResult {
 }
 ```
 
-- [ ] **Step 6: Update `applyMoraleGameOver` to use `gameOverCharacterId`**
+- **Step 6: Update `applyMoraleGameOver` to use `gameOverCharacterId`**
 
 ```ts
 export function applyMoraleGameOver(state: GameState): GameState {
@@ -1007,14 +1025,15 @@ export function applyMoraleGameOver(state: GameState): GameState {
 }
 ```
 
-- [ ] **Step 7: Run tests**
+- **Step 7: Run tests**
 
 ```bash
 npm run test -- gameLogic.test.ts
 ```
+
 Expected: all tests pass (existing + new).
 
-- [ ] **Step 8: Commit**
+- **Step 8: Commit**
 
 ```bash
 git add src/logic/gameLogic.ts src/logic/__tests__/gameLogic.test.ts
@@ -1026,18 +1045,21 @@ git commit -m "feat: add strikeActive drain multiplier and stormedOutClientIds t
 ## Task 5: Update `useGameEngine.ts`
 
 **Files:**
-- Modify: `src/hooks/useGameEngine.ts`
 
-- [ ] **Step 1: Replace imports and build initial state**
+- Modify: `src/hooks/useGameEngine.ts`
+- **Step 1: Replace imports and build initial state**
 
 Replace:
+
 ```ts
 import { generateDailyVips, injectVipReservations } from '../logic/vipLogic';
 import { generateDailyBanned, injectBannedReservations } from '../logic/bannedLogic';
 import { VIP_ROSTER } from '../logic/vipRoster';
 import { BANNED_ROSTER } from '../logic/bannedRoster';
 ```
+
 With:
+
 ```ts
 import { generateDailyCharacters, injectCharacterReservations } from '../logic/characterRoster';
 import { CHARACTER_ROSTER } from '../logic/characterRoster';
@@ -1045,7 +1067,7 @@ import { createCharacter } from '../logic/characters/factory';
 import type { SpecialCharacter } from '../logic/characters/SpecialCharacter';
 ```
 
-- [ ] **Step 2: Update `buildInitialState`**
+- **Step 2: Update `buildInitialState`**
 
 ```ts
 function buildInitialState(difficulty: number, persist?: PersistState): GameState {
@@ -1083,7 +1105,7 @@ function buildInitialState(difficulty: number, persist?: PersistState): GameStat
 }
 ```
 
-- [ ] **Step 3: Create the `characters` ref and populate it; pass ref to hooks**
+- **Step 3: Create the `characters` ref and populate it; pass ref to hooks**
 
 ```ts
 export function useGameEngine() {
@@ -1121,14 +1143,15 @@ export function useGameEngine() {
 }
 ```
 
-- [ ] **Step 4: Run lint**
+- **Step 4: Run lint**
 
 ```bash
 npm run lint
 ```
+
 Expected: errors in the hooks that haven't been updated yet (useClientSpawner, useQueueManager, useDecisionActions, useAccusationActions). That's expected — proceed.
 
-- [ ] **Step 5: Commit (partial — compile errors expected)**
+- **Step 5: Commit (partial — compile errors expected)**
 
 ```bash
 git add src/hooks/useGameEngine.ts
@@ -1140,11 +1163,12 @@ git commit -m "feat: wire CHARACTER_ROSTER and characters ref into useGameEngine
 ## Task 6: Update `useClientSpawner.ts`
 
 **Files:**
-- Modify: `src/hooks/useClientSpawner.ts`
 
-- [ ] **Step 1: Update signature to accept `characters` ref and replace `vipId`/`bannedId` with `characterId`**
+- Modify: `src/hooks/useClientSpawner.ts`
+- **Step 1: Update signature to accept `characters` ref and replace `vipId`/`bannedId` with `characterId`**
 
 Full rewrite of the hook. Key changes:
+
 1. Add `characters: React.RefObject<Map<string, SpecialCharacter>>` parameter.
 2. Replace `vipId: vip.id` → `characterId: vip.id` everywhere.
 3. Replace `bannedId: banned.id` → `characterId: banned.id`.
@@ -1199,6 +1223,7 @@ const spawnBypassCharacter = useCallback((def: CharacterDefinition) => {
 ```
 
 In the `useEffect`, add the BYPASS check:
+
 ```ts
 // BYPASS characters — direct desk interrupt
 const bypassChars = dailyCharsFromRoster.filter(c =>
@@ -1211,24 +1236,28 @@ bypassChars.forEach(c => spawnBypassCharacter(c));
 ```
 
 Also update the `excludeTraits` lookup:
+
 ```ts
 const excludeTraits = dailyCharsFromRoster.map(c => c.visualTraits);
 ```
+
 Where `dailyCharsFromRoster` is resolved once at the top of the effect:
+
 ```ts
 const dailyCharsFromRoster = gameState.dailyCharacterIds
   .map(id => CHARACTER_ROSTER.find(c => c.id === id))
   .filter((c): c is CharacterDefinition => c !== undefined);
 ```
 
-- [ ] **Step 2: Run lint**
+- **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
+
 Expected: errors only in hooks not yet updated.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/hooks/useClientSpawner.ts
@@ -1240,9 +1269,9 @@ git commit -m "feat: update useClientSpawner to use characterId and handle BYPAS
 ## Task 7: Update `useQueueManager.ts` to call `onStormOut`
 
 **Files:**
-- Modify: `src/hooks/useQueueManager.ts`
 
-- [ ] **Step 1: Update signature and add `onStormOut` handling**
+- Modify: `src/hooks/useQueueManager.ts`
+- **Step 1: Update signature and add `onStormOut` handling**
 
 ```ts
 export function useQueueManager(
@@ -1282,13 +1311,13 @@ export function useQueueManager(
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/hooks/useQueueManager.ts
@@ -1300,11 +1329,12 @@ git commit -m "feat: call character.onStormOut in useQueueManager after processQ
 ## Task 8: Update `useDecisionActions.ts`
 
 **Files:**
-- Modify: `src/hooks/useDecisionActions.ts`
 
-- [ ] **Step 1: Update signature and replace all `vipId`/`bannedId` logic with `characterId` + character hooks**
+- Modify: `src/hooks/useDecisionActions.ts`
+- **Step 1: Update signature and replace all `vipId`/`bannedId` logic with `characterId` + character hooks**
 
 Update signature:
+
 ```ts
 export function useDecisionActions(
   setGameState: Dispatch<SetStateAction<GameState>>,
@@ -1314,7 +1344,9 @@ export function useDecisionActions(
 ```
 
 In `handleDecision` (the Refuse button):
+
 - Replace the `if (deskClient.vipId)` block with:
+
 ```ts
 if (deskClient.characterId) {
   const ch = characters.current.get(deskClient.characterId);
@@ -1334,7 +1366,9 @@ if (deskClient.characterId) {
 ```
 
 In `confirmSeating` (the Seat confirm):
+
 - Replace the `if (deskClient.bannedId)` block with:
+
 ```ts
 if (deskClient.characterId) {
   const ch = characters.current.get(deskClient.characterId);
@@ -1356,6 +1390,7 @@ if (deskClient.characterId) {
 ```
 
 - Replace the `nextSeatedVipIds` block and `if (client.vipId)` toast block with:
+
 ```ts
 const nextSeatedCharacterIds = client.characterId
   ? [...prev.seatedCharacterIds, client.characterId]
@@ -1372,16 +1407,14 @@ if (client.characterId) {
 ```
 
 - Also update `seatedVipIds: nextSeatedVipIds` → `seatedCharacterIds: nextSeatedCharacterIds`.
-
 - Remove the import of `computeVipRefusalOutcome` and `computeBannedSeatingOutcome` (no longer needed).
-
-- [ ] **Step 2: Run lint**
+- **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/hooks/useDecisionActions.ts
@@ -1393,9 +1426,9 @@ git commit -m "feat: update useDecisionActions to use character hooks via charac
 ## Task 9: Update `useAccusationActions.ts`
 
 **Files:**
-- Modify: `src/hooks/useAccusationActions.ts`
 
-- [ ] **Step 1: Update signature and call `character.onRefused()` for VIP characters**
+- Modify: `src/hooks/useAccusationActions.ts`
+- **Step 1: Update signature and call `character.onRefused()` for VIP characters**
 
 ```ts
 export function useAccusationActions(
@@ -1440,21 +1473,23 @@ export function useAccusationActions(
 }
 ```
 
-- [ ] **Step 2: Run lint**
+- **Step 2: Run lint**
 
 ```bash
 npm run lint
 ```
+
 Expected: clean (all hooks updated).
 
-- [ ] **Step 3: Run all tests**
+- **Step 3: Run all tests**
 
 ```bash
 npm run test
 ```
+
 Expected: all tests pass.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/hooks/useAccusationActions.ts
@@ -1466,10 +1501,10 @@ git commit -m "feat: call character.onRefused in useAccusationActions for VIP ch
 ## Task 10: Update `Clipboard.tsx` and `App.tsx`
 
 **Files:**
+
 - Modify: `src/components/desk/Clipboard.tsx`
 - Modify: `src/App.tsx`
-
-- [ ] **Step 1: Update `Clipboard.tsx`**
+- **Step 1: Update `Clipboard.tsx`**
 
 Replace `Vip`/`Banned` imports with `CharacterDefinition`. Update `VipDossierEntry` and `BannedDossierEntry` props to accept `CharacterDefinition`. Update render logic:
 
@@ -1504,7 +1539,7 @@ const dailyBannedDefs = gameState.dailyCharacterIds
 
 Then update all references to `gameState.seatedVipIds` / `gameState.seatedBannedIds` → `gameState.seatedCharacterIds`.
 
-- [ ] **Step 2: Update `App.tsx`**
+- **Step 2: Update `App.tsx`**
 
 Find the two lines that read `gameState.gameOverVipId` / `gameState.gameOverBannedId` (around line 135-143):
 
@@ -1529,33 +1564,35 @@ if (gameState.gameOverCharacterId) {
 
 Also add `import { CHARACTER_ROSTER } from './logic/characterRoster';` to `App.tsx`.
 
-- [ ] **Step 3: Run lint**
+- **Step 3: Run lint**
 
 ```bash
 npm run lint
 ```
+
 Expected: clean build.
 
-- [ ] **Step 4: Run all tests**
+- **Step 4: Run all tests**
 
 ```bash
 npm run test
 ```
+
 Expected: all tests pass.
 
-- [ ] **Step 5: Start dev server and smoke-test manually**
+- **Step 5: Start dev server and smoke-test manually**
 
 ```bash
 npm run dev
 ```
 
 Manual checks:
-- [ ] Game starts without errors
-- [ ] Clipboard VIPs tab shows correct characters
-- [ ] Clipboard Banned tab shows correct characters
-- [ ] A normal game night plays through without console errors
 
-- [ ] **Step 6: Commit**
+- Game starts without errors
+- Clipboard VIPs tab shows correct characters
+- Clipboard Banned tab shows correct characters
+- A normal game night plays through without console errors
+- **Step 6: Commit**
 
 ```bash
 git add src/components/desk/Clipboard.tsx src/App.tsx
@@ -1567,39 +1604,43 @@ git commit -m "feat: update Clipboard and App to use unified CharacterDefinition
 ## Task 11: End-to-end verification and cleanup
 
 **Files:**
-- Modify: `src/logic/vipRoster.ts`, `src/logic/bannedRoster.ts`, `src/logic/vipLogic.ts`, `src/logic/bannedLogic.ts` (mark as deprecated or delete if no references remain)
 
-- [ ] **Step 1: Check for remaining references to old files**
+- Modify: `src/logic/vipRoster.ts`, `src/logic/bannedRoster.ts`, `src/logic/vipLogic.ts`, `src/logic/bannedLogic.ts` (mark as deprecated or delete if no references remain)
+- **Step 1: Check for remaining references to old files**
 
 ```bash
 grep -rn "vipRoster\|bannedRoster\|vipLogic\|bannedLogic\|dailyVips\|dailyBanned\|seatedVipIds\|seatedBannedIds\|gameOverVipId\|gameOverBannedId\|\.vipId\|\.bannedId" src/ --include="*.ts" --include="*.tsx"
 ```
+
 Expected: no results (all references migrated).
 
-- [ ] **Step 2: Delete old files if no references remain**
+- **Step 2: Delete old files if no references remain**
 
 ```bash
 git rm src/logic/vipRoster.ts src/logic/bannedRoster.ts src/logic/vipLogic.ts src/logic/bannedLogic.ts
 git rm src/logic/__tests__/vipLogic.test.ts src/logic/__tests__/bannedLogic.test.ts
 ```
 
-- [ ] **Step 3: Run full test suite**
+- **Step 3: Run full test suite**
 
 ```bash
 npm run test
 ```
+
 Expected: all tests pass, no TypeScript errors.
 
-- [ ] **Step 4: Run lint**
+- **Step 4: Run lint**
 
 ```bash
 npm run lint
 ```
+
 Expected: clean.
 
-- [ ] **Step 5: Final commit**
+- **Step 5: Final commit**
 
 ```bash
 git add -A
 git commit -m "feat: complete SpecialCharacter migration — remove old vipRoster, bannedRoster, vipLogic, bannedLogic"
 ```
+
