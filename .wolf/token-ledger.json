@@ -2,16 +2,736 @@
   "version": 1,
   "created_at": "2026-04-22T20:24:31.690Z",
   "lifetime": {
-    "total_tokens_estimated": 0,
-    "total_reads": 0,
-    "total_writes": 0,
-    "total_sessions": 0,
-    "anatomy_hits": 0,
-    "anatomy_misses": 0,
-    "repeated_reads_blocked": 0,
-    "estimated_savings_vs_bare_cli": 0
+    "total_tokens_estimated": 84056,
+    "total_reads": 45,
+    "total_writes": 70,
+    "total_sessions": 3,
+    "anatomy_hits": 35,
+    "anatomy_misses": 10,
+    "repeated_reads_blocked": 119,
+    "estimated_savings_vs_bare_cli": 336278
   },
-  "sessions": [],
+  "sessions": [
+    {
+      "id": "",
+      "started": "",
+      "ended": "2026-04-22T20:37:59.760Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/.superpowers/brainstorm/73980-1776889133/content/waiting.html",
+          "tokens_estimated": 42,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 42,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "",
+      "started": "",
+      "ended": "2026-04-22T20:39:07.660Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/.superpowers/brainstorm/73980-1776889133/content/waiting.html",
+          "tokens_estimated": 42,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 42,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "",
+      "started": "",
+      "ended": "2026-04-22T20:40:41.925Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/.superpowers/brainstorm/73980-1776889133/content/waiting.html",
+          "tokens_estimated": 42,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/specs/2026-04-22-boss-spawn-warning-design.md",
+          "tokens_estimated": 955,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 997,
+        "reads_count": 0,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-04-22-2242",
+      "started": "2026-04-22T20:42:14.615Z",
+      "ended": "2026-04-22T20:54:59.818Z",
+      "reads": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 500,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 943,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 4118,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/audio/gameSfx.ts",
+          "tokens_estimated": 1524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/zIndex.ts",
+          "tokens_estimated": 191,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 4163,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 172,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7276,
+        "output_tokens_estimated": 4487,
+        "reads_count": 5,
+        "writes_count": 3,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-04-22-2242",
+      "started": "2026-04-22T20:42:14.615Z",
+      "ended": "2026-04-22T21:18:45.947Z",
+      "reads": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 587,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 1007,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 4690,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/audio/gameSfx.ts",
+          "tokens_estimated": 3857,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/zIndex.ts",
+          "tokens_estimated": 241,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 3753,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/constants.ts",
+          "tokens_estimated": 2603,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/en/ui.json",
+          "tokens_estimated": 1101,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/fr/ui.json",
+          "tokens_estimated": 1166,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossEncounterOutcome.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/HandshakeGame.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/vitest.config.ts",
+          "tokens_estimated": 91,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/PaparazziGame.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/scene/PixelAvatar.tsx",
+          "tokens_estimated": 987,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 537,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.ts",
+          "tokens_estimated": 579,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 4421,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/types.ts",
+          "tokens_estimated": 1643,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 4163,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/constants.ts",
+          "tokens_estimated": 117,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/audio/gameSfx.ts",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/zIndex.ts",
+          "tokens_estimated": 71,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/en/ui.json",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/fr/ui.json",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.ts",
+          "tokens_estimated": 579,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 484,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 141,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 135,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 227,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 355,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 61,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 128,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 76,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 257,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 27263,
+        "output_tokens_estimated": 8240,
+        "reads_count": 20,
+        "writes_count": 31,
+        "repeated_reads_blocked": 58,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-04-22-2242",
+      "started": "2026-04-22T20:42:14.615Z",
+      "ended": "2026-04-22T21:27:00.414Z",
+      "reads": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 587,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 1007,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 4690,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/audio/gameSfx.ts",
+          "tokens_estimated": 3857,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/zIndex.ts",
+          "tokens_estimated": 241,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 3753,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/constants.ts",
+          "tokens_estimated": 2603,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/en/ui.json",
+          "tokens_estimated": 1101,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/fr/ui.json",
+          "tokens_estimated": 1166,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossEncounterOutcome.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/HandshakeGame.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/vitest.config.ts",
+          "tokens_estimated": 91,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/PaparazziGame.test.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/scene/PixelAvatar.tsx",
+          "tokens_estimated": 987,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 537,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.ts",
+          "tokens_estimated": 579,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 4421,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/types.ts",
+          "tokens_estimated": 1643,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 4163,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/docs/superpowers/plans/2026-04-22-boss-spawn-warning.md",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/constants.ts",
+          "tokens_estimated": 117,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/audio/gameSfx.ts",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/zIndex.ts",
+          "tokens_estimated": 71,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/en/ui.json",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/i18n/locales/fr/ui.json",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/__tests__/BossWarningToast.test.ts",
+          "tokens_estimated": 579,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 484,
+          "action": "create"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/components/boss/BossWarningToast.tsx",
+          "tokens_estimated": 141,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 135,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 227,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 355,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useGameEngine.ts",
+          "tokens_estimated": 61,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/context/GameContext.tsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 128,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 76,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 257,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/App.tsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/tbianchini/workspace/service-compris/src/hooks/useClientSpawner.ts",
+          "tokens_estimated": 206,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 27263,
+        "output_tokens_estimated": 8446,
+        "reads_count": 20,
+        "writes_count": 32,
+        "repeated_reads_blocked": 59,
+        "anatomy_lookups": 15
+      }
+    }
+  ],
   "daemon_usage": [],
   "waste_flags": [],
   "optimization_report": {
