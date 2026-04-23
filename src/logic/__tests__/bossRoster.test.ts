@@ -53,9 +53,9 @@ describe('BOSS_ROSTER', () => {
       expect(don().role).toBe('VIP');
       expect(don().miniGame).toBe('HANDSHAKE');
     });
-    it('spawns when cash >= 600', () => {
-      expect(don().spawnCondition(makeState({ cash: 599 }))).toBe(false);
-      expect(don().spawnCondition(makeState({ cash: 600 }))).toBe(true);
+    it('spawns when cash >= 3000', () => {
+      expect(don().spawnCondition(makeState({ cash: 2999 }))).toBe(false);
+      expect(don().spawnCondition(makeState({ cash: 3000 }))).toBe(true);
     });
   });
 
@@ -65,10 +65,10 @@ describe('BOSS_ROSTER', () => {
       expect(inq().role).toBe('BANNED');
       expect(inq().miniGame).toBe('WHITE_GLOVE');
     });
-    it('spawns when rating >= 4.0 and time >= 1290', () => {
-      expect(inq().spawnCondition(makeState({ rating: 4.0, inGameMinutes: 1289 }))).toBe(false);
-      expect(inq().spawnCondition(makeState({ rating: 3.9, inGameMinutes: 1290 }))).toBe(false);
-      expect(inq().spawnCondition(makeState({ rating: 4.0, inGameMinutes: 1290 }))).toBe(true);
+    it('spawns when rating >= 4.5 and time >= 1290', () => {
+      expect(inq().spawnCondition(makeState({ rating: 4.5, inGameMinutes: 1289 }))).toBe(false);
+      expect(inq().spawnCondition(makeState({ rating: 4.4, inGameMinutes: 1290 }))).toBe(false);
+      expect(inq().spawnCondition(makeState({ rating: 4.5, inGameMinutes: 1290 }))).toBe(true);
     });
   });
 
@@ -78,9 +78,9 @@ describe('BOSS_ROSTER', () => {
       expect(inf().role).toBe('VIP');
       expect(inf().miniGame).toBe('PAPARAZZI');
     });
-    it('spawns when shiftRevenue >= 400', () => {
-      expect(inf().spawnCondition(makeState({ shiftRevenue: 399 }))).toBe(false);
-      expect(inf().spawnCondition(makeState({ shiftRevenue: 400 }))).toBe(true);
+    it('spawns when shiftRevenue >= 1500', () => {
+      expect(inf().spawnCondition(makeState({ shiftRevenue: 1499 }))).toBe(false);
+      expect(inf().spawnCondition(makeState({ shiftRevenue: 1500 }))).toBe(true);
     });
   });
 

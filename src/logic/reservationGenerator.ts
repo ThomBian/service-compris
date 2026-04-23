@@ -12,10 +12,10 @@ function clamp(value: number, min: number, max: number): number {
 
 function weightedPartySize(): number {
   const roll = Math.random();
-  if (roll < 0.40) return Math.floor(Math.random() * 2) + 1;
-  if (roll < 0.75) return Math.floor(Math.random() * 2) + 3;
-  if (roll < 0.95) return Math.floor(Math.random() * 2) + 5;
-  return Math.floor(Math.random() * 2) + 7;
+  if (roll < 0.40) return Math.floor(Math.random() * 2) + 1; // 1-2
+  if (roll < 0.75) return Math.floor(Math.random() * 2) + 3; // 3-4
+  if (roll < 0.95) return Math.floor(Math.random() * 2) + 5; // 5-6
+  return Math.floor(Math.random() * 2) + 7;                   // 7-8
 }
 
 function pickWithoutReplacement<T>(arr: T[], count: number): T[] {
@@ -29,12 +29,13 @@ function pickWithoutReplacement<T>(arr: T[], count: number): T[] {
   return picked;
 }
 
-const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => 1170 + i * 15);
+const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => 1170 + i * 15); // 19:30–22:00
 
 export function generateReservations({ nightNumber, rating }: GenerateOptions): Reservation[] {
   const ratingBonus = Math.round((rating - 3.0) * 2);
   const N = clamp(8 + Math.floor(nightNumber * 0.5) + ratingBonus, 4, 16);
 
+  // Sample names without replacement (wrap around if N > pool size)
   const firstPool = [...FIRST_NAMES].sort(() => Math.random() - 0.5);
   const lastPool = [...LAST_NAMES].sort(() => Math.random() - 0.5);
 
