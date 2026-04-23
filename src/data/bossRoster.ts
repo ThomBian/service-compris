@@ -45,7 +45,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
     consequenceDescription: "They leave a briefcase of cash on the ledger.",
     refusalDescription: "The Don smashes the front window.",
     vipRefusalWrongPolicy: { ratingLoss: 2.75, moraleLoss: 55, cashLoss: 450 },
-    spawnCondition: (s) => s.cash >= 600,
+    spawnCondition: (s) => s.cash >= 3000,
   },
   {
     id: "grand-inquisitor",
@@ -78,7 +78,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
     refusalDescription:
       "The Inquisitor screams. Two full stars lost immediately.",
     bannedSeatWrongPolicy: { ratingLoss: 1.25, moraleLoss: 28, cashLoss: 180 },
-    spawnCondition: (s) => s.rating >= 4.0 && s.inGameMinutes >= 1290,
+    spawnCondition: (s) => s.rating >= 4.5 && s.inGameMinutes >= 1290,
   },
   {
     id: "influencer-megastar",
@@ -109,7 +109,7 @@ export const BOSS_ROSTER: BossDefinition[] = [
     refusalDescription:
       "The Influencer is caught from a bad angle. Massive queue patience drain.",
     vipRefusalWrongPolicy: { ratingLoss: 2.1, moraleLoss: 48, cashLoss: 320 },
-    spawnCondition: (s) => s.shiftRevenue >= 400,
+    spawnCondition: (s) => s.shiftRevenue >= 1500,
   },
   {
     id: "aristocrat",
